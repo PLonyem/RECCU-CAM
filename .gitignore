@@ -14,6 +14,12 @@
 # testing
 /coverage
 
+# temporary/cache files
+/tmp/
+/.cache/
+*.tmp
+*.temp
+
 # next.js
 /.next/
 /out/
