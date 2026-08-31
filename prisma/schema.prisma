@@ -1,0 +1,523 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("admin")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
+model NewsArticle {
+  id               String    @id @default(cuid())
+  title            String
+  slug             String    @unique
+  language         String    @default("en")
+  category         String
+  tags             String[]
+  excerpt          String    @db.Text
+  content          String    @db.Text
+  authorName       String
+  authorRole       String?
+  chapter          String?
+  featured         Boolean   @default(false)
+  published        Boolean   @default(false)
+  publishedAt      DateTime?
+  heroImageUrl     String?
+  heroImageAlt     String?
+  heroImageCaption String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([category])
+  @@index([published])
+  @@index([publishedAt])
+  @@index([language])
+  @@map("news_articles")
+}
+
+model Region {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  chapters  Chapter[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("regions")
+}
+
+model Chapter {
+  id         String      @id @default(cuid())
+  name       String
+  regionId   String
+  region     Region      @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  affiliates Affiliate[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@unique([name, regionId])
+  @@index([regionId])
+  @@map("chapters")
+}
+
+model Affiliate {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  region      String
+  // The legacy chapter label remains mapped to the existing `chapter`
+  // column for a non-destructive migration. New management and directory
+  // flows use chapterId as the governed Region -> Chapter relationship.
+  chapterName String?  @map("chapter")
+  chapterId   String?
+  chapter     Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  city        String?
+  address     String?
+  phone       String?
+  email       String?
+  website     String?
+  isActive    Boolean  @default(true)
+
+  // Chapter Profile Form fields — populated via the admin "Upload Chapter
+  // Profiles" tool (manual entry or best-effort extraction from an uploaded
+  // document), and displayed on the public /affiliates/[code] profile page.
+  yearEstablished        Int?
+  briefHistory           String?   @db.Text
+  totalMembers           Int?
+  branchCount            Int?
+  memberCreditUnionCount Int?
+  services               String[]  @default([])
+  chapterPresident       String?
+  chapterSupervisor      String?
+  boardSize              Int?
+  staffCount             Int?
+  // Array of { name: string, code: string } — a chapter's self-reported
+  // member credit unions, as listed on its Chapter Profile Form. Distinct
+  // from the top-level Affiliate records, which each have their own
+  // independent code/region/etc.
+  memberCreditUnions     Json?
+  profileUpdatedAt       DateTime?
+  // "pending" | "approved" | "rejected" — gates public visibility of the
+  // profile fields above on /affiliates/[code]. Defaults to "pending" so
+  // every submitted profile requires admin sign-off before going live.
+  profileStatus          String?   @default("pending")
+  // Set by the reviewer when rejecting a submission; not part of the
+  // Chapter Profile Form fields above, and never touched by a chapter's
+  // own submission — only by the admin review action.
+  profileReviewNote      String?   @db.Text
+
+  documents            AffiliateDocument[]
+  signupRequests       CreditUnionSignupRequest[]
+  submissions          AffiliateSubmission[]
+  loanProductOverrides LoanProductAffiliate[]
+  loanSimulations      LoanSimulation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([region])
+  @@index([chapterId])
+  @@index([name])
+  @@index([profileStatus])
+  @@map("affiliates")
+}
+
+// Public loan products are deliberately policy-free. Every financial rule
+// lives in an immutable LoanProductVersion so a historical simulation can
+// always be reproduced after rates or limits change.
+model LoanProduct {
+  id             String                 @id @default(cuid())
+  code           String                 @unique
+  nameEn         String
+  nameFr         String
+  descriptionEn  String                 @db.Text
+  descriptionFr  String                 @db.Text
+  category       String
+  icon           String                 @default("Landmark")
+  isActive       Boolean                @default(false)
+  versions       LoanProductVersion[]
+  affiliateRules LoanProductAffiliate[]
+  simulations    LoanSimulation[]
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+  @@map("loan_products")
+}
+
+model LoanProductVersion {
+  id                         String                 @id @default(cuid())
+  loanProductId              String
+  loanProduct                LoanProduct            @relation(fields: [loanProductId], references: [id], onDelete: Cascade)
+  version                    Int
+  minimumAmount              Int
+  maximumAmount              Int
+  availableTerms             Int[]
+  interestRateBasisPoints    Int
+  interestPeriod             String // annual | monthly
+  calculationMethod          String // flat | reducing_balance
+  requiredSavingsBasisPoints Int
+  affordabilityBasisPoints   Int? // optional indicative repayment-to-income ceiling
+  gracePeriodMonths          Int                    @default(0)
+  eligibilityDescriptionEn   String?                @db.Text
+  eligibilityDescriptionFr   String?                @db.Text
+  requiredDocuments          Json                   @default("[]")
+  feeRules                   Json                   @default("[]")
+  effectiveFrom              DateTime
+  effectiveTo                DateTime?
+  isPublished                Boolean                @default(false)
+  changeReason               String?                @db.Text
+  createdBy                  String?
+  createdAt                  DateTime               @default(now())
+  affiliateRules             LoanProductAffiliate[]
+  simulations                LoanSimulation[]
+
+  @@unique([loanProductId, version])
+  @@index([loanProductId, effectiveFrom])
+  @@index([isPublished, effectiveFrom])
+  @@map("loan_product_versions")
+}
+
+// Nullable fields inherit from the selected product version. This encodes
+// the precedence CamCCUL default -> product version -> affiliate override.
+model LoanProductAffiliate {
+  id                         String             @id @default(cuid())
+  loanProductId              String
+  loanProduct                LoanProduct        @relation(fields: [loanProductId], references: [id], onDelete: Cascade)
+  loanProductVersionId       String
+  loanProductVersion         LoanProductVersion @relation(fields: [loanProductVersionId], references: [id], onDelete: Cascade)
+  affiliateId                String
+  affiliate                  Affiliate          @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  minimumAmount              Int?
+  maximumAmount              Int?
+  availableTerms             Int[]
+  interestRateBasisPoints    Int?
+  interestPeriod             String?
+  calculationMethod          String?
+  requiredSavingsBasisPoints Int?
+  feeRules                   Json?
+  isActive                   Boolean            @default(true)
+  effectiveFrom              DateTime
+  effectiveTo                DateTime?
+  changeReason               String?            @db.Text
+  createdBy                  String?
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+
+  @@unique([loanProductVersionId, affiliateId])
+  @@index([affiliateId, isActive])
+  @@map("loan_product_affiliates")
+}
+
+model LoanSimulation {
+  id                   String             @id @default(cuid())
+  reference            String             @unique
+  loanProductId        String
+  loanProduct          LoanProduct        @relation(fields: [loanProductId], references: [id])
+  loanProductVersionId String
+  loanProductVersion   LoanProductVersion @relation(fields: [loanProductVersionId], references: [id])
+  affiliateId          String?
+  affiliate            Affiliate?         @relation(fields: [affiliateId], references: [id])
+  language             String             @default("en")
+  requestedAmount      Int
+  termMonths           Int
+  savingsBalance       Int
+  policySnapshot       Json
+  inputSnapshot        Json
+  resultSnapshot       Json
+  eligibilityStatus    String
+  createdAt            DateTime           @default(now())
+
+  @@index([createdAt])
+  @@index([loanProductId, createdAt])
+  @@index([affiliateId, createdAt])
+  @@map("loan_simulations")
+}
+
+model LoanPolicyAuditLog {
+  id           String   @id @default(cuid())
+  actorUserId  String
+  entityType   String
+  entityId     String
+  action       String
+  previousData Json?
+  newData      Json?
+  reason       String?  @db.Text
+  createdAt    DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("loan_policy_audit_logs")
+}
+
+// One row per profile submission/resubmission, preserving history that
+// Affiliate.profileStatus/profileReviewNote/profileUpdatedAt overwrite each
+// time — those three fields stay the single source of truth for "current"
+// state everywhere else in the app; this table exists purely to feed
+// SubmissionTimeline on the credit union dashboard. Created (status:
+// "pending") by POST /api/dashboard/profile on every submit, updated in
+// place by PUT /api/admin/affiliates/review/[id] when an admin decides.
+// "superseded" covers the case where a chapter resubmits before a prior
+// submission was ever decided — that stale row is closed out rather than
+// left showing "pending" forever alongside the newer one.
+model AffiliateSubmission {
+  id              String    @id @default(cuid())
+  affiliateId     String
+  affiliate       Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  status          String    @default("pending") // pending | approved | rejected | superseded
+  rejectionReason String?
+  submittedAt     DateTime  @default(now())
+  // Full CreditUnionProfileValues (src/lib/validation/credit-union-profile.ts)
+  // as submitted at this point in time — lets the Edit History page
+  // (src/app/dashboard/profile/history) diff consecutive submissions into
+  // real "field: old -> new" entries instead of just a status timeline.
+  // Nullable because rows created before this column existed have none —
+  // those can't be retroactively diffed, only rows from here on.
+  fieldSnapshot   Json?
+
+  @@index([affiliateId])
+  @@map("affiliate_submissions")
+}
+
+// A self-service "I want a login for my credit union" request, reviewed by
+// an admin before the account gets real access. No password lives here —
+// this table is a review queue, not a credentials store. The Clerk account
+// itself is created up front at signup time (src/app/signup/page.tsx, via
+// Clerk's client-side signUp.create() with the password the applicant
+// chose there — Clerk owns it, this table never sees it), but that account
+// has no role in its publicMetadata yet, so proxy.ts's dashboard gate
+// blocks it until an admin approves this request and sets
+// role: "credit_union" (mirroring how the admin "Create Account" tool sets
+// that metadata directly). Replaces the old CreditUnionUser model, which
+// stored a passwordHash and was checked during sign-in by the pre-Clerk
+// src/lib/auth.ts — dead since the 2026-08-15 migration (nothing has
+// written to it since; Clerk owns all credentials).
+model CreditUnionSignupRequest {
+  id              String     @id @default(cuid())
+  // Globally unique because it's the email of a real Clerk account by the
+  // time this row exists — Clerk itself never allows two accounts to share
+  // an email, so this can't conflict the way a bare business-data field
+  // might.
+  email           String     @unique
+  // Uniqueness on this field is enforced in application code (a
+  // case-insensitive lookup — see /api/signup/credit-union), not here:
+  // "Bamenda Credit Union" and "bamenda credit union" must collide, which a
+  // plain @unique index (case-sensitive) wouldn't catch.
+  creditUnionName String
+  // Selected from the same chapter dropdown as the profile-upload form —
+  // free text here (not a relation) because the applicant is naming their
+  // own chapter before any admin has matched them to a specific Affiliate.
+  chapter         String
+  // Set by the admin at approval time once they've matched this request to
+  // an actual affiliate record — null until then.
+  affiliateId     String?
+  affiliate       Affiliate? @relation(fields: [affiliateId], references: [id])
+  status          String     @default("pending") // pending | approved | rejected
+  rejectionReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([creditUnionName])
+  @@map("credit_union_signup_requests")
+}
+
+// Tracks a chapter profile document uploaded for a given affiliate, so
+// staff can find and review what was submitted (and what — if anything —
+// was auto-extracted from it) after the fact.
+model AffiliateDocument {
+  id            String    @id @default(cuid())
+  affiliateId   String
+  affiliate     Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  fileName      String
+  fileType      String
+  fileSize      Int
+  storagePath   String
+  status        String    @default("pending_review")
+  extractedText String?   @db.Text
+  createdAt     DateTime  @default(now())
+
+  @@index([affiliateId])
+  @@map("affiliate_documents")
+}
+
+model Resource {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?  @db.Text
+  category      String
+  fileType      String?
+  fileSize      Int?
+  fileUrl       String?
+  downloadCount Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([category])
+  @@map("resources")
+}
+
+model Announcement {
+  id            String    @id @default(cuid())
+  title         String
+  opening       String    @db.Text // The brief paragraph (Dear Colleagues...)
+  details       Json      @default("[]") // Array of { label, value }
+  category      String    @default("Circular") // Circular, Training, COBAC, Announcement, Event
+  priority      String    @default("normal") // low, normal, high, urgent
+  targetChapter String? // null = all chapters, or specific chapter
+  isPublished   Boolean   @default(false)
+  publishedAt   DateTime?
+  expiryDate    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([isPublished])
+  @@index([publishedAt])
+  @@index([category])
+  @@map("announcements")
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
+}
+
+// Editable homepage content for a future admin CMS UI (not wired to the
+// live homepage yet — src/app/(site)/HomeClient.tsx still reads its copy
+// from src/lib/i18n.ts). No enforced singleton at the schema level; the
+// app is expected to read/upsert a single known row, same as SiteSettings
+// and NotificationSettings below. Defaults intentionally match the current
+// live homepage's actual copy/figures (not the feature brief's invented
+// ones) to avoid seeding numbers nobody has confirmed — statsAssets has no
+// equivalent anywhere else in the app, so it defaults to "" rather than a
+// fabricated figure.
+model HomepageContent {
+  id String @id @default(cuid())
+
+  // HERO CONTENT
+  heroTitle           String @default("Owned by members. Built for communities.")
+  heroSubtitle        String @default("CamCCUL supervises and empowers cooperative credit unions across Cameroon, extending safe, affordable financial services to every region.")
+  heroBadge           String @default("Cameroon Cooperative Credit Union League")
+  primaryButtonText   String @default("Find a credit union near you")
+  primaryButtonLink   String @default("/affiliates")
+  secondaryButtonText String @default("Become an affiliate")
+  secondaryButtonLink String @default("/contact")
+  heroImages          Json   @default("[]")
+
+  // HERO APPEARANCE
+  overlayColor      String  @default("#000000")
+  overlayOpacity    Int     @default(40)
+  backgroundColor   String  @default("#0A2647")
+  gradientDirection String  @default("to-br")
+  textAlignment     String  @default("left")
+  buttonStyle       String  @default("solid")
+  showOverlay       Boolean @default(true)
+
+  // HERO STATISTICS
+  statsAffiliates Int    @default(216)
+  statsMembers    String @default("50,000+")
+  statsAssets     String @default("")
+
+  // SECTION VISIBILITY
+  showHero     Boolean @default(true)
+  showStats    Boolean @default(true)
+  showMission  Boolean @default(true)
+  showServices Boolean @default(true)
+  showReach    Boolean @default(true)
+  showNews     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("homepage_content")
+}
+
+// Site-wide contact/social info for a future admin CMS UI. Defaults
+// deliberately match contactInfo in src/lib/mock-data.ts (the current
+// source of truth used by the Footer, UtilityBar, and Contact page) rather
+// than the feature brief's own values, which conflicted with it on
+// address, phone, and email — see the "Contact info inconsistency" note
+// in project memory. No enforced singleton at the schema level.
+model SiteSettings {
+  id               String   @id @default(cuid())
+  siteName         String   @default("CamCCUL")
+  fullName         String   @default("Cameroon Cooperative Credit Union League")
+  address          String   @default("City Chemist, Bamenda")
+  addressSecondary String   @default("Opposite MTN Office")
+  phone            String   @default("(237) 233 44 57 66")
+  email            String   @default("camccul@camccul.cm")
+  officeHours      String   @default("Monday–Friday, 8:00am–4:00pm")
+  facebookUrl      String   @default("https://www.facebook.com/CamCCUL/")
+  linkedinUrl      String   @default("")
+  twitterUrl       String   @default("")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+// Controls for the profile-submission/approval emails already sent by
+// src/lib/email.ts. adminNotificationEmail defaults to "info@camccul.cm",
+// matching that file's existing hardcoded recipient — not a new value.
+model NotificationSettings {
+  id                            String   @id @default(cuid())
+  adminNotificationEmail        String   @default("info@camccul.cm")
+  newCreditUnionCreated         Boolean  @default(true)
+  profileSubmittedForReview     Boolean  @default(true)
+  profileUpdated                Boolean  @default(false)
+  contactFormMessage            Boolean  @default(true)
+  accountCredentialsEmail       Boolean  @default(true)
+  profileSubmissionConfirmation Boolean  @default(true)
+  profileApprovedEmail          Boolean  @default(true)
+  profileRejectedEmail          Boolean  @default(true)
+  emailTemplates                Json     @default("{}")
+  // Kept for backwards-compatible deployments that already have these
+  // columns; the more specific switches above are the active controls.
+  enableEmails                  Boolean  @default(true)
+  enableProfileSubmissionEmail  Boolean  @default(true)
+  enableProfileApprovalEmail    Boolean  @default(true)
+  createdAt                     DateTime @default(now())
+  updatedAt                     DateTime @updatedAt
+
+  @@map("notification_settings")
+}
+
+model AdminSecuritySettings {
+  id                       String   @id @default(cuid())
+  minimumPasswordLength    Int      @default(8)
+  requireNumbers           Boolean  @default(true)
+  requireSpecialCharacters Boolean  @default(false)
+  passwordExpiryDays       Int      @default(0)
+  sessionTimeoutMinutes    Int      @default(60)
+  maximumFailedAttempts    Int      @default(5)
+  lockoutDurationMinutes   Int      @default(15)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@map("admin_security_settings")
+}

@@ -1,0 +1,236 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  /* Keeps an anchor-scroll target from landing underneath the credit
+     union dashboard's sticky bars — the only place in the app that uses
+     in-page anchors at all: ProfileCompletion's "click a missing field"
+     links and DashboardNav's dropdown items. 7rem clears both the
+     CreditUnionNavbar (h-16) and DashboardNav (h-12) stacked on top of
+     each other. */
+  scroll-padding-top: 7rem;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: theme(colors.primary.300) transparent;
+}
+
+/* Custom range-input thumb for the Homepage Editor's Overlay Opacity
+   slider — the track/fill themselves are drawn by sibling divs (see
+   the Appearance tab), so this only needs to hide the native track and
+   restyle the thumb. Kept as a real <input type="range"> rather than a
+   from-scratch div-based slider, so keyboard/touch/drag all keep working
+   for free. */
+.styled-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+.styled-range::-webkit-slider-runnable-track {
+  background: transparent;
+}
+.styled-range::-moz-range-track {
+  background: transparent;
+}
+.styled-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: white;
+  border: 2px solid theme(colors.primary.500);
+  border-radius: 9999px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+.styled-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+.styled-range::-moz-range-thumb {
+  width: 1.25rem;
+  height: 1.25rem;
+  background: white;
+  border: 2px solid theme(colors.primary.500);
+  border-radius: 9999px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+.styled-range::-moz-range-thumb:hover {
+  transform: scale(1.15);
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: theme(colors.primary.300);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: theme(colors.primary.400);
+}
+
+::selection {
+  background-color: color-mix(in srgb, theme(colors.primary.500) 20%, transparent);
+}
+
+.focus-ring {
+  @apply outline-none ring-2 ring-primary-500 ring-offset-2 ring-offset-white transition-shadow;
+}
+
+@keyframes chatbot-pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.animate-chatbot-pulse {
+  animation: chatbot-pulse-ring 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes chatbot-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-chatbot-float {
+  animation: chatbot-float 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-chatbot-float,
+  .animate-chatbot-pulse {
+    animation: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* Mobile hamburger dropdown (Navbar.tsx) — the overshoot on entry
+   (cubic-bezier(0.34,1.56,0.64,1) pushes past scale(1) before settling)
+   is what reads as "springing" from the button; the exit has none, since
+   an overshoot on the way out looks like a bounce-back rather than a
+   dismissal. */
+@keyframes springIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes springOut {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.85) translateY(-8px);
+  }
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+/* Used by the About page's FadeUp wrapper. Base state is fully visible —
+   the hidden/animated state only exists inside the no-preference media
+   query, so prefers-reduced-motion users never see anything to reveal. */
+.fade-up {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fade-up {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 400ms ease-out, transform 400ms ease-out;
+  }
+
+  .fade-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Landing-page polish pass, additive only — layered on top of .fade-up
+     via FadeUp's `refined`/`hero` props, never replacing it, so every other
+     page's motion (which uses plain .fade-up) is untouched. Relies on
+     source order below .fade-up to win at equal specificity. */
+  .fade-up-refined {
+    transition-duration: 500ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .fade-up-hero {
+    transform: translateY(20px);
+    transition-duration: 600ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+/* Hero photo parallax (landing page only) — JS applies the translateY
+   inline via a scroll listener that itself checks prefers-reduced-motion
+   before attaching, but this belongs alongside .fade-up's own guard as a
+   second line of defense: it neutralizes any inline transform outright for
+   reduced-motion users even if the listener logic above it ever drifts. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-parallax-photo {
+    transform: none !important;
+  }
+}
+
+.loan-estimate-watermark {
+  opacity: 0.065;
+  transform: translate(-50%, -50%) rotate(-38deg);
+}
+
+@media print {
+  @page {
+    margin: 1.5cm;
+  }
+
+  body {
+    background: #fff;
+  }
+}
+
