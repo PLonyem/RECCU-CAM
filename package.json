@@ -13,6 +13,7 @@
     "start": "next start",
     "lint": "eslint --ignore-pattern src/generated/**",
     "typecheck": "tsc --noEmit --incremental false",
+    "test:affiliates": "tsx --test src/data/affiliates/*.test.ts",
     "test:loan": "tsx --test src/lib/loan-calculator/*.test.ts",
     "postinstall": "prisma generate"
   },
