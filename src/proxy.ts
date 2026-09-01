@@ -20,6 +20,7 @@ const isPublicRoute = createRouteMatcher([
   "/sitemap",
   "/api/affiliates(.*)",
   "/api/affiliate-banking-inquiry",
+  "/api/vtime-registration",
 ]);
 
 const isAuthPage = createRouteMatcher(["/login(.*)", "/signup(.*)"]);

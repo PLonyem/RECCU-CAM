@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CalendarDays } from "lucide-react";
+import { CalendarDays } from "lucide-react";
+import { Suspense } from "react";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { VerificationNote } from "@/components/layout/VerificationNote";
-import { TrainingProgramCard } from "@/components/vtime/TrainingProgramCard";
-import { Button, Container, Section, SectionHeader } from "@/components/ui";
-import { trainingPrograms } from "@/data/training-programs";
+import { ProgramsExplorer } from "@/components/vtime/ProgramsExplorer";
+import { Button, Card, Container, LoadingSkeleton, Section, SectionHeader } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "VTIME Programs",
@@ -41,25 +41,28 @@ export default function ProgramsPage() {
           <SectionHeader
             eyebrow="Program outlines"
             title="Explore the current curriculum foundation."
-            subtitle="Each outline identifies the intended audience and core learning structure. More categories can be developed against the same data model."
+            subtitle="Search and filter by the capability, audience, delivery format, level, or schedule status that matters to you."
             className="mt-12"
           />
-          <div className="mt-10 grid gap-6 lg:grid-cols-2">
-            {trainingPrograms.map((program) => (
-              <div key={program.id} id={program.slug} className="scroll-mt-32">
-                <TrainingProgramCard program={program} showModules />
-              </div>
-            ))}
-          </div>
-          <div className="mt-10 flex justify-center">
-            <Button asChild>
-              <Link href="/vtime/registration">
-                View registration guidance <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-            </Button>
+          <div className="mt-10">
+            <Suspense fallback={<ProgramsExplorerSkeleton />}>
+              <ProgramsExplorer />
+            </Suspense>
           </div>
         </Container>
       </Section>
     </>
+  );
+}
+
+function ProgramsExplorerSkeleton() {
+  return (
+    <div aria-label="Loading program filters">
+      <Card padding="default"><LoadingSkeleton lines={4} /></Card>
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <Card padding="default"><LoadingSkeleton lines={6} /></Card>
+        <Card padding="default"><LoadingSkeleton lines={6} /></Card>
+      </div>
+    </div>
   );
 }

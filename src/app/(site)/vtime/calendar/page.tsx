@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarDays } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { PageIntro } from "@/components/layout/PageIntro";
-import { Button, Container, EmptyState, Section } from "@/components/ui";
+import { TrainingCalendar } from "@/components/vtime/TrainingCalendar";
+import { Button, Container, Section } from "@/components/ui";
 import { publishedTrainingEvents } from "@/data/training-programs";
 
 export const metadata: Metadata = {
   title: "VTIME Training Calendar",
-  description: "View confirmed VTIME training cohorts and registration availability.",
+  description: "Navigate confirmed VTIME training cohorts by month or list view.",
 };
 
 export default function CalendarPage() {
@@ -15,23 +16,19 @@ export default function CalendarPage() {
     <>
       <PageIntro
         eyebrow="VTIME training calendar"
-        title="Dates appear only when they are ready to rely on."
-        description="Confirmed cohorts will include their dates, format, location, facilitator, capacity, and registration status."
+        title="Plan with dates you can rely on."
+        description="Navigate confirmed cohorts by month or list view. Dates appear only after their complete delivery details are verified."
+        actions={
+          <Button asChild size="lg" variant="accent">
+            <Link href="/vtime/programs">
+              Browse Programs <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </Button>
+        }
       />
       <Section>
         <Container>
-          {publishedTrainingEvents.length === 0 ? (
-            <EmptyState
-              icon={CalendarDays}
-              title="No verified training dates published"
-              description="The calendar is intentionally empty until RECCU-CAM confirms the complete delivery information for a cohort."
-              action={
-                <Button asChild variant="secondary">
-                  <Link href="/vtime/programs">Browse program outlines</Link>
-                </Button>
-              }
-            />
-          ) : null}
+          <TrainingCalendar events={publishedTrainingEvents} />
         </Container>
       </Section>
     </>

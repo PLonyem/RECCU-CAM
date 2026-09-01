@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/config/institution";
+import { trainingPrograms } from "@/data/training-programs";
 
 const routes = [
   "",
@@ -20,6 +21,7 @@ const routes = [
   "/services/consultancy",
   "/vtime",
   "/vtime/programs",
+  ...trainingPrograms.map((program) => `/vtime/programs/${program.slug}`),
   "/vtime/calendar",
   "/vtime/registration",
   "/vtime/resources",

@@ -81,7 +81,6 @@ export const placeholderPages = {
   "/about/institutional-framework": ["Institutional Framework", "About RECCU-CAM", "The approved legal and institutional framework will be presented here with source references."],
   "/network/become-an-affiliate": ["Become an Affiliate", "Our Network", "Eligibility, documentation, and the affiliation process are being prepared for publication."],
   "/services/consultancy": ["Consultancy", "Services", "Verified consultancy areas and engagement guidance will be published here."],
-  "/vtime/registration": ["Training Registration", "VTIME", "Registration will open here when RECCU-CAM confirms program dates, venues, and participation terms."],
   "/vtime/resources": ["VTIME Resources", "VTIME", "Approved learning materials and participant resources will be made available here."],
   "/knowledge/regulatory-library": ["Regulatory Library", "Knowledge Centre", "Source-labelled regulations and supervisory references are being organized for publication."],
   "/knowledge/circulars": ["Circulars", "Knowledge Centre", "Approved circulars will appear here with issuer, date, version, and status information."],

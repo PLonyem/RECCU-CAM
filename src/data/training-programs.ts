@@ -44,8 +44,18 @@ export interface TrainingProgram {
   facilitator: string | null;
   objectives: readonly string[];
   modules: readonly string[];
+  requirements: readonly string[];
   capacity: number | null;
   registrationStatus: RegistrationStatus;
+}
+
+export interface TrainingProgramFilters {
+  query?: string;
+  category?: TrainingCategorySlug | "";
+  audience?: string;
+  format?: TrainingFormat | "";
+  level?: TrainingLevel | "";
+  date?: "scheduled" | "pending" | "";
 }
 
 export const trainingCategories: readonly TrainingCategory[] = [
@@ -135,6 +145,7 @@ export const trainingPrograms: readonly TrainingProgram[] = [
       "Strengthen meeting and accountability practices",
     ],
     modules: ["Cooperative identity", "Roles and accountability", "Meeting discipline"],
+    requirements: [],
     capacity: null,
     registrationStatus: "schedule-pending",
   },
@@ -159,6 +170,7 @@ export const trainingPrograms: readonly TrainingProgram[] = [
       "Support reliable review and decision-making",
     ],
     modules: ["Accounting workflow", "Reconciliation discipline", "Management reporting"],
+    requirements: [],
     capacity: null,
     registrationStatus: "schedule-pending",
   },
@@ -183,6 +195,7 @@ export const trainingPrograms: readonly TrainingProgram[] = [
       "Identify portfolio signals that require follow-up",
     ],
     modules: ["Member needs", "Assessment workflow", "Portfolio follow-up"],
+    requirements: [],
     capacity: null,
     registrationStatus: "schedule-pending",
   },
@@ -207,6 +220,7 @@ export const trainingPrograms: readonly TrainingProgram[] = [
       "Document findings and follow-up actions clearly",
     ],
     modules: ["Control environment", "Operational safeguards", "Review and follow-up"],
+    requirements: [],
     capacity: null,
     registrationStatus: "schedule-pending",
   },
@@ -223,6 +237,47 @@ export function getTrainingCategory(slug: TrainingCategorySlug) {
   return trainingCategories.find((category) => category.slug === slug);
 }
 
+export function getTrainingProgramBySlug(slug: string) {
+  return trainingPrograms.find((program) => program.slug === slug);
+}
+
+export function getTrainingAudienceOptions(programs: readonly TrainingProgram[] = trainingPrograms) {
+  return [...new Set(programs.flatMap((program) => program.audience))].sort((a, b) =>
+    a.localeCompare(b),
+  );
+}
+
+export function filterTrainingPrograms(
+  programs: readonly TrainingProgram[],
+  filters: TrainingProgramFilters,
+) {
+  const query = filters.query?.trim().toLocaleLowerCase() ?? "";
+
+  return programs.filter((program) => {
+    const category = getTrainingCategory(program.category);
+    const searchableText = [
+      program.title,
+      program.summary,
+      category?.title,
+      ...program.audience,
+      ...program.objectives,
+      ...program.modules,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLocaleLowerCase();
+
+    if (query && !searchableText.includes(query)) return false;
+    if (filters.category && program.category !== filters.category) return false;
+    if (filters.audience && !program.audience.includes(filters.audience)) return false;
+    if (filters.format && program.format !== filters.format) return false;
+    if (filters.level && program.level !== filters.level) return false;
+    if (filters.date === "scheduled" && program.startDate === null) return false;
+    if (filters.date === "pending" && program.startDate !== null) return false;
+    return true;
+  });
+}
+
 export const trainingLevelLabels: Record<TrainingLevel, string> = {
   foundation: "Foundation",
   intermediate: "Intermediate",
@@ -235,3 +290,23 @@ export const trainingFormatLabels: Record<TrainingFormat, string> = {
   online: "Online",
   hybrid: "Hybrid",
 };
+
+export const registrationStatusLabels: Record<RegistrationStatus, string> = {
+  "schedule-pending": "Schedule pending",
+  "registration-open": "Registration open",
+  waitlist: "Waitlist available",
+  "registration-closed": "Registration closed",
+};
+
+export function formatTrainingDateRange(startDate: string | null, endDate: string | null) {
+  if (!startDate) return "To be confirmed";
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const start = formatter.format(new Date(`${startDate}T00:00:00Z`));
+  if (!endDate || endDate === startDate) return start;
+  return `${start} – ${formatter.format(new Date(`${endDate}T00:00:00Z`))}`;
+}
