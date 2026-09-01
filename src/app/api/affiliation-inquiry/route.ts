@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { sendContactFormNotification } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
-import {
-  affiliateBankingInquirySchema,
-  getAffiliateStatusLabel,
-  getSupportCategoryLabel,
-} from "@/lib/validation/affiliate-banking";
+import { affiliationInquirySchema } from "@/lib/validation/affiliation-inquiry";
 import {
   acceptedSubmissionResponse,
   isLikelyAutomatedSubmission,
@@ -23,7 +19,7 @@ export async function POST(request: Request) {
     return NextResponse.json(acceptedSubmissionResponse, { status: 201 });
   }
 
-  const parsed = affiliateBankingInquirySchema.safeParse(body);
+  const parsed = affiliationInquirySchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Review the highlighted fields.", details: parsed.error.flatten() },
@@ -32,14 +28,11 @@ export async function POST(request: Request) {
   }
 
   const inquiry = parsed.data;
-  const category = getSupportCategoryLabel(inquiry.supportCategory);
   const message = [
     `Institution: ${inquiry.institution}`,
-    `Affiliate status: ${getAffiliateStatusLabel(inquiry.affiliateStatus)}`,
+    `City: ${inquiry.city}`,
     `Contact person: ${inquiry.contactPerson}`,
     `Role: ${inquiry.role}`,
-    `City: ${inquiry.city}`,
-    `Support category: ${category}`,
     "",
     inquiry.message,
   ].join("\n");
@@ -50,12 +43,12 @@ export async function POST(request: Request) {
         name: inquiry.contactPerson,
         email: inquiry.email,
         phone: inquiry.phone,
-        subject: `Affiliate Banking inquiry — ${category}`,
+        subject: `Affiliation inquiry — ${inquiry.institution}`,
         message,
       },
     });
   } catch (error) {
-    console.error("Affiliate Banking inquiry could not be stored:", error);
+    console.error("Affiliation inquiry could not be stored:", error);
     return NextResponse.json(
       { error: "The inquiry service is temporarily unavailable. Please try again later." },
       { status: 503 },
@@ -65,7 +58,7 @@ export async function POST(request: Request) {
   try {
     await sendContactFormNotification(inquiry.email);
   } catch (error) {
-    console.error("Affiliate Banking inquiry notification failed:", error);
+    console.error("Affiliation inquiry notification failed:", error);
   }
 
   return NextResponse.json({ success: true }, { status: 201 });

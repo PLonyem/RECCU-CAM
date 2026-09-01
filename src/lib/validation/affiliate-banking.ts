@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { honeypotField } from "@/lib/validation/form-security";
 
 export const affiliateStatusOptions = [
   { value: "current-affiliate", label: "Current RECCU-CAM affiliate" },
@@ -17,6 +18,7 @@ export const supportCategoryOptions = [
 const credentialPattern = /\b(password|passcode|pin|one[- ]?time password|otp|banking credential|login credential)\b/i;
 
 export const affiliateBankingInquirySchema = z.object({
+  companyWebsite: honeypotField,
   institution: z.string().trim().min(2, "Enter the institution name.").max(160),
   affiliateStatus: z.enum(affiliateStatusOptions.map((option) => option.value) as [
     (typeof affiliateStatusOptions)[number]["value"],

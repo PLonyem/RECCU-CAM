@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getTrainingProgramBySlug } from "@/data/training-programs";
 import { sendContactFormNotification } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import {
+  acceptedSubmissionResponse,
+  isLikelyAutomatedSubmission,
+} from "@/lib/validation/form-security";
 import { vtimeRegistrationSchema } from "@/lib/validation/vtime-registration";
 
 export async function POST(request: Request) {
@@ -10,6 +14,10 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  if (isLikelyAutomatedSubmission(body)) {
+    return NextResponse.json(acceptedSubmissionResponse, { status: 201 });
   }
 
   const parsed = vtimeRegistrationSchema.safeParse(body);

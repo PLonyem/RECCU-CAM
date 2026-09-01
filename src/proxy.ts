@@ -20,6 +20,8 @@ const isPublicRoute = createRouteMatcher([
   "/sitemap",
   "/api/affiliates(.*)",
   "/api/affiliate-banking-inquiry",
+  "/api/affiliation-inquiry",
+  "/api/contact",
   "/api/vtime-registration",
 ]);
 

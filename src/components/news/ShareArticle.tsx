@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Link as LinkIcon, Check, MessageCircle, Share2, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AlertTriangle, Link as LinkIcon, Check, MessageCircle, Share2, Mail } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { siteUrl } from "@/config/institution";
 
@@ -13,12 +13,21 @@ interface ShareArticleProps {
 export function ShareArticle({ title, slug }: ShareArticleProps) {
   const { t } = useLanguage();
   const url = `${siteUrl}/news/${slug}`;
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
+
+  useEffect(() => {
+    if (copyState === "idle") return;
+    const timer = window.setTimeout(() => setCopyState("idle"), 2500);
+    return () => window.clearTimeout(timer);
+  }, [copyState]);
 
   async function handleCopyLink() {
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopyState("copied");
+    } catch {
+      setCopyState("error");
+    }
   }
 
   const whatsappHref = `https://wa.me/?text=${encodeURIComponent(`${title} - ${url}`)}`;
@@ -26,25 +35,26 @@ export function ShareArticle({ title, slug }: ShareArticleProps) {
   const emailHref = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}`;
 
   return (
-    <div className="border-t border-gray-200 pt-6 mt-8">
-      <p className="text-sm font-medium text-gray-500 mb-3">
+    <div className="mt-8 border-t border-border pt-6">
+      <p className="mb-3 text-sm font-medium text-muted-foreground">
         {t("news_share_article")}
       </p>
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
           onClick={handleCopyLink}
-          className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
+          className="inline-flex min-h-11 items-center gap-2 rounded-control bg-muted px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
+          aria-live="polite"
         >
-          {copied ? <Check className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
-          {copied ? t("news_copied") : t("news_copy_link")}
+          {copyState === "copied" ? <Check className="h-4 w-4" /> : copyState === "error" ? <AlertTriangle className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
+          {copyState === "copied" ? t("news_copied") : copyState === "error" ? "Copy unavailable" : t("news_copy_link")}
         </button>
 
         <a
           href={whatsappHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
+          className="inline-flex min-h-11 items-center gap-2 rounded-control bg-success-subtle px-3 py-2 text-sm font-semibold text-success transition-colors hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
         >
           <MessageCircle className="h-4 w-4" />
           WhatsApp
@@ -54,7 +64,7 @@ export function ShareArticle({ title, slug }: ShareArticleProps) {
           href={facebookHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
+          className="inline-flex min-h-11 items-center gap-2 rounded-control bg-primary-50 px-3 py-2 text-sm font-semibold text-forest transition-colors hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
         >
           <Share2 className="h-4 w-4" />
           Facebook
@@ -62,7 +72,7 @@ export function ShareArticle({ title, slug }: ShareArticleProps) {
 
         <a
           href={emailHref}
-          className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
+          className="inline-flex min-h-11 items-center gap-2 rounded-control bg-muted px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
         >
           <Mail className="h-4 w-4" />
           {t("news_email")}

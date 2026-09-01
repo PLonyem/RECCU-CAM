@@ -4,7 +4,7 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { TrainingProgramCard } from "@/components/vtime/TrainingProgramCard";
-import { Button, Card, EmptyState } from "@/components/ui";
+import { Button, Card, EmptyState, FilterDrawer } from "@/components/ui";
 import {
   filterTrainingPrograms,
   getTrainingAudienceOptions,
@@ -90,39 +90,26 @@ export function ProgramsExplorer() {
             placeholder="Search by program, category, audience, objective or module"
           />
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <FilterSelect
-            label="Category"
-            value={filters.category ?? ""}
-            onChange={(value) => updateFilter("category", value)}
-            options={trainingCategories.map((category) => ({ value: category.slug, label: category.title }))}
+        <FilterDrawer
+          activeCount={activeFilterCount}
+          title="Filter training programs"
+          description="Narrow the curriculum by category, audience, format, level, or verified schedule status."
+          resultLabel={`Show ${results.length} ${results.length === 1 ? "program" : "programs"}`}
+          onClear={clearFilters}
+        >
+          <ProgramFilterFields
+            idPrefix="mobile"
+            filters={filters}
+            audienceOptions={audienceOptions}
+            updateFilter={updateFilter}
           />
-          <FilterSelect
-            label="Audience"
-            value={filters.audience ?? ""}
-            onChange={(value) => updateFilter("audience", value)}
-            options={audienceOptions.map((audience) => ({ value: audience, label: audience }))}
-          />
-          <FilterSelect
-            label="Format"
-            value={filters.format ?? ""}
-            onChange={(value) => updateFilter("format", value)}
-            options={(Object.entries(trainingFormatLabels) as [TrainingFormat, string][]).map(([value, label]) => ({ value, label }))}
-          />
-          <FilterSelect
-            label="Level"
-            value={filters.level ?? ""}
-            onChange={(value) => updateFilter("level", value)}
-            options={(Object.entries(trainingLevelLabels) as [TrainingLevel, string][]).map(([value, label]) => ({ value, label }))}
-          />
-          <FilterSelect
-            label="Date"
-            value={filters.date ?? ""}
-            onChange={(value) => updateFilter("date", value)}
-            options={[
-              { value: "scheduled", label: "Scheduled" },
-              { value: "pending", label: "Schedule pending" },
-            ]}
+        </FilterDrawer>
+        <div className="mt-4 hidden gap-4 lg:grid lg:grid-cols-5">
+          <ProgramFilterFields
+            idPrefix="desktop"
+            filters={filters}
+            audienceOptions={audienceOptions}
+            updateFilter={updateFilter}
           />
         </div>
       </Card>
@@ -174,14 +161,15 @@ function readFilters(searchParams: { get: (name: string) => string | null }): Tr
 }
 
 interface FilterSelectProps {
+  idPrefix: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: readonly { value: string; label: string }[];
 }
 
-function FilterSelect({ label, onChange, options, value }: FilterSelectProps) {
-  const id = `program-filter-${label.toLocaleLowerCase().replaceAll(" ", "-")}`;
+function FilterSelect({ idPrefix, label, onChange, options, value }: FilterSelectProps) {
+  const id = `${idPrefix}-program-filter-${label.toLocaleLowerCase().replaceAll(" ", "-")}`;
   return (
     <label htmlFor={id} className="block">
       <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
@@ -192,5 +180,60 @@ function FilterSelect({ label, onChange, options, value }: FilterSelectProps) {
         ))}
       </select>
     </label>
+  );
+}
+
+function ProgramFilterFields({
+  audienceOptions,
+  filters,
+  idPrefix,
+  updateFilter,
+}: {
+  audienceOptions: readonly string[];
+  filters: TrainingProgramFilters;
+  idPrefix: string;
+  updateFilter: (name: keyof TrainingProgramFilters, value: string) => void;
+}) {
+  return (
+    <>
+      <FilterSelect
+        idPrefix={idPrefix}
+        label="Category"
+        value={filters.category ?? ""}
+        onChange={(value) => updateFilter("category", value)}
+        options={trainingCategories.map((category) => ({ value: category.slug, label: category.title }))}
+      />
+      <FilterSelect
+        idPrefix={idPrefix}
+        label="Audience"
+        value={filters.audience ?? ""}
+        onChange={(value) => updateFilter("audience", value)}
+        options={audienceOptions.map((audience) => ({ value: audience, label: audience }))}
+      />
+      <FilterSelect
+        idPrefix={idPrefix}
+        label="Format"
+        value={filters.format ?? ""}
+        onChange={(value) => updateFilter("format", value)}
+        options={(Object.entries(trainingFormatLabels) as [TrainingFormat, string][]).map(([value, label]) => ({ value, label }))}
+      />
+      <FilterSelect
+        idPrefix={idPrefix}
+        label="Level"
+        value={filters.level ?? ""}
+        onChange={(value) => updateFilter("level", value)}
+        options={(Object.entries(trainingLevelLabels) as [TrainingLevel, string][]).map(([value, label]) => ({ value, label }))}
+      />
+      <FilterSelect
+        idPrefix={idPrefix}
+        label="Date"
+        value={filters.date ?? ""}
+        onChange={(value) => updateFilter("date", value)}
+        options={[
+          { value: "scheduled", label: "Scheduled" },
+          { value: "pending", label: "Schedule pending" },
+        ]}
+      />
+    </>
   );
 }

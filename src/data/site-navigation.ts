@@ -79,7 +79,6 @@ export const placeholderPages = {
   "/about/governance": ["Governance", "About RECCU-CAM", "Governance structures and responsibilities will be published after institutional confirmation."],
   "/about/leadership": ["Leadership", "About RECCU-CAM", "Verified leadership profiles and responsibilities will be published here."],
   "/about/institutional-framework": ["Institutional Framework", "About RECCU-CAM", "The approved legal and institutional framework will be presented here with source references."],
-  "/network/become-an-affiliate": ["Become an Affiliate", "Our Network", "Eligibility, documentation, and the affiliation process are being prepared for publication."],
   "/services/consultancy": ["Consultancy", "Services", "Verified consultancy areas and engagement guidance will be published here."],
   "/vtime/resources": ["VTIME Resources", "VTIME", "Approved learning materials and participant resources will be made available here."],
   "/privacy": ["Privacy", "Legal", "RECCU-CAM's reviewed privacy notice will be published here."],

@@ -147,6 +147,7 @@ function DesktopNavigationItem({
 export function Navbar() {
   const pathname = usePathname();
   const headerRef = useRef<HTMLElement>(null);
+  const mobileNavigationRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const firstMobileLinkRef = useRef<HTMLAnchorElement>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -175,7 +176,7 @@ export function Navbar() {
     if (!mobileOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    requestAnimationFrame(() => firstMobileLinkRef.current?.focus());
+    const focusTimer = window.setTimeout(() => firstMobileLinkRef.current?.focus(), 0);
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -183,9 +184,9 @@ export function Navbar() {
         mobileButtonRef.current?.focus();
         return;
       }
-      if (event.key !== "Tab" || !headerRef.current) return;
+      if (event.key !== "Tab" || !mobileNavigationRef.current) return;
       const focusable = Array.from(
-        headerRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'),
+        mobileNavigationRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'),
       ).filter((element) => element.offsetParent !== null);
       const first = focusable[0];
       const last = focusable.at(-1);
@@ -200,6 +201,7 @@ export function Navbar() {
     window.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
+      window.clearTimeout(focusTimer);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [mobileOpen]);
@@ -257,6 +259,7 @@ export function Navbar() {
 
       {mobileOpen && (
         <div
+          ref={mobileNavigationRef}
           id="mobile-navigation"
           role="dialog"
           aria-modal="true"

@@ -206,16 +206,16 @@ export function AffiliateDirectory({ affiliates, filterOptions }: AffiliateDirec
       {activeCount > 0 && (
         <div className="mt-5 flex flex-wrap items-center gap-2" aria-label="Active filters">
           {query.trim() && (
-            <button onClick={() => setQuery("")} className="inline-flex min-h-9 items-center gap-2 rounded-pill border border-primary-200 bg-primary-50 px-3 text-xs font-semibold text-primary-800 transition-colors hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2">
+            <button type="button" onClick={() => setQuery("")} className="inline-flex min-h-9 items-center gap-2 rounded-pill border border-primary-200 bg-primary-50 px-3 text-xs font-semibold text-primary-800 transition-colors hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2">
               Search: &ldquo;{query.trim()}&rdquo; <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           )}
           {activeFilters.map((key) => (
-            <button key={key} onClick={() => onFilterChange(key, "")} className="inline-flex min-h-9 items-center gap-2 rounded-pill border border-primary-200 bg-primary-50 px-3 text-xs font-semibold text-primary-800 transition-colors hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2">
+            <button type="button" key={key} onClick={() => onFilterChange(key, "")} className="inline-flex min-h-9 items-center gap-2 rounded-pill border border-primary-200 bg-primary-50 px-3 text-xs font-semibold text-primary-800 transition-colors hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2">
               {filterLabels[key]} <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           ))}
-          <button onClick={clearFilters} className="min-h-9 rounded-sm px-2 text-xs font-semibold text-muted-foreground underline decoration-border underline-offset-4 hover:text-institutional focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2">Clear All</button>
+          <button type="button" onClick={clearFilters} className="min-h-9 rounded-sm px-2 text-xs font-semibold text-muted-foreground underline decoration-border underline-offset-4 hover:text-institutional focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2">Clear All</button>
         </div>
       )}
 

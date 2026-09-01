@@ -5,6 +5,7 @@ export * from "./Container";
 export * from "./CTASection";
 export * from "./EmptyState";
 export * from "./ErrorState";
+export * from "./FilterDrawer";
 export * from "./IconFeature";
 export * from "./LoadingSkeleton";
 export * from "./Section";

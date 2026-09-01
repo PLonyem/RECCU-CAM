@@ -4,7 +4,7 @@ import { ArrowRight, FileSearch, Search, SlidersHorizontal, X } from "lucide-rea
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
-import { Badge, Button, Card, EmptyState } from "@/components/ui";
+import { Badge, Button, Card, EmptyState, FilterDrawer } from "@/components/ui";
 import {
   filterKnowledgeDocuments,
   formatKnowledgeDate,
@@ -101,48 +101,26 @@ function KnowledgeExplorerContent({ initialSearchParams }: { initialSearchParams
             placeholder="Search regulations, circulars, reports, guides and templates"
           />
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <FilterSelect
-            label="Category"
-            value={filters.category ?? ""}
-            onChange={(value) => updateFilter("category", value)}
-            options={knowledgeCategories.map((category) => ({ value: category.slug, label: category.title }))}
+        <FilterDrawer
+          activeCount={activeFilterCount}
+          title="Filter public documents"
+          description="Narrow the source-labelled public collection. Restricted records remain unexposed."
+          resultLabel={`Show ${results.length} ${results.length === 1 ? "document" : "documents"}`}
+          onClear={clearFilters}
+        >
+          <KnowledgeFilterFields
+            idPrefix="mobile"
+            filters={filters}
+            filterOptions={filterOptions}
+            updateFilter={updateFilter}
           />
-          <FilterSelect
-            label="Issuing authority"
-            value={filters.issuingAuthority ?? ""}
-            onChange={(value) => updateFilter("issuingAuthority", value)}
-            options={filterOptions.authorities.map((authority) => ({ value: authority, label: authority }))}
-          />
-          <FilterSelect
-            label="Year"
-            value={filters.year ?? ""}
-            onChange={(value) => updateFilter("year", value)}
-            options={filterOptions.years.map((year) => ({ value: year, label: year }))}
-            emptyLabel="No verified publication years"
-          />
-          <FilterSelect
-            label="Document type"
-            value={filters.documentType ?? ""}
-            onChange={(value) => updateFilter("documentType", value)}
-            options={knowledgeDocumentTypes.map((type) => ({ value: type, label: type }))}
-          />
-          <FilterSelect
-            label="Access level"
-            value={filters.accessLevel ?? ""}
-            onChange={(value) => updateFilter("accessLevel", value)}
-            options={(Object.entries(knowledgeAccessLevelLabels) as [KnowledgeAccessLevel, string][]).map(
-              ([value, label]) => ({ value, label }),
-            )}
-          />
-          <FilterSelect
-            label="Sort by"
-            value={filters.sort ?? "newest"}
-            onChange={(value) => updateFilter("sort", value)}
-            includeAll={false}
-            options={(Object.entries(knowledgeSortLabels) as [KnowledgeSort, string][]).map(
-              ([value, label]) => ({ value, label }),
-            )}
+        </FilterDrawer>
+        <div className="mt-4 hidden gap-4 lg:grid lg:grid-cols-3">
+          <KnowledgeFilterFields
+            idPrefix="desktop"
+            filters={filters}
+            filterOptions={filterOptions}
+            updateFilter={updateFilter}
           />
         </div>
       </Card>
@@ -215,6 +193,7 @@ function KnowledgeExplorerContent({ initialSearchParams }: { initialSearchParams
 }
 
 interface FilterSelectProps {
+  idPrefix: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -223,8 +202,8 @@ interface FilterSelectProps {
   emptyLabel?: string;
 }
 
-function FilterSelect({ emptyLabel, includeAll = true, label, onChange, options, value }: FilterSelectProps) {
-  const id = `knowledge-filter-${label.toLocaleLowerCase().replaceAll(" ", "-")}`;
+function FilterSelect({ emptyLabel, idPrefix, includeAll = true, label, onChange, options, value }: FilterSelectProps) {
+  const id = `${idPrefix}-knowledge-filter-${label.toLocaleLowerCase().replaceAll(" ", "-")}`;
   return (
     <label htmlFor={id} className="block">
       <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
@@ -236,6 +215,71 @@ function FilterSelect({ emptyLabel, includeAll = true, label, onChange, options,
         {options.length === 0 && emptyLabel && <option value="unavailable" disabled>{emptyLabel}</option>}
       </select>
     </label>
+  );
+}
+
+function KnowledgeFilterFields({
+  filterOptions,
+  filters,
+  idPrefix,
+  updateFilter,
+}: {
+  filterOptions: ReturnType<typeof getKnowledgeFilterOptions>;
+  filters: KnowledgeFilters;
+  idPrefix: string;
+  updateFilter: (name: keyof KnowledgeFilters, value: string) => void;
+}) {
+  return (
+    <>
+      <FilterSelect
+        idPrefix={idPrefix}
+        label="Category"
+        value={filters.category ?? ""}
+        onChange={(value) => updateFilter("category", value)}
+        options={knowledgeCategories.map((category) => ({ value: category.slug, label: category.title }))}
+      />
+      <FilterSelect
+        idPrefix={idPrefix}
+        label="Issuing authority"
+        value={filters.issuingAuthority ?? ""}
+        onChange={(value) => updateFilter("issuingAuthority", value)}
+        options={filterOptions.authorities.map((authority) => ({ value: authority, label: authority }))}
+      />
+      <FilterSelect
+        idPrefix={idPrefix}
+        label="Year"
+        value={filters.year ?? ""}
+        onChange={(value) => updateFilter("year", value)}
+        options={filterOptions.years.map((year) => ({ value: year, label: year }))}
+        emptyLabel="No verified publication years"
+      />
+      <FilterSelect
+        idPrefix={idPrefix}
+        label="Document type"
+        value={filters.documentType ?? ""}
+        onChange={(value) => updateFilter("documentType", value)}
+        options={knowledgeDocumentTypes.map((type) => ({ value: type, label: type }))}
+      />
+      <FilterSelect
+        idPrefix={idPrefix}
+        label="Access level"
+        value={filters.accessLevel ?? ""}
+        onChange={(value) => updateFilter("accessLevel", value)}
+        options={(Object.entries(knowledgeAccessLevelLabels) as [KnowledgeAccessLevel, string][]).map(
+          ([value, label]) => ({ value, label }),
+        )}
+      />
+      <FilterSelect
+        idPrefix={idPrefix}
+        label="Sort by"
+        value={filters.sort ?? "newest"}
+        onChange={(value) => updateFilter("sort", value)}
+        includeAll={false}
+        options={(Object.entries(knowledgeSortLabels) as [KnowledgeSort, string][]).map(
+          ([value, label]) => ({ value, label }),
+        )}
+      />
+    </>
   );
 }
 
