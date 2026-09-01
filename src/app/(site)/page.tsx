@@ -1,120 +1,187 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, BookOpenCheck, Building2, GraduationCap, MapPinned, Network, ShieldCheck } from "lucide-react";
+import { ArrowRight, BadgeCheck, Landmark, Newspaper } from "lucide-react";
+import { HomeHero } from "@/components/home/HomeHero";
+import { NetworkPreview } from "@/components/home/NetworkPreview";
+import { AffiliatePreview } from "@/components/home/AffiliatePreview";
+import { VerificationNote } from "@/components/layout/VerificationNote";
+import { buttonVariants } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
+import { CTASection } from "@/components/ui/CTASection";
+import { IconFeature } from "@/components/ui/IconFeature";
 import { Section } from "@/components/ui/Section";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { VerificationNote } from "@/components/layout/VerificationNote";
 import { institution } from "@/config/institution";
-import { platformServices } from "@/data/services";
+import {
+  editorialPreviews,
+  homepageServices,
+  institutionalPillars,
+  knowledgePreview,
+  vtimeTopics,
+} from "@/data/homepage";
+import trainingImage from "../../../public/images/home/vtime-training.webp";
 
 export default function HomePage() {
   return (
     <>
-      <section className="relative isolate overflow-hidden bg-primary-900 text-white">
-        <div className="absolute inset-0 -z-10 opacity-25 [background-image:radial-gradient(circle_at_15%_25%,#F0C351_0,transparent_24%),radial-gradient(circle_at_85%_20%,#7CBA99_0,transparent_28%),linear-gradient(135deg,transparent_35%,rgba(255,255,255,.08)_35%,rgba(255,255,255,.08)_36%,transparent_36%)]" />
-        <Container className="grid min-h-[650px] items-center gap-12 py-20 lg:grid-cols-[1.2fr_.8fr] lg:py-24">
-          <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-accent-200">
-              <Network className="h-4 w-4" /> {institution.displayName}
-            </p>
-            <h1 className="mt-7 max-w-4xl font-display text-5xl font-bold leading-[1.03] tracking-tight sm:text-6xl lg:text-7xl">
-              Cooperation that moves <span className="text-accent-300">communities forward.</span>
-            </h1>
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-primary-100 sm:text-xl">
-              {institution.platformStatement}
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link href="/network/affiliates" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-accent-400 px-6 font-bold text-primary-900 transition hover:bg-accent-300">
-                Explore the network <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link href="/vtime" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 px-6 font-bold text-white transition hover:bg-white/10">
-                Discover VTIME
-              </Link>
-            </div>
-          </div>
-          <div className="relative mx-auto w-full max-w-md">
-            <div className="absolute -inset-6 rounded-[3rem] border border-white/10" />
-            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/15 bg-white/10 p-7 shadow-2xl backdrop-blur">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent-200">A connected platform</p>
-              <div className="mt-6 space-y-4">
-                {[
-                  [MapPinned, "Find and understand the network"],
-                  [GraduationCap, "Build capability through VTIME"],
-                  [BookOpenCheck, "Access controlled knowledge"],
-                  [ShieldCheck, "Support consistent governance"],
-                ].map(([Icon, label]) => (
-                  <div key={label as string} className="flex items-center gap-4 rounded-2xl bg-white/10 p-4">
-                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-white text-primary-800"><Icon className="h-5 w-5" /></span>
-                    <span className="font-semibold text-primary-50">{label as string}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
+      <HomeHero />
 
-      <Section className="border-b border-gray-100 bg-white">
+      <Section tone="surface" spacing="compact" className="border-b border-border">
         <Container>
           <VerificationNote>
-            <strong>Verified institutional reference:</strong> Cameroon’s Ministry of Finance lists {institution.legalName} in {institution.location.city} under approval order {institution.approval.order} dated 5 April 2018. No unconfirmed member totals, financial figures, rates, or leadership details are published here.
+            <strong>Verified institutional reference:</strong> Cameroon&apos;s Ministry of Finance lists {institution.legalName} in {institution.location.city} under approval order {institution.approval.order}, dated 5 April 2018. No unconfirmed network totals, rates, financial figures, or leadership claims are presented here.
           </VerificationNote>
         </Container>
       </Section>
 
-      <Section className="bg-[#F7FAF8]">
+      <Section tone="muted">
         <Container>
-          <SectionHeader eyebrow="Platform experiences" title="One network. Clear paths to action." subtitle="Each experience is designed around a specific job: discover the network, coordinate services, grow capability, or find trusted knowledge." />
-          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {platformServices.map((service) => (
-              <Link key={service.href} href={service.href} className="group rounded-3xl border border-primary-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary-200 hover:shadow-lg">
-                <div className="flex items-start justify-between gap-4">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary-50 text-primary-700"><service.icon className="h-6 w-6" /></span>
-                  {service.status === "preview" && <span className="rounded-full bg-accent-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-accent-700">Preview</span>}
-                </div>
-                <h2 className="mt-6 font-display text-xl font-bold text-primary-900">{service.title}</h2>
-                <p className="mt-3 text-sm leading-6 text-gray-600">{service.description}</p>
-                <span className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary-700">Explore <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+          <SectionHeader eyebrow="Institutional pillars" title="A stronger foundation for cooperative finance." subtitle="RECCU-CAM brings institutional support, shared capability, and responsible cooperation together around the needs of credit unions and their communities." />
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {institutionalPillars.map((pillar) => <IconFeature key={pillar.title} {...pillar} />)}
+          </div>
+        </Container>
+      </Section>
+
+      <Section tone="surface">
+        <Container>
+          <SectionHeader eyebrow="Services" title="Institutional support across the cooperative lifecycle." subtitle="Explore six connected service areas designed to help affiliate institutions strengthen governance, operations, people, and shared infrastructure." />
+          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {homepageServices.map((service) => (
+              <Link key={service.title} href={service.href ?? "/services"} className="group rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-4">
+                <Card padding="default" className="h-full transition-[border-color,box-shadow,transform] duration-base motion-safe:group-hover:-translate-y-1 group-hover:border-primary-200 group-hover:shadow-raised">
+                  <span className="grid h-12 w-12 place-items-center rounded-control bg-primary-50 text-forest" aria-hidden="true"><service.icon className="h-6 w-6" /></span>
+                  <h3 className="mt-6 font-display text-h4 text-institutional">{service.title}</h3>
+                  <p className="mt-3 text-body text-muted-foreground">{service.description}</p>
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-forest">Explore service <ArrowRight className="h-4 w-4 transition-transform duration-fast group-hover:translate-x-1" aria-hidden="true" /></span>
+                </Card>
               </Link>
             ))}
           </div>
         </Container>
       </Section>
 
-      <Section className="bg-white">
-        <Container className="grid gap-10 lg:grid-cols-2 lg:items-center">
+      <Section tone="muted">
+        <Container>
+          <SectionHeader eyebrow="Network preview" title="See the cooperative network in context." subtitle="A lightweight view of the source-labelled starter directory. The full map provides institution-level context without third-party tracking." />
+          <div className="mt-10"><NetworkPreview /></div>
+        </Container>
+      </Section>
+
+      <Section tone="surface">
+        <Container>
+          <SectionHeader eyebrow="Affiliate preview" title="Meet institutions in the source-listed directory." subtitle="These entries are transcribed from the cited MINFI list as at 31 December 2021 and are not presented as a complete or current membership count." />
+          <div className="mt-10"><AffiliatePreview /></div>
+        </Container>
+      </Section>
+
+      <Section tone="brand" className="overflow-hidden">
+        <Container>
+          <div className="relative overflow-hidden rounded-panel border border-white/10 bg-institutional p-8 shadow-raised sm:p-10 lg:p-14">
+            <div className="absolute -right-24 -top-24 h-72 w-72 rounded-pill border border-accent-300/20" aria-hidden="true" />
+            <div className="absolute -bottom-36 right-24 h-80 w-80 rounded-pill border border-primary-400/20" aria-hidden="true" />
+            <div className="relative grid gap-10 lg:grid-cols-[1fr_.72fr] lg:items-end">
+              <div className="max-w-reading">
+                <span className="grid h-12 w-12 place-items-center rounded-control bg-white/10 text-accent-300" aria-hidden="true"><Landmark className="h-6 w-6" /></span>
+                <p className="mt-6 text-meta uppercase text-accent-300">Affiliate Banking</p>
+                <h2 className="mt-3 font-display text-h2 text-white">Financial Strength Within the Network</h2>
+                <p className="mt-5 text-lead text-primary-100">A shared-service blueprint designed around secure settlement, clearer reporting, liquidity coordination, and practical operational support—without publishing unverified rates or product claims.</p>
+              </div>
+              <div className="lg:text-right">
+                <Link href="/services/affiliate-banking" className={buttonVariants({ variant: "accent", size: "lg" })}>
+                  Explore Affiliate Banking <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </Section>
+
+      <Section tone="surface">
+        <Container className="grid gap-12 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
+          <div className="relative overflow-hidden rounded-panel bg-muted shadow-card">
+            <Image
+              src={trainingImage}
+              alt="Illustrative professional training workshop with Cameroonian cooperative staff"
+              sizes="(max-width: 1024px) 100vw, 44vw"
+              className="h-auto w-full object-cover"
+            />
+            <p className="absolute bottom-4 left-4 rounded-pill bg-institutional/80 px-3 py-1.5 text-xs text-primary-100 backdrop-blur-sm">Illustrative training imagery</p>
+          </div>
           <div>
-            <SectionHeader eyebrow="Cooperative infrastructure" title="Built for institutions. Useful to people." subtitle="The platform separates public information from protected operational workflows, keeping each audience focused and each responsibility clear." />
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              {[
-                [Building2, "Public discovery", "Institutional, network, learning, and knowledge pages remain open and indexable."],
-                [BadgeCheck, "Protected operations", "Affiliate and administrator workflows retain Clerk role checks and server-side authorization."],
-              ].map(([Icon, title, text]) => (
-                <div key={title as string} className="rounded-2xl border border-gray-200 p-5">
-                  <Icon className="h-6 w-6 text-accent-600" />
-                  <h3 className="mt-4 font-bold text-primary-900">{title as string}</h3>
-                  <p className="mt-2 text-sm leading-6 text-gray-600">{text as string}</p>
+            <SectionHeader eyebrow="VTIME" title="Developing the Next Generation of Microfinance Professionals" subtitle="Practical learning pathways connect cooperative principles with the governance, financial, compliance, leadership, and digital capabilities institutions need." />
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+              {vtimeTopics.map(([topic, Icon]) => (
+                <div key={topic} className="rounded-control border border-border bg-muted p-4">
+                  <Icon className="h-5 w-5 text-gold-strong" aria-hidden="true" />
+                  <p className="mt-3 text-sm font-semibold text-institutional">{topic}</p>
                 </div>
               ))}
             </div>
+            <Link href="/vtime" className={`${buttonVariants({ variant: "default", size: "lg" })} mt-8`}>
+              Explore VTIME <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
           </div>
-          <div className="rounded-[2rem] bg-primary-50 p-8 sm:p-10">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent-700">Start with what you need</p>
-            <div className="mt-6 space-y-3">
-              {[
-                ["I want to find an affiliate", "/network/affiliates"],
-                ["I want to explore shared banking services", "/services/affiliate-banking"],
-                ["I want to build professional capability", "/vtime"],
-                ["I need a verified document or template", "/knowledge"],
-              ].map(([label, href]) => (
-                <Link key={href} href={href} className="flex items-center justify-between rounded-2xl bg-white px-5 py-4 font-semibold text-primary-900 shadow-sm hover:shadow-md">
-                  {label} <ArrowRight className="h-4 w-4 text-accent-600" />
+        </Container>
+      </Section>
+
+      <Section tone="muted">
+        <Container>
+          <div className="grid gap-10 lg:grid-cols-[.72fr_1.28fr] lg:items-start">
+            <div>
+              <SectionHeader eyebrow="Knowledge Centre" title="Trusted resources, clearly controlled." subtitle="Each collection is designed around source ownership, effective dates, versions, and visible publication status." />
+              <Link href="/knowledge" className={`${buttonVariants({ variant: "default", size: "lg" })} mt-8`}>
+                Enter Knowledge Centre <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {knowledgePreview.map((item, index) => (
+                <Link key={item.title} href={item.href ?? "/knowledge"} className={`group rounded-card border border-border bg-surface p-5 shadow-card transition-[border-color,box-shadow,transform] duration-base motion-safe:hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-raised ${index === knowledgePreview.length - 1 ? "sm:col-span-2" : ""}`}>
+                  <div className="flex items-start gap-4">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-primary-50 text-forest" aria-hidden="true"><item.icon className="h-5 w-5" /></span>
+                    <div><h3 className="font-display text-h4 text-institutional">{item.title}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{item.description}</p></div>
+                  </div>
                 </Link>
               ))}
             </div>
           </div>
         </Container>
       </Section>
+
+      <Section tone="surface">
+        <Container>
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <SectionHeader eyebrow="News & Events" title="Editorial ideas, awaiting approval." subtitle="Demo content is shown separately from the verified newsroom and is not presented as published RECCU-CAM news." />
+            <Link href="/news" className={buttonVariants({ variant: "secondary" })}>Visit Newsroom <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
+          </div>
+          <div className="mt-10 grid gap-5 lg:grid-cols-3">
+            {editorialPreviews.map((story) => (
+              <article key={story.title} className="flex h-full flex-col rounded-card border border-border bg-surface p-6 shadow-card">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-control bg-gold-subtle text-gold-strong" aria-hidden="true"><Newspaper className="h-5 w-5" /></span>
+                  <span className="rounded-pill bg-warning-subtle px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-wide text-warning">Editorial preview</span>
+                </div>
+                <p className="mt-6 text-meta uppercase text-gold-strong">{story.category}</p>
+                <h3 className="mt-2 font-display text-h4 text-institutional">{story.title}</h3>
+                <p className="mt-3 text-body text-muted-foreground">{story.summary}</p>
+                <p className="mt-auto flex items-center gap-2 pt-6 text-xs font-semibold text-muted-foreground"><BadgeCheck className="h-4 w-4" aria-hidden="true" /> Not published news</p>
+              </article>
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      <CTASection
+        eyebrow="Affiliation"
+        title="Grow Within a Stronger Cooperative Network"
+        description="Begin a structured conversation about institutional alignment, affiliation expectations, and the next verified steps."
+        actions={
+          <Link href="/network/become-an-affiliate" className={buttonVariants({ variant: "accent", size: "lg" })}>
+            Start Affiliation Inquiry <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        }
+      />
     </>
   );
 }
