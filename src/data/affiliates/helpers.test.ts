@@ -7,6 +7,7 @@ import {
   filterAffiliatesByRegion,
   filterAffiliatesByService,
   filterAffiliatesByType,
+  getMappableAffiliates,
   getAffiliateBySlug,
   searchAffiliates,
 } from "./helpers";
@@ -143,4 +144,16 @@ test("source records leave unknown details null instead of inventing them", () =
     assert.equal(affiliate.updatedAt, null);
     assert.equal(affiliate.dataClassification, "demo-safe-source-reference");
   }
+});
+
+test("maps only records with complete, valid coordinates", () => {
+  const valid: Affiliate = { ...demoAffiliates[0], latitude: 5.9631, longitude: 10.1591 };
+  const missingLongitude: Affiliate = { ...demoAffiliates[0], id: "missing-longitude", latitude: 5.9631 };
+  const invalidLatitude: Affiliate = { ...demoAffiliates[0], id: "invalid-latitude", latitude: 95, longitude: 10.1591 };
+
+  assert.deepEqual(
+    getMappableAffiliates([valid, missingLongitude, invalidLatitude]).map((item) => item.id),
+    [valid.id],
+  );
+  assert.equal(getMappableAffiliates(affiliates).length, 0);
 });

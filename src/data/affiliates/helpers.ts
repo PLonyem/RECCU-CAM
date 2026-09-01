@@ -22,6 +22,11 @@ export interface AffiliateFilters {
   institutionType?: InstitutionType | null;
 }
 
+export type MappableAffiliate = Affiliate & {
+  latitude: number;
+  longitude: number;
+};
+
 function normalize(value: string) {
   return value
     .normalize("NFKD")
@@ -30,7 +35,7 @@ function normalize(value: string) {
     .toLocaleLowerCase("en");
 }
 
-function copy(items: readonly Affiliate[]) {
+function copy<T extends Affiliate>(items: readonly T[]) {
   return Array.from(items);
 }
 
@@ -41,7 +46,26 @@ function labelFromSlug(value: string) {
     .join(" ");
 }
 
-export function searchAffiliates(items: readonly Affiliate[], query: string | null | undefined) {
+export function hasMappableCoordinates(
+  affiliate: Affiliate,
+): affiliate is MappableAffiliate {
+  return (
+    typeof affiliate.latitude === "number" &&
+    Number.isFinite(affiliate.latitude) &&
+    affiliate.latitude >= -90 &&
+    affiliate.latitude <= 90 &&
+    typeof affiliate.longitude === "number" &&
+    Number.isFinite(affiliate.longitude) &&
+    affiliate.longitude >= -180 &&
+    affiliate.longitude <= 180
+  );
+}
+
+export function getMappableAffiliates(items: readonly Affiliate[]) {
+  return items.filter(hasMappableCoordinates);
+}
+
+export function searchAffiliates<T extends Affiliate>(items: readonly T[], query: string | null | undefined) {
   const normalizedQuery = normalize(query ?? "");
   if (!normalizedQuery) return copy(items);
 
@@ -70,8 +94,8 @@ export function searchAffiliates(items: readonly Affiliate[], query: string | nu
   );
 }
 
-export function filterAffiliates(
-  items: readonly Affiliate[],
+export function filterAffiliates<T extends Affiliate>(
+  items: readonly T[],
   filters: AffiliateFilters,
 ) {
   return filterAffiliatesByType(
@@ -89,8 +113,8 @@ export function filterAffiliates(
   );
 }
 
-export function filterAffiliatesByRegion(
-  items: readonly Affiliate[],
+export function filterAffiliatesByRegion<T extends Affiliate>(
+  items: readonly T[],
   region: string | null | undefined,
 ) {
   const normalizedRegion = normalize(region ?? "");
@@ -98,8 +122,8 @@ export function filterAffiliatesByRegion(
   return items.filter((affiliate) => normalize(affiliate.region ?? "") === normalizedRegion);
 }
 
-export function filterAffiliatesByCity(
-  items: readonly Affiliate[],
+export function filterAffiliatesByCity<T extends Affiliate>(
+  items: readonly T[],
   city: string | null | undefined,
 ) {
   const normalizedCity = normalize(city ?? "");
@@ -107,8 +131,8 @@ export function filterAffiliatesByCity(
   return items.filter((affiliate) => normalize(affiliate.city ?? "") === normalizedCity);
 }
 
-export function filterAffiliatesByService(
-  items: readonly Affiliate[],
+export function filterAffiliatesByService<T extends Affiliate>(
+  items: readonly T[],
   service: string | null | undefined,
 ) {
   const normalizedService = normalize(service ?? "");
@@ -118,16 +142,16 @@ export function filterAffiliatesByService(
   );
 }
 
-export function filterAffiliatesByType(
-  items: readonly Affiliate[],
+export function filterAffiliatesByType<T extends Affiliate>(
+  items: readonly T[],
   institutionType: InstitutionType | null | undefined,
 ) {
   if (!institutionType) return copy(items);
   return items.filter((affiliate) => affiliate.institutionType === institutionType);
 }
 
-export function getAffiliateBySlug(
-  items: readonly Affiliate[],
+export function getAffiliateBySlug<T extends Affiliate>(
+  items: readonly T[],
   slug: string | null | undefined,
 ) {
   const normalizedSlug = normalize(slug ?? "");

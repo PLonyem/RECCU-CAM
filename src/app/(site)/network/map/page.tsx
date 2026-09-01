@@ -4,7 +4,33 @@ import { PageIntro } from "@/components/layout/PageIntro";
 import { VerificationNote } from "@/components/layout/VerificationNote";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
-import { networkAffiliates } from "@/data/affiliates";
+import { affiliates, getMappableAffiliates } from "@/data/affiliates";
 
-export const metadata: Metadata = { title: "Network map", description: "Explore an illustrative, source-labelled map of published RECCU-CAM affiliate locations." };
-export default function NetworkMapPage() { return <><PageIntro eyebrow="Network map" title="See connection in place." description="An intentionally lightweight map experience focused on published towns, source context, and fast access to affiliate profiles." /><Section><Container><VerificationNote>Map points are illustrative town-level positions, not exact branches. Confirm a visiting address through an institution’s verified channel before travelling.</VerificationNote><div className="mt-8"><MapExplorerClient affiliates={networkAffiliates} /></div></Container></Section></>; }
+export const metadata: Metadata = {
+  title: "Interactive Network Map",
+  description: "Explore RECCU-CAM network affiliates with verified geographic coordinates on an interactive OpenStreetMap.",
+};
+
+export default function NetworkMapPage() {
+  const mappedCount = getMappableAffiliates(affiliates).length;
+
+  return (
+    <>
+      <PageIntro
+        eyebrow="Our network"
+        title="Interactive Network Map"
+        description="Explore the geographic reach of cooperative financial institutions using verified location data."
+      />
+      <Section>
+        <Container>
+          <VerificationNote>
+            Only institutions with complete coordinates in the structured affiliate source appear as markers. The current source contains {mappedCount} mapped {mappedCount === 1 ? "institution" : "institutions"}; missing coordinates are never estimated.
+          </VerificationNote>
+          <div className="mt-8">
+            <MapExplorerClient affiliates={affiliates} />
+          </div>
+        </Container>
+      </Section>
+    </>
+  );
+}

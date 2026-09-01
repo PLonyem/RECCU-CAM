@@ -149,3 +149,43 @@ body {
     background: theme(colors.surface);
   }
 }
+
+/* Leaflet is route-local; these selectors only style its generated controls. */
+.reccucam-map-marker {
+  position: relative;
+  border: 3px solid theme(colors.surface);
+  border-radius: theme(borderRadius.pill);
+  background: theme(colors.forest);
+  box-shadow: theme(boxShadow.raised);
+}
+
+.reccucam-map-marker::after {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-right: 3px solid theme(colors.surface);
+  border-bottom: 3px solid theme(colors.surface);
+  background: theme(colors.forest);
+  content: "";
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.leaflet-container {
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.leaflet-bar a {
+  color: theme(colors.institutional);
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: theme(colors.surface);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: theme(borderRadius.card);
+  box-shadow: theme(boxShadow.raised);
+}
