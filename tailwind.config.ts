@@ -1,4 +1,7 @@
 import type { Config } from "tailwindcss";
+import { designTokens } from "./src/config/design-tokens";
+
+const { colors, layout, motion, palettes, radii, shadows, typography } = designTokens;
 
 const config: Config = {
   content: [
@@ -7,33 +10,62 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        institutional: colors.institutional,
+        brand: colors.brand,
+        forest: colors.forest,
+        background: colors.background,
+        surface: colors.surface,
+        foreground: colors.foreground,
+        muted: {
+          DEFAULT: colors.muted,
+          foreground: colors.mutedForeground,
+        },
+        border: colors.border,
+        gold: {
+          DEFAULT: colors.gold,
+          strong: colors.goldStrong,
+          subtle: colors.goldSubtle,
+          foreground: colors.onGold,
+        },
+        success: { DEFAULT: colors.success, subtle: colors.successSubtle },
+        warning: { DEFAULT: colors.warning, subtle: colors.warningSubtle },
+        error: { DEFAULT: colors.error, subtle: colors.errorSubtle },
         primary: {
-          50: "#EEF7F2",
-          100: "#D7EBDF",
-          200: "#ADD7C0",
-          300: "#7CBA99",
-          400: "#4A9871",
-          500: "#267A57",
-          600: "#185F43",
-          700: "#124C37",
-          800: "#0D3D2E",
-          900: "#082D22",
+          DEFAULT: colors.brand,
+          ...palettes.primary,
         },
         accent: {
-          50: "#FFF9EB",
-          100: "#FCEEC7",
-          200: "#F8DB8A",
-          300: "#F0C351",
-          400: "#DDA62F",
-          500: "#C58B2A",
-          600: "#A56920",
-          700: "#83501E",
+          DEFAULT: colors.gold,
+          ...palettes.accent,
         },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        display: ["Lexend", "Inter", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        display: ["var(--font-lexend)", "var(--font-inter)", "system-ui", "sans-serif"],
       },
+      fontSize: Object.fromEntries(
+        Object.entries(typography).map(([name, value]) => [
+          name,
+          [value.size, { lineHeight: value.lineHeight, letterSpacing: value.letterSpacing, fontWeight: value.weight }],
+        ]),
+      ),
+      maxWidth: { content: layout.container, reading: layout.reading },
+      spacing: {
+        gutter: layout.gutter,
+        section: layout.section,
+        "section-sm": layout.sectionSm,
+        "section-lg": layout.sectionLg,
+        card: layout.cardPadding,
+      },
+      borderRadius: {
+        control: radii.control,
+        card: radii.card,
+        panel: radii.panel,
+        pill: radii.pill,
+      },
+      boxShadow: { card: shadows.card, raised: shadows.raised, focus: shadows.focus },
+      transitionDuration: { fast: motion.fast, base: motion.base, slow: motion.slow },
+      transitionTimingFunction: { standard: motion.standard, emphasized: motion.emphasized },
     },
   },
   plugins: [],

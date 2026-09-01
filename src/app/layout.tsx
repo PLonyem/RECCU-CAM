@@ -3,6 +3,7 @@ import { Inter, Lexend } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { institution, siteUrl } from "@/config/institution";
+import { designTokens } from "@/config/design-tokens";
 import "./globals.css";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -35,14 +36,14 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0D3D2E",
+  themeColor: designTokens.colors.brand,
   viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const document = (
     <html lang="en" className={`${inter.variable} ${lexend.variable} h-full antialiased`}>
-      <body className={`${inter.className} min-h-full bg-white text-gray-900`}>
+      <body className={`${inter.className} min-h-full bg-background text-foreground`}>
         <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>

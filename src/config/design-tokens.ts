@@ -1,0 +1,88 @@
+const primaryPalette = {
+  50: "#EEF7F2",
+  100: "#D7EBDF",
+  200: "#ADD7C0",
+  300: "#7CBA99",
+  400: "#4A9871",
+  500: "#267A57",
+  600: "#185F43",
+  700: "#124C37",
+  800: "#0D3D2E",
+  900: "#082D22",
+} as const;
+
+const accentPalette = {
+  50: "#FFF9EB",
+  100: "#FCEEC7",
+  200: "#F8DB8A",
+  300: "#F0C351",
+  400: "#DDA62F",
+  500: "#C58B2A",
+  600: "#A56920",
+  700: "#83501E",
+} as const;
+
+export const designTokens = {
+  palettes: { primary: primaryPalette, accent: accentPalette },
+  colors: {
+    institutional: primaryPalette[900],
+    brand: primaryPalette[800],
+    forest: primaryPalette[500],
+    background: "#FAF8F2",
+    surface: "#FFFFFF",
+    foreground: "#17211D",
+    mutedForeground: "#5C6B64",
+    border: "#D7E1DB",
+    muted: "#EEF3F0",
+    gold: accentPalette[500],
+    goldStrong: accentPalette[700],
+    goldSubtle: accentPalette[50],
+    onBrand: "#FFFFFF",
+    onGold: "#2A210B",
+    success: "#16734A",
+    successSubtle: "#EAF7F0",
+    warning: "#8A5A00",
+    warningSubtle: "#FFF5D6",
+    error: "#B42318",
+    errorSubtle: "#FEECEB",
+  },
+  layout: {
+    container: "80rem",
+    reading: "48rem",
+    gutter: "clamp(1.25rem, 3vw, 2.5rem)",
+    sectionSm: "4rem",
+    section: "5rem",
+    sectionLg: "6rem",
+    cardPadding: "1.5rem",
+  },
+  radii: {
+    control: "0.75rem",
+    card: "1.25rem",
+    panel: "1.75rem",
+    pill: "9999px",
+  },
+  shadows: {
+    card: "0 1px 2px rgb(8 45 34 / 0.05), 0 8px 24px rgb(8 45 34 / 0.06)",
+    raised: "0 18px 48px rgb(8 45 34 / 0.14)",
+    focus: "0 0 0 3px rgb(38 122 87 / 0.28)",
+  },
+  motion: {
+    fast: "150ms",
+    base: "220ms",
+    slow: "400ms",
+    standard: "cubic-bezier(0.2, 0, 0, 1)",
+    emphasized: "cubic-bezier(0.22, 1, 0.36, 1)",
+  },
+  typography: {
+    display: { size: "clamp(3rem, 7vw, 5.5rem)", lineHeight: "0.98", letterSpacing: "-0.045em", weight: "750" },
+    h1: { size: "clamp(2.5rem, 5vw, 4rem)", lineHeight: "1.05", letterSpacing: "-0.035em", weight: "750" },
+    h2: { size: "clamp(2rem, 4vw, 3rem)", lineHeight: "1.1", letterSpacing: "-0.03em", weight: "700" },
+    h3: { size: "clamp(1.5rem, 3vw, 2rem)", lineHeight: "1.2", letterSpacing: "-0.02em", weight: "700" },
+    h4: { size: "1.25rem", lineHeight: "1.35", letterSpacing: "-0.01em", weight: "700" },
+    body: { size: "1rem", lineHeight: "1.7", letterSpacing: "0", weight: "400" },
+    lead: { size: "1.125rem", lineHeight: "1.7", letterSpacing: "-0.005em", weight: "400" },
+    meta: { size: "0.8125rem", lineHeight: "1.45", letterSpacing: "0.04em", weight: "600" },
+  },
+} as const;
+
+export type DesignTokens = typeof designTokens;
