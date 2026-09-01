@@ -71,7 +71,7 @@ export const homepageServices: HomepageFeature[] = [
   },
   {
     title: "Affiliate Banking",
-    description: "A shared-service blueprint for settlement, reporting, liquidity coordination, and operational support.",
+    description: "Structured network-based support focused on institutional liquidity, financial resilience, and cooperative growth.",
     icon: Landmark,
     href: "/services/affiliate-banking",
   },

@@ -36,7 +36,7 @@ export const platformServices: PlatformService[] = [
   {
     title: "Affiliate Banking",
     description:
-      "A service blueprint for shared settlement, reporting, liquidity coordination, and operational support.",
+      "Structured network-based support for institutional liquidity, financial resilience, and cooperative growth.",
     href: "/services/affiliate-banking",
     icon: Landmark,
     status: "preview",

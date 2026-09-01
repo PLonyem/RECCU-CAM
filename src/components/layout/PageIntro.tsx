@@ -1,12 +1,14 @@
 import { Container } from "@/components/ui/Container";
+import type { ReactNode } from "react";
 
 interface PageIntroProps {
   eyebrow: string;
   title: string;
   description: string;
+  actions?: ReactNode;
 }
 
-export function PageIntro({ eyebrow, title, description }: PageIntroProps) {
+export function PageIntro({ actions, eyebrow, title, description }: PageIntroProps) {
   return (
     <section className="relative overflow-hidden border-b border-white/10 bg-institutional py-section-sm text-white sm:py-section">
       <div aria-hidden="true" className="absolute -left-24 -top-24 h-72 w-72 rounded-pill bg-gold/15 blur-3xl" />
@@ -17,6 +19,7 @@ export function PageIntro({ eyebrow, title, description }: PageIntroProps) {
           {title}
         </h1>
         <p className="mt-6 max-w-reading text-lead text-primary-100">{description}</p>
+        {actions && <div className="mt-8 flex flex-wrap gap-3">{actions}</div>}
       </Container>
     </section>
   );

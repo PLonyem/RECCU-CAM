@@ -19,6 +19,7 @@ const isPublicRoute = createRouteMatcher([
   "/accessibility",
   "/sitemap",
   "/api/affiliates(.*)",
+  "/api/affiliate-banking-inquiry",
 ]);
 
 const isAuthPage = createRouteMatcher(["/login(.*)", "/signup(.*)"]);

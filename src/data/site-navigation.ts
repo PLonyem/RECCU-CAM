@@ -40,7 +40,7 @@ export const siteNavigation: readonly NavigationLink[] = [
       { label: "Supervision & Compliance", href: "/services/regulatory-supervision", description: "Strengthening responsible cooperative operations." },
       { label: "Audit & Internal Control", href: "/services/financial-auditing", description: "Supporting sound controls and accountability." },
       { label: "Capacity Building", href: "/services/capacity-building", description: "Developing people and institutional capability." },
-      { label: "Affiliate Banking", href: "/services/affiliate-banking", description: "Shared financial infrastructure for affiliates." },
+      { label: "Affiliate Banking", href: "/services/affiliate-banking", description: "Structured financial support for eligible affiliates." },
       { label: "Digital Transformation", href: "/services/digitalization", description: "Practical pathways to digital readiness." },
       { label: "Consultancy", href: "/services/consultancy", description: "Specialist support for cooperative institutions." },
     ],
@@ -94,4 +94,3 @@ export const placeholderPages = {
 } as const;
 
 export type PlaceholderPath = keyof typeof placeholderPages;
-

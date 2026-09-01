@@ -86,7 +86,7 @@ export default function HomePage() {
                 <span className="grid h-12 w-12 place-items-center rounded-control bg-white/10 text-accent-300" aria-hidden="true"><Landmark className="h-6 w-6" /></span>
                 <p className="mt-6 text-meta uppercase text-accent-300">Affiliate Banking</p>
                 <h2 className="mt-3 font-display text-h2 text-white">Financial Strength Within the Network</h2>
-                <p className="mt-5 text-lead text-primary-100">A shared-service blueprint designed around secure settlement, clearer reporting, liquidity coordination, and practical operational support—without publishing unverified rates or product claims.</p>
+                <p className="mt-5 text-lead text-primary-100">Structured network-based support focused on institutional liquidity, financial resilience, cooperative growth, and responsible relationship management—without guaranteed finance or unverified rates.</p>
               </div>
               <div className="lg:text-right">
                 <Link href="/services/affiliate-banking" className={buttonVariants({ variant: "accent", size: "lg" })}>
