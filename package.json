@@ -17,6 +17,7 @@
     "test:affiliate-banking": "tsx --test src/lib/validation/affiliate-banking.test.ts",
     "test:vtime": "tsx --test src/data/training-programs.test.ts",
     "test:vtime-registration": "tsx --test src/lib/validation/vtime-registration.test.ts",
+    "test:knowledge": "tsx --test src/data/knowledge.test.ts",
     "test:loan": "tsx --test src/lib/loan-calculator/*.test.ts",
     "postinstall": "prisma generate"
   },

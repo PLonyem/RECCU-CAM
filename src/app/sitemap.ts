@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/config/institution";
 import { trainingPrograms } from "@/data/training-programs";
+import { publicKnowledgeDocuments } from "@/data/knowledge";
 
 const routes = [
   "",
@@ -26,10 +27,7 @@ const routes = [
   "/vtime/registration",
   "/vtime/resources",
   "/knowledge",
-  "/knowledge/regulatory-library",
-  "/knowledge/circulars",
-  "/knowledge/publications",
-  "/knowledge/compliance-resources",
+  ...publicKnowledgeDocuments.map((document) => `/knowledge/${document.slug}`),
   "/resources",
   "/faq",
   "/news",

@@ -101,10 +101,10 @@ export const vtimeTopics = [
 ] as const;
 
 export const knowledgePreview: HomepageFeature[] = [
-  { title: "Regulatory Resources", description: "Source-labelled regulatory references.", icon: Scale, href: "/knowledge/regulatory-library" },
-  { title: "Circulars", description: "Controlled notices with clear publication status.", icon: FileText, href: "/knowledge/circulars" },
-  { title: "Compliance Guidance", description: "Practical resources for responsible operations.", icon: FileCheck2, href: "/knowledge/compliance-resources" },
-  { title: "Publications", description: "Approved reports, research, and institutional material.", icon: LibraryBig, href: "/knowledge/publications" },
+  { title: "Regulatory Resources", description: "Source-labelled regulatory references.", icon: Scale, href: "/knowledge?category=regulatory-library" },
+  { title: "Circulars", description: "Controlled notices with clear publication status.", icon: FileText, href: "/knowledge?category=reccu-cam-circulars" },
+  { title: "Compliance Guidance", description: "Practical resources for responsible operations.", icon: FileCheck2, href: "/knowledge?category=compliance" },
+  { title: "Publications", description: "Approved reports, research, and institutional material.", icon: LibraryBig, href: "/knowledge?category=reports-publications" },
   { title: "Training Resources", description: "Learning material prepared for VTIME participants.", icon: BookOpenCheck, href: "/vtime/resources" },
 ];
 

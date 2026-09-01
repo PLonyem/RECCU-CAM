@@ -1,11 +1,171 @@
-
 import type { Metadata } from "next";
-import { ArrowUpRight, FileClock, FileText, ShieldCheck } from "lucide-react";
+import {
+  BadgeCheck,
+  BookOpenCheck,
+  Building2,
+  Calculator,
+  ClipboardCheck,
+  FileCheck2,
+  FileLock2,
+  FileText,
+  GraduationCap,
+  Landmark,
+  Library,
+  Scale,
+  ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
+import Link from "next/link";
+import { Suspense } from "react";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { VerificationNote } from "@/components/layout/VerificationNote";
-import { Container } from "@/components/ui/Container";
-import { Section } from "@/components/ui/Section";
-import { knowledgeCollections } from "@/data/knowledge";
+import { KnowledgeExplorer } from "@/components/knowledge/KnowledgeExplorer";
+import { Card, Container, LoadingSkeleton, Section, SectionHeader } from "@/components/ui";
+import {
+  knowledgeCategories,
+  type KnowledgeCategorySlug,
+} from "@/data/knowledge";
 
-export const metadata: Metadata = { title: "Knowledge Centre", description: "Source-labelled institutional references, controlled documents, and cooperative learning resources." };
-export default function KnowledgePage() { return <><PageIntro eyebrow="Knowledge and compliance" title="Trusted knowledge needs a source, owner, and version." description="The Knowledge Centre makes publication status visible so users can distinguish an authoritative resource from a planned collection." /><Section><Container><VerificationNote>Legacy documents are never relabelled as RECCU-CAM publications. Each future file should carry a title, issuing authority, effective date, version, and publication status.</VerificationNote><div className="mt-8 grid gap-5 md:grid-cols-2">{knowledgeCollections.map(collection => <article key={collection.slug} className="rounded-3xl border border-gray-200 p-7"><div className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary-50 text-primary-700">{collection.publicationStatus === "source-available" ? <FileText className="h-6 w-6" /> : <FileClock className="h-6 w-6" />}</span><span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${collection.publicationStatus === "source-available" ? "bg-primary-50 text-primary-700" : "bg-gray-100 text-gray-600"}`}>{collection.publicationStatus === "source-available" ? "Source available" : "Awaiting publication"}</span></div><h2 className="mt-6 font-display text-xl font-bold text-primary-900">{collection.title}</h2><p className="mt-3 text-sm leading-6 text-gray-600">{collection.description}</p>{collection.href && <a href={collection.href} target="_blank" rel="noreferrer" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary-700">Open source <ArrowUpRight className="h-4 w-4" /></a>}</article>)}</div><div className="mt-10 flex gap-4 rounded-3xl bg-primary-900 p-7 text-white"><ShieldCheck className="h-7 w-7 shrink-0 text-accent-300" /><div><h2 className="font-bold">Controlled publication by design</h2><p className="mt-2 text-sm leading-6 text-primary-100">The preserved admin resource workflow can support future uploads after RECCU-CAM defines approval, review, expiry, and archival responsibilities.</p></div></div></Container></Section></>; }
+export const metadata: Metadata = {
+  title: "Knowledge and Compliance Centre",
+  description:
+    "Search source-labelled regulatory guidance, circulars, publications, governance resources, and professional materials for cooperative financial institutions.",
+};
+
+const categoryIcons: Record<KnowledgeCategorySlug, LucideIcon> = {
+  "regulatory-library": Library,
+  "cobac-resources": Landmark,
+  "cemac-resources": Scale,
+  "minfi-notices": Building2,
+  "reccu-cam-circulars": FileText,
+  governance: BookOpenCheck,
+  compliance: BadgeCheck,
+  "internal-control": ClipboardCheck,
+  "aml-cft": ShieldCheck,
+  "credit-management": FileCheck2,
+  accounting: Calculator,
+  "training-materials": GraduationCap,
+  "reports-publications": FileText,
+};
+
+export default function KnowledgePage() {
+  return (
+    <>
+      <PageIntro
+        eyebrow="Knowledge and Compliance Centre"
+        title="Knowledge That Strengthens Institutions"
+        description="The RECCU-CAM Knowledge Centre brings together regulatory guidance, circulars, publications, governance resources and professional materials for cooperative financial institutions."
+      />
+
+      <Section>
+        <Container>
+          <VerificationNote>
+            Public records are source-labelled. Restricted documents are not listed, previewed, or exposed through this prototype.
+          </VerificationNote>
+          <SectionHeader
+            eyebrow="Knowledge categories"
+            title="Find resources by institutional need."
+            subtitle="Category routes feed directly into the searchable public collection. Empty categories remain visible without implying that unverified documents exist."
+            className="mt-12"
+          />
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {knowledgeCategories.map((category) => {
+              const Icon = categoryIcons[category.slug];
+              return (
+                <Link
+                  key={category.id}
+                  href={`/knowledge?category=${category.slug}`}
+                  className="group rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
+                >
+                  <Card padding="default" className="h-full transition-[border-color,box-shadow,transform] group-hover:-translate-y-0.5 group-hover:border-primary-200 group-hover:shadow-raised">
+                    <span className="grid h-10 w-10 place-items-center rounded-control bg-primary-50 text-forest" aria-hidden="true">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <h2 className="mt-4 font-display text-lg font-semibold text-institutional">{category.title}</h2>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{category.description}</p>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        </Container>
+      </Section>
+
+      <Section tone="muted" id="document-library">
+        <Container>
+          <SectionHeader
+            eyebrow="Public document library"
+            title="Search trusted, source-labelled material."
+            subtitle="Use filters and sorting to narrow the public collection. Missing metadata is shown as unpublished rather than inferred."
+          />
+          <div className="mt-10">
+            <Suspense fallback={<KnowledgeExplorerSkeleton />}>
+              <KnowledgeExplorer />
+            </Suspense>
+          </div>
+        </Container>
+      </Section>
+
+      <Section>
+        <Container>
+          <SectionHeader
+            eyebrow="Access architecture"
+            title="Clear access levels without simulated authorization."
+            subtitle="The model supports three audiences, while this public route exposes only documents explicitly classified as Public."
+          />
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            <AccessCard
+              icon={FileText}
+              title="Public"
+              status="Available here"
+              description="Source-labelled records and files approved for unrestricted public access."
+            />
+            <AccessCard
+              icon={FileLock2}
+              title="Affiliate Only"
+              status="Not exposed"
+              description="Requires a future authenticated affiliate workflow and explicit document authorization."
+            />
+            <AccessCard
+              icon={ShieldCheck}
+              title="Staff Only"
+              status="Not exposed"
+              description="Requires a future staff identity, role check, and controlled delivery path."
+            />
+          </div>
+        </Container>
+      </Section>
+    </>
+  );
+}
+
+function KnowledgeExplorerSkeleton() {
+  return (
+    <div aria-label="Loading Knowledge Centre filters">
+      <Card padding="default"><LoadingSkeleton lines={5} /></Card>
+      <Card padding="default" className="mt-6"><LoadingSkeleton lines={6} /></Card>
+    </div>
+  );
+}
+
+interface AccessCardProps {
+  icon: LucideIcon;
+  title: string;
+  status: string;
+  description: string;
+}
+
+function AccessCard({ description, icon: Icon, status, title }: AccessCardProps) {
+  return (
+    <Card padding="default" className="h-full">
+      <div className="flex items-start justify-between gap-4">
+        <span className="grid h-11 w-11 place-items-center rounded-control bg-primary-50 text-forest" aria-hidden="true">
+          <Icon className="h-5 w-5" />
+        </span>
+        <span className="rounded-pill border border-border bg-muted px-3 py-1 text-meta uppercase text-muted-foreground">{status}</span>
+      </div>
+      <h3 className="mt-5 font-display text-h4 text-institutional">{title}</h3>
+      <p className="mt-2 text-body text-muted-foreground">{description}</p>
+    </Card>
+  );
+}
