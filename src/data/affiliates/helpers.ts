@@ -14,6 +14,14 @@ export interface AffiliateFilterOptions {
   institutionTypes: FilterOption<InstitutionType>[];
 }
 
+export interface AffiliateFilters {
+  query?: string | null;
+  region?: string | null;
+  city?: string | null;
+  service?: string | null;
+  institutionType?: InstitutionType | null;
+}
+
 function normalize(value: string) {
   return value
     .normalize("NFKD")
@@ -38,6 +46,9 @@ export function searchAffiliates(items: readonly Affiliate[], query: string | nu
   if (!normalizedQuery) return copy(items);
 
   const regionNames = new Map(regions.map((region) => [region.id, region.name]));
+  const serviceNames = new Map(
+    affiliateServiceCategories.map((service) => [service.slug, service.name]),
+  );
 
   return items.filter((affiliate) =>
     normalize(
@@ -50,10 +61,31 @@ export function searchAffiliates(items: readonly Affiliate[], query: string | nu
         affiliate.region ? regionNames.get(affiliate.region) : null,
         affiliate.city,
         affiliate.address,
+        ...affiliate.services,
+        ...affiliate.services.map((service) => serviceNames.get(service) ?? null),
       ]
         .filter((value): value is string => Boolean(value))
         .join(" "),
     ).includes(normalizedQuery),
+  );
+}
+
+export function filterAffiliates(
+  items: readonly Affiliate[],
+  filters: AffiliateFilters,
+) {
+  return filterAffiliatesByType(
+    filterAffiliatesByService(
+      filterAffiliatesByCity(
+        filterAffiliatesByRegion(
+          searchAffiliates(items, filters.query),
+          filters.region,
+        ),
+        filters.city,
+      ),
+      filters.service,
+    ),
+    filters.institutionType,
   );
 }
 

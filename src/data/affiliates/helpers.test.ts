@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   deriveAffiliateFilterOptions,
+  filterAffiliates,
   filterAffiliatesByCity,
   filterAffiliatesByRegion,
   filterAffiliatesByService,
@@ -67,7 +68,29 @@ test("searches across name, acronym, description, city, and region label", () =>
   assert.deepEqual(searchAffiliates(demoAffiliates, "dnc").map((item) => item.slug), ["demo-north"]);
   assert.deepEqual(searchAffiliates(demoAffiliates, "community finance").map((item) => item.slug), ["demo-north"]);
   assert.deepEqual(searchAffiliates(demoAffiliates, "North-West Region").map((item) => item.slug), ["demo-north"]);
+  assert.deepEqual(searchAffiliates(demoAffiliates, "Affiliate Banking").map((item) => item.slug), ["demo-north"]);
   assert.equal(searchAffiliates(demoAffiliates, "missing").length, 0);
+});
+
+test("combines search, location, service, and institution-type filters", () => {
+  assert.deepEqual(
+    filterAffiliates(demoAffiliates, {
+      query: "cooperative",
+      region: "north-west",
+      city: "Demo City",
+      service: "capacity-building",
+      institutionType: "cooperative-credit-union",
+    }).map((item) => item.slug),
+    ["demo-north"],
+  );
+
+  assert.equal(
+    filterAffiliates(demoAffiliates, {
+      region: "north-west",
+      city: "Another City",
+    }).length,
+    0,
+  );
 });
 
 test("filters affiliates by region and city without case sensitivity", () => {
