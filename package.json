@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit --incremental false",
     "test:affiliates": "tsx --test src/data/affiliates/*.test.ts",
     "test:affiliate-banking": "tsx --test src/lib/validation/affiliate-banking.test.ts",
+    "test:vtime": "tsx --test src/data/training-programs.test.ts",
     "test:loan": "tsx --test src/lib/loan-calculator/*.test.ts",
     "postinstall": "prisma generate"
   },
