@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search, ChevronDown } from "lucide-react";
-import { regionLabels } from "@/lib/mock-data";
+import { regionLabels } from "@/data/admin-options";
 import { cn } from "@/lib/utils";
 
 export interface ChapterOption {

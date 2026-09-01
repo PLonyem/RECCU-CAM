@@ -91,7 +91,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           : sendProfileRejectedEmail({
               creditUnionName: affiliate.name,
               creditUnionEmail: email,
-              rejectionReason: reason ?? "Please contact CamCCUL for more information.",
+              rejectionReason: reason ?? "Please contact an authorised RECCU-CAM administrator for more information.",
             })
       )
     );

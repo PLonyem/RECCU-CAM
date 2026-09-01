@@ -253,7 +253,7 @@ export default function LoanProductAdministrationPage() {
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">CamCCUL Loan Calculator Administration</h1>
+          <h1 className="text-2xl font-bold text-gray-900">RECCU-CAM Loan Calculator Administration</h1>
           <p className="mt-1 text-sm text-gray-500">Versioned network policies, products, rates, savings rules, fees and taxes.</p>
         </div>
         <div className="flex flex-wrap gap-2"><Link href="/admin/loan-products/overrides" className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800"><ShieldCheck className="h-4 w-4" />Affiliate Overrides</Link><button type="button" onClick={() => { setForm(blankForm()); setShowForm(true); setError(""); }} className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-700"><Plus className="h-4 w-4" />New Loan Product</button></div>
@@ -271,7 +271,7 @@ export default function LoanProductAdministrationPage() {
       {success && <div className="flex gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"><Check className="h-5 w-5 shrink-0" />{success}</div>}
 
       {showForm && <form onSubmit={submit} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
-        <div className="flex items-center justify-between"><div><h2 className="text-xl font-bold">{form.id ? "Create New Policy Version" : "New Loan Product"}</h2><p className="mt-1 text-sm text-gray-500">No field below is treated as an official CamCCUL policy until explicitly published.</p></div><button type="button" onClick={() => setShowForm(false)} className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"><X className="h-5 w-5" /></button></div>
+        <div className="flex items-center justify-between"><div><h2 className="text-xl font-bold">{form.id ? "Create New Policy Version" : "New Loan Product"}</h2><p className="mt-1 text-sm text-gray-500">No field below is treated as an official RECCU-CAM policy until explicitly published.</p></div><button type="button" onClick={() => setShowForm(false)} className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"><X className="h-5 w-5" /></button></div>
         <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           <label className="text-sm font-medium">Product code<input required value={form.code} onChange={e=>setForm({...form,code:e.target.value.toUpperCase()})} placeholder="Configured code" className={fieldClass} /></label>
           <label className="text-sm font-medium">Category<input required value={form.category} onChange={e=>setForm({...form,category:e.target.value})} placeholder="Configured category" className={fieldClass} /></label>

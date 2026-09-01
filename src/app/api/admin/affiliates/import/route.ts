@@ -3,7 +3,7 @@ import Papa from "papaparse";
 import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { regions } from "@/lib/mock-data";
+import { regions } from "@/data/admin-options";
 
 const MAX_ROWS = 2000;
 

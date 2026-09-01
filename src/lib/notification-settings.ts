@@ -34,32 +34,32 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplates = {
   },
   accountCredentialsEmail: {
     name: "Account Credentials",
-    subject: "Your CamCCUL Portal Access",
-    body: "Dear {creditUnionName},\n\nYour CamCCUL portal account is ready.\nLogin Email: {email}\nTemporary Password: {password}\nChapter: {chapter}",
+    subject: "Your RECCU-CAM Portal Access",
+    body: "Dear {creditUnionName},\n\nYour RECCU-CAM portal account is ready.\nLogin Email: {email}\nTemporary Password: {password}\nChapter: {chapter}",
     variables: ["{creditUnionName}", "{email}", "{password}", "{chapter}"],
   },
   profileSubmissionConfirmation: {
     name: "Submission Confirmation",
-    subject: "Profile Submission Received — CamCCUL",
+    subject: "Profile Submission Received — RECCU-CAM",
     body: "Dear {creditUnionName},\n\nYour profile has been received and is now under review.",
     variables: ["{creditUnionName}"],
   },
   profileApprovedEmail: {
     name: "Profile Approved",
-    subject: "Profile Approved — CamCCUL",
+    subject: "Profile Approved — RECCU-CAM",
     body: "Dear {creditUnionName},\n\nYour profile has been approved and is now live.",
     variables: ["{creditUnionName}"],
   },
   profileRejectedEmail: {
     name: "Profile Rejected",
-    subject: "Profile Review Update — CamCCUL",
+    subject: "Profile Review Update — RECCU-CAM",
     body: "Dear {creditUnionName},\n\nYour profile requires changes.\nReason: {rejectionReason}",
     variables: ["{creditUnionName}", "{rejectionReason}"],
   },
 };
 
 export const DEFAULT_NOTIFICATION_SETTINGS = {
-  adminNotificationEmail: "info@camccul.cm",
+  adminNotificationEmail: "",
   newCreditUnionCreated: true,
   profileSubmittedForReview: true,
   profileUpdated: false,

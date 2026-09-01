@@ -35,7 +35,7 @@ export function heroOverlayGradient(
   return `linear-gradient(${angleDeg}deg, rgba(${r},${g},${b},${a}) 0%, rgba(${r},${g},${b},${a}) ${fadeStartPercent}%, rgba(${r},${g},${b},0) ${fadeEndPercent}%)`;
 }
 
-// Detects seed/mock content that hasn't been replaced with real CamCCUL
+// Detects seed/mock content that has not been replaced with verified institutional
 // copy yet — bracket-wrapped filler (e.g. "[City Name]") or text that
 // describes itself as a placeholder — so callers can hide it instead of
 // ever showing it to site visitors.

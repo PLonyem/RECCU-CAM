@@ -76,7 +76,7 @@ const tabs: { key: Tab; labelKey: TranslationKey }[] = [
   { key: "sections", labelKey: "admin.sections" },
 ];
 
-// CamCCUL Blue (primary-500), Deep Navy (primary-900), Dark Blue
+// RECCU-CAM primary and accent palette shortcuts.
 // (primary-700), Black — plus the ColorField's own free-text/native
 // color-picker input for anything else.
 const OVERLAY_COLOR_PRESETS = ["#205295", "#0A2647", "#144272", "#000000"];

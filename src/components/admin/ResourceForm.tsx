@@ -8,7 +8,7 @@ import { z } from "zod";
 import { AlertCircle } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { RESOURCE_CATEGORIES } from "@/lib/mock-data";
+import { RESOURCE_CATEGORIES } from "@/data/admin-options";
 import { formatCategory } from "@/lib/utils";
 
 export const resourceFormSchema = z.object({

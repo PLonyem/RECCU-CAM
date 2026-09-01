@@ -21,7 +21,7 @@ function AccountConfigurationScreen() {
         </h1>
         <p className="text-gray-600 mt-2">
           This portal account is not linked to a credit union record. Contact your chapter supervisor
-          or CamCCUL headquarters so the account can be corrected.
+          or a RECCU-CAM administrator so the account can be corrected.
         </p>
         <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "mt-6")}>
           Back to Website
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
         chapter: { select: { name: true } },
       },
     }),
-    // Single source of truth for CamCCUL's own contact details (Need Help
+    // Single source of truth for RECCU-CAM's own contact details (Need Help
     // section below) — never hardcoded here, since this app has a standing
     // history of conflicting phone/email values scattered across files.
     prisma.siteSettings.findUnique({ where: { id: "default" } }),

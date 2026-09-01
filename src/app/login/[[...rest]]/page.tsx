@@ -6,10 +6,10 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
           <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center mx-auto">
-            <span className="text-white font-bold text-xl">C</span>
+            <span className="text-white font-bold text-xl">R</span>
           </div>
           <h1 className="font-display text-2xl font-bold text-primary-900 mt-3">Sign In</h1>
-          <p className="text-sm text-gray-500 mt-1">Access your CamCCUL dashboard</p>
+          <p className="text-sm text-gray-500 mt-1">Access your RECCU-CAM portal</p>
         </div>
         <SignIn
           routing="path"
@@ -30,7 +30,7 @@ export default function LoginPage() {
           }}
         />
         <p className="mt-5 text-center text-sm leading-6 text-gray-500">
-          Access is provided by CamCCUL. Contact your chapter supervisor if you need an account.
+          Access is provided by RECCU-CAM. Contact your authorised network administrator if you need an account.
         </p>
       </div>
     </div>

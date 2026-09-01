@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
@@ -9,7 +9,7 @@ import { AlertCircle } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { slugify } from "@/lib/slug";
-import { CATEGORIES, CHAPTERS } from "@/lib/mock-data";
+import { CATEGORIES, CHAPTERS } from "@/data/admin-options";
 
 export const FORM_CATEGORIES = CATEGORIES.filter((c) =>
   (
@@ -107,7 +107,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<ArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
@@ -116,7 +116,9 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
 
   const titleField = register("title");
   const slugField = register("slug");
-  const excerptWordCount = watch("excerpt").trim().split(/\s+/).filter(Boolean)
+  const excerpt = useWatch({ control, name: "excerpt" }) ?? "";
+  const published = useWatch({ control, name: "published" }) ?? false;
+  const excerptWordCount = excerpt.trim().split(/\s+/).filter(Boolean)
     .length;
   const isSubmitting = pendingAction !== null;
 
@@ -378,7 +380,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
                 {...register("published")}
               />
-              {watch("published") ? "Publish immediately" : "Save as draft"}
+              {published ? "Publish immediately" : "Save as draft"}
             </label>
           </div>
 

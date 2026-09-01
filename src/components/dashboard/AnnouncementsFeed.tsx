@@ -204,12 +204,12 @@ export function AnnouncementsFeed() {
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-6">
-      <h2 className="font-semibold text-lg text-gray-900">Announcements from CamCCUL</h2>
+      <h2 className="font-semibold text-lg text-gray-900">Announcements from RECCU-CAM</h2>
 
       {isLoading ? (
         <p className="mt-4 text-gray-400 text-sm">Loading announcements...</p>
       ) : announcements.length === 0 ? (
-        <p className="mt-4 text-gray-400 text-sm">No announcements from CamCCUL at this time.</p>
+        <p className="mt-4 text-gray-400 text-sm">No announcements from RECCU-CAM at this time.</p>
       ) : (
         <div className="mt-4 space-y-2">
           {announcements.map((item) => (

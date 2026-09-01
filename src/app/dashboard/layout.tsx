@@ -3,6 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { CreditUnionNavbar } from "@/components/dashboard/CreditUnionNavbar";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({
   children,
 }: {

@@ -194,7 +194,7 @@ model LoanProductVersion {
 }
 
 // Nullable fields inherit from the selected product version. This encodes
-// the precedence CamCCUL default -> product version -> affiliate override.
+// the precedence RECCU-CAM default -> product version -> affiliate override.
 model LoanProductAffiliate {
   id                         String             @id @default(cuid())
   loanProductId              String
@@ -420,13 +420,13 @@ model HomepageContent {
   id String @id @default(cuid())
 
   // HERO CONTENT
-  heroTitle           String @default("Owned by members. Built for communities.")
-  heroSubtitle        String @default("CamCCUL supervises and empowers cooperative credit unions across Cameroon, extending safe, affordable financial services to every region.")
-  heroBadge           String @default("Cameroon Cooperative Credit Union League")
-  primaryButtonText   String @default("Find a credit union near you")
-  primaryButtonLink   String @default("/affiliates")
-  secondaryButtonText String @default("Become an affiliate")
-  secondaryButtonLink String @default("/contact")
+  heroTitle           String @default("Cooperation that moves communities forward.")
+  heroSubtitle        String @default("One trusted digital home for RECCU-CAM network services, learning, knowledge, and cooperative connection.")
+  heroBadge           String @default("RECCU-CAM LTD")
+  primaryButtonText   String @default("Explore the network")
+  primaryButtonLink   String @default("/network/affiliates")
+  secondaryButtonText String @default("Discover VTIME")
+  secondaryButtonLink String @default("/vtime")
   heroImages          Json   @default("[]")
 
   // HERO APPEARANCE
@@ -439,13 +439,13 @@ model HomepageContent {
   showOverlay       Boolean @default(true)
 
   // HERO STATISTICS
-  statsAffiliates Int    @default(216)
-  statsMembers    String @default("50,000+")
+  statsAffiliates Int    @default(0)
+  statsMembers    String @default("")
   statsAssets     String @default("")
 
   // SECTION VISIBILITY
   showHero     Boolean @default(true)
-  showStats    Boolean @default(true)
+  showStats    Boolean @default(false)
   showMission  Boolean @default(true)
   showServices Boolean @default(true)
   showReach    Boolean @default(true)
@@ -457,22 +457,18 @@ model HomepageContent {
   @@map("homepage_content")
 }
 
-// Site-wide contact/social info for a future admin CMS UI. Defaults
-// deliberately match contactInfo in src/lib/mock-data.ts (the current
-// source of truth used by the Footer, UtilityBar, and Contact page) rather
-// than the feature brief's own values, which conflicted with it on
-// address, phone, and email — see the "Contact info inconsistency" note
-// in project memory. No enforced singleton at the schema level.
+// Site-wide institutional settings. Defaults contain only verified identity
+// and location data; contact channels remain blank until confirmed.
 model SiteSettings {
   id               String   @id @default(cuid())
-  siteName         String   @default("CamCCUL")
-  fullName         String   @default("Cameroon Cooperative Credit Union League")
-  address          String   @default("City Chemist, Bamenda")
-  addressSecondary String   @default("Opposite MTN Office")
-  phone            String   @default("(237) 233 44 57 66")
-  email            String   @default("camccul@camccul.cm")
-  officeHours      String   @default("Monday–Friday, 8:00am–4:00pm")
-  facebookUrl      String   @default("https://www.facebook.com/CamCCUL/")
+  siteName         String   @default("RECCU-CAM")
+  fullName         String   @default("Union of Renaissance Cooperative Credit Unions in Cameroon Ltd")
+  address          String   @default("Bamenda, Cameroon")
+  addressSecondary String   @default("")
+  phone            String   @default("")
+  email            String   @default("")
+  officeHours      String   @default("")
+  facebookUrl      String   @default("")
   linkedinUrl      String   @default("")
   twitterUrl       String   @default("")
   createdAt        DateTime @default(now())
@@ -482,11 +478,10 @@ model SiteSettings {
 }
 
 // Controls for the profile-submission/approval emails already sent by
-// src/lib/email.ts. adminNotificationEmail defaults to "info@camccul.cm",
-// matching that file's existing hardcoded recipient — not a new value.
+// src/lib/email.ts. No recipient address is inferred by the schema.
 model NotificationSettings {
   id                            String   @id @default(cuid())
-  adminNotificationEmail        String   @default("info@camccul.cm")
+  adminNotificationEmail        String   @default("")
   newCreditUnionCreated         Boolean  @default(true)
   profileSubmittedForReview     Boolean  @default(true)
   profileUpdated                Boolean  @default(false)

@@ -121,7 +121,7 @@ export default function AdminSettingsPage() {
                   <Setting label="Maximum failed login attempts" helper="Number of failed attempts before temporary lockout."><input type="number" min={1} max={20} value={security.maximumFailedAttempts} onChange={(event) => updateNumber("maximumFailedAttempts", event.target.value)} className={inputClass} /></Setting>
                   <Setting label="Lockout duration (minutes)" helper="How long a temporary account lockout should remain active."><input type="number" min={1} max={1440} value={security.lockoutDurationMinutes} onChange={(event) => updateNumber("lockoutDurationMinutes", event.target.value)} className={inputClass} /></Setting>
                 </div>
-                <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">Password strength and failed-login lockouts are enforced by the connected identity provider. These preferences document CamCCUL policy for that configuration.</p>
+                <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">Password strength and failed-login lockouts are enforced by the connected identity provider. These preferences document RECCU-CAM policy for that configuration.</p>
               </Card>
 
               <Card className="p-6">

@@ -11,6 +11,21 @@ const nextConfig: NextConfig = {
     // moment SUPABASE_URL is set and someone uploads an image.
     remotePatterns: [{ protocol: "https", hostname: "*.supabase.co" }],
   },
+  async redirects() {
+    return [
+      { source: "/affiliates", destination: "/network/affiliates", permanent: true },
+      { source: "/affiliates/:code", destination: "/network/affiliates/:code", permanent: true },
+      { source: "/loan-calculator", destination: "/services/affiliate-banking", permanent: true },
+      { source: "/resources", destination: "/knowledge", permanent: true },
+      { source: "/resources/chapter-profile-template", destination: "/knowledge", permanent: true },
+      { source: "/services/capacity-building", destination: "/vtime", permanent: true },
+      { source: "/services/digitalization", destination: "/services/affiliate-banking", permanent: true },
+      { source: "/services/financial-auditing", destination: "/services/affiliate-banking", permanent: true },
+      { source: "/services/regulatory-supervision", destination: "/knowledge", permanent: true },
+      { source: "/news/:slug", destination: "/news", permanent: true },
+      { source: "/affiliate-portal", destination: "/dashboard", permanent: false },
+    ];
+  },
   async headers() {
     return [{
       source: "/(.*)",

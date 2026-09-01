@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { CAMCCUL_REGION_STRUCTURE, regionNameToCode } from "@/lib/chapters";
+import { RECCUCAM_REGION_STRUCTURE, regionNameToCode } from "@/lib/chapters";
 import { extractClerkErrorMessage } from "@/lib/clerk-admin-utils";
-import { sendCreditUnionCredentials, sendNewCreditUnionCreatedToCamCCUL } from "@/lib/email";
+import { sendCreditUnionCredentials, sendNewCreditUnionCreatedToReccucam } from "@/lib/email";
 
 const createCreditUnionSchema = z.object({
   name: z.string().trim().min(3, "Credit union name is required."),
@@ -37,8 +37,8 @@ export async function GET() {
     if (metadata.role === "credit_union" && metadata.affiliateId) userByAffiliate.set(metadata.affiliateId, user);
   }
 
-  const regionOrder = new Map<string, number>(CAMCCUL_REGION_STRUCTURE.map((region, index) => [region.name, index]));
-  const chapterOrder = new Map<string, number>(CAMCCUL_REGION_STRUCTURE.flatMap((region) =>
+  const regionOrder = new Map<string, number>(RECCUCAM_REGION_STRUCTURE.map((region, index) => [region.name, index]));
+  const chapterOrder = new Map<string, number>(RECCUCAM_REGION_STRUCTURE.flatMap((region) =>
     region.chapters.map((chapter, index) => [`${region.name}:${chapter}`, index])
   ));
   const hierarchy = regions
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await sendNewCreditUnionCreatedToCamCCUL({ creditUnionName: affiliate.name, email: data.email, chapter: chapter.name });
+    await sendNewCreditUnionCreatedToReccucam({ creditUnionName: affiliate.name, email: data.email, chapter: chapter.name });
   } catch (error) {
     console.error("New credit union admin notification failed:", error);
   }

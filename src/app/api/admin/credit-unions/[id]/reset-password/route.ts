@@ -39,7 +39,7 @@ export async function POST(
       creditUnionName: affiliate.name,
       email,
       password,
-      chapter: affiliate.chapter?.name ?? affiliate.chapterName ?? "CamCCUL",
+      chapter: affiliate.chapter?.name ?? affiliate.chapterName ?? "RECCU-CAM",
     });
   } catch (error) {
     emailSent = false;

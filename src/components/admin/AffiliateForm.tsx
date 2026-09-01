@@ -8,7 +8,7 @@ import { z } from "zod";
 import { AlertCircle } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { regions, regionLabels } from "@/lib/mock-data";
+import { regions, regionLabels } from "@/data/admin-options";
 
 export const affiliateFormSchema = z.object({
   code: z.string().min(1, "Code is required"),

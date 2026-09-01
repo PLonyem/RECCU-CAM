@@ -7,7 +7,7 @@ import { Plus, Pencil, Trash2, Search, CheckCircle2 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/Button";
 import { Badge, type BadgeProps } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
-import { CATEGORIES } from "@/lib/mock-data";
+import { CATEGORIES } from "@/data/admin-options";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface NewsArticleRow {

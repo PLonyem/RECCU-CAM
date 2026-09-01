@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useClerk, useUser } from "@clerk/nextjs";
@@ -9,6 +8,7 @@ import { LogOut, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminNavGroups, getActiveAdminNavHref, type AdminNavItem } from "./nav-items";
 import { useLanguage } from "@/context/LanguageContext";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 interface SidebarProps {
   onNavigate?: () => void;
@@ -59,17 +59,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   return (
     <aside className="bg-gray-900 text-white h-full flex flex-col">
       <div className="flex flex-col items-center border-b border-gray-800 px-4 py-5 text-center">
-        <div className="rounded-lg bg-white p-1 shadow-sm ring-1 ring-white/10">
-          <Image
-            src="/images/logo.jpg"
-            alt="CamCCUL logo"
-            width={56}
-            height={68}
-            priority
-            className="block h-auto w-14 rounded-lg object-contain"
-          />
-        </div>
-        <p className="mt-2 text-xs leading-tight text-gray-400">Admin Dashboard</p>
+        <BrandMark className="h-12 w-12 bg-white text-primary-900" />
+        <p className="mt-3 font-display text-sm font-bold text-white">RECCU-CAM</p>
+        <p className="mt-1 text-xs leading-tight text-gray-400">Admin workspace</p>
       </div>
 
       <nav className="mt-2 flex-1 overflow-y-auto px-3 pb-4">

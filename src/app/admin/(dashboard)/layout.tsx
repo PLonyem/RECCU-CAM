@@ -3,6 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { AdminNavGuard } from "@/components/admin/AdminNavGuard";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminLayout({
   children,
 }: {

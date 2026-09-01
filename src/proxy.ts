@@ -1,30 +1,28 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
   "/",
   "/about",
+  "/network(.*)",
   "/services(.*)",
+  "/vtime(.*)",
+  "/knowledge(.*)",
   "/affiliates(.*)",
   "/resources(.*)",
   "/news(.*)",
   "/faq(.*)",
   "/contact(.*)",
   "/loan-calculator(.*)",
-  "/api/chatbot(.*)",
-  "/api/contact(.*)",
   "/api/affiliates(.*)",
-  "/api/homepage(.*)",
-  "/api/announcements(.*)",
-  "/api/loan-products(.*)",
-  "/api/simulations/calculate",
 ]);
 
 const isAuthPage = createRouteMatcher(["/login(.*)", "/signup(.*)"]);
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 const isDashboardRoute = createRouteMatcher(["/dashboard(.*)"]);
+const isAffiliatePortalRoute = createRouteMatcher(["/affiliate-portal(.*)"]);
 
-export default clerkMiddleware(async (auth, req) => {
+const configuredProxy = clerkMiddleware(async (auth, req) => {
   const authObject = await auth();
   const { userId, sessionClaims } = authObject;
   const isAuthenticated = !!userId;
@@ -51,7 +49,7 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
-  if (isDashboardRoute(req)) {
+  if (isDashboardRoute(req) || isAffiliatePortalRoute(req)) {
     if (!isAuthenticated) {
       return authObject.redirectToSignIn({ returnBackUrl: req.url });
     }
@@ -65,6 +63,25 @@ export default clerkMiddleware(async (auth, req) => {
     await auth.protect();
   }
 });
+
+function unconfiguredProxy(req: NextRequest) {
+  if (isPublicRoute(req)) return NextResponse.next();
+
+  if (req.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.json(
+      { error: "Authentication is not configured." },
+      { status: 503 },
+    );
+  }
+
+  return NextResponse.redirect(new URL("/", req.url));
+}
+
+const hasClerkConfiguration = Boolean(
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY,
+);
+
+export default hasClerkConfiguration ? configuredProxy : unconfiguredProxy;
 
 export const config = {
   matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],

@@ -219,6 +219,20 @@ body {
   }
 }
 
+body {
+  background: #ffffff;
+  color: #17211d;
+}
+
+::selection {
+  background: #f0c351;
+  color: #082d22;
+}
+
+:focus-visible {
+  scroll-margin: 1rem;
+}
+
 .loan-estimate-watermark {
   opacity: 0.065;
   transform: translate(-50%, -50%) rotate(-38deg);

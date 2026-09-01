@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { regions } from "@/lib/mock-data";
+import { regions } from "@/data/admin-options";
 
 export const affiliateSchema = z.object({
   code: z.string().min(1, "Code is required"),

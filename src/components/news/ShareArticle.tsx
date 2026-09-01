@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link as LinkIcon, Check, MessageCircle, Share2, Mail } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { siteUrl } from "@/config/institution";
 
 interface ShareArticleProps {
   title: string;
@@ -11,15 +12,10 @@ interface ShareArticleProps {
 
 export function ShareArticle({ title, slug }: ShareArticleProps) {
   const { t } = useLanguage();
-  const [url, setUrl] = useState("");
+  const url = `${siteUrl}/news/${slug}`;
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    setUrl(`${window.location.origin}/news/${slug}`);
-  }, [slug]);
-
   async function handleCopyLink() {
-    if (!url) return;
     await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

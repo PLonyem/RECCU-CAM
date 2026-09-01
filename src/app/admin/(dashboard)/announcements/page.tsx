@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge, type BadgeProps } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
-import { regions, regionLabels } from "@/lib/mock-data";
+import { regions, regionLabels } from "@/data/admin-options";
 import { cn } from "@/lib/utils";
 import type { AnnouncementDetail } from "@/lib/validation/announcement";
 

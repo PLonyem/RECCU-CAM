@@ -6,7 +6,7 @@ import { Plus, Pencil, Trash2, Search, Upload, CheckCircle2, AlertCircle } from 
 import { Button, buttonVariants } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
-import { regions, regionLabels } from "@/lib/mock-data";
+import { regions, regionLabels } from "@/data/admin-options";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface AffiliateRow {

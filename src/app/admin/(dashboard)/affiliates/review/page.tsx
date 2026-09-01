@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
-import { regions, regionLabels } from "@/lib/mock-data";
+import { regions, regionLabels } from "@/data/admin-options";
 import { RejectDialog } from "./RejectDialog";
 
 interface DocumentSummary {

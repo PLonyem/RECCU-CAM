@@ -12,8 +12,6 @@ import {
   GraduationCap,
   Newspaper,
   FileText,
-  Phone,
-  Mail,
   MessageSquare,
   type LucideIcon,
 } from "lucide-react";
@@ -43,18 +41,16 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Resources",
     items: [
-      { label: "COBAC Templates", href: "/resources?category=COBACRegulation", icon: FileCheck2 },
-      { label: "Training Materials", href: "/resources?category=TrainingMaterial", icon: GraduationCap },
+      { label: "Knowledge Centre", href: "/knowledge", icon: FileCheck2 },
+      { label: "VTIME Programmes", href: "/vtime/programs", icon: GraduationCap },
       { label: "Latest Circulars", href: "/news", icon: Newspaper },
-      { label: "Important Forms", href: "/resources?category=Form", icon: FileText },
+      { label: "Published Resources", href: "/knowledge", icon: FileText },
     ],
   },
   {
     label: "Help",
     items: [
-      { label: "Call CamCCUL", href: "tel:+237233361182", icon: Phone },
-      { label: "Email Support", href: "mailto:info@camccul.cm", icon: Mail },
-      { label: "Send Message", href: "/contact", icon: MessageSquare },
+      { label: "Contact status", href: "/contact", icon: MessageSquare },
     ],
   },
 ];
@@ -64,7 +60,7 @@ function isExternalHref(href: string) {
 }
 
 // tel:/mailto: links skip next/link's client-side routing entirely (see
-// UtilityBar/Footer/contact page for the same plain-<a> convention used
+// Shared dashboard navigation entries use plain anchors consistently.
 // sitewide), so those two schemes render as a plain anchor instead.
 function DropdownLink({
   item,

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useSyncExternalStore, type ReactNode } from "react";
 import { translations, type Language, type TranslationKey } from "@/lib/i18n";
 
 interface LanguageContextValue {
@@ -11,28 +11,33 @@ interface LanguageContextValue {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-const STORAGE_KEY = "camccul-language";
+const STORAGE_KEY = "reccucam-language";
+const LANGUAGE_EVENT = "reccucam-language-change";
+
+function subscribeToLanguage(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(LANGUAGE_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(LANGUAGE_EVENT, callback);
+  };
+}
+
+function getStoredLanguage(): Language {
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  return stored === "fr" ? "fr" : "en";
+}
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("en");
-
-  // Deliberately an effect, not a lazy useState initializer: the server has
-  // no localStorage, so the first client render must also produce "en" to
-  // match the server-rendered HTML. Reading localStorage synchronously
-  // during render would return "fr" immediately on repeat visits and cause
-  // a hydration mismatch. Swapping the language post-mount is the correct
-  // fix for this specific case, even though it trips the generic
-  // set-state-in-effect lint rule.
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "en" || stored === "fr") {
-      setLanguageState(stored);
-    }
-  }, []);
+  const language = useSyncExternalStore(
+    subscribeToLanguage,
+    getStoredLanguage,
+    (): Language => "en",
+  );
 
   const setLanguage = useCallback((next: Language) => {
-    setLanguageState(next);
     localStorage.setItem(STORAGE_KEY, next);
+    window.dispatchEvent(new Event(LANGUAGE_EVENT));
   }, []);
 
   const t = useCallback(

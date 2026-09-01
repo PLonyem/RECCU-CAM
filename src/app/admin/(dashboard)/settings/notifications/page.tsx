@@ -184,7 +184,7 @@ export default function NotificationSettingsPage() {
   return (
     <form onSubmit={saveSettings} className="mx-auto max-w-6xl space-y-8 pb-24">
       {toast && <div className="fixed right-5 top-20 z-50 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white shadow-lg">Notification settings saved</div>}
-      <div><h1 className="text-2xl font-bold text-gray-900">Notification Settings</h1><p className="mt-1 text-sm text-gray-500">Configure how CamCCUL receives and sends notifications.</p></div>
+      <div><h1 className="text-2xl font-bold text-gray-900">Notification Settings</h1><p className="mt-1 text-sm text-gray-500">Configure how RECCU-CAM receives and sends notifications.</p></div>
 
       <section><h2 className="mb-4 font-display text-lg font-bold text-primary-900">Admin Notifications</h2>{renderCards(ADMIN_CARDS)}</section>
       <section><h2 className="mb-4 font-display text-lg font-bold text-primary-900">Credit Union Notifications</h2>{renderCards(CREDIT_UNION_CARDS)}</section>

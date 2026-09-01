@@ -7,17 +7,16 @@ import {
   type EmailTemplates,
 } from "@/lib/notification-settings";
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const resend =
+  process.env.RESEND_API_KEY && process.env.RESEND_FROM
+    ? new Resend(process.env.RESEND_API_KEY)
+    : null;
 
-// Overridable for testing before camccul.cm is verified as a sending domain
-// in Resend — sends from an unverified domain are rejected outright, and
-// Resend's sandbox mode only ever delivers to the account owner's own
-// verified email. Both fall back to the real CamCCUL addresses when unset,
-// so removing these two env vars once the domain is verified is the whole
-// migration back to production — no code change needed.
-const FROM_NOTIFICATIONS = process.env.RESEND_FROM || "CamCCUL Portal <notifications@camccul.cm>";
-const FROM_HEADQUARTERS = process.env.RESEND_FROM || "CamCCUL Headquarters <info@camccul.cm>";
-const ADMIN_EMAIL = process.env.RESEND_ADMIN_EMAIL || "info@camccul.cm";
+// Sending is disabled until both a Resend key and an explicitly verified
+// sender are configured. No institution email address is inferred in code.
+const FROM_NOTIFICATIONS = process.env.RESEND_FROM || "";
+const FROM_HEADQUARTERS = process.env.RESEND_FROM || "";
+const ADMIN_EMAIL = process.env.RESEND_ADMIN_EMAIL || "";
 
 async function getNotificationPreferences() {
   try {
@@ -73,7 +72,7 @@ async function sendOrThrow(params: Parameters<NonNullable<typeof resend>["emails
   }
 }
 
-interface ProfileSubmissionToCamCCULParams {
+interface ProfileSubmissionToReccucamParams {
   creditUnionName: string;
   creditUnionCode: string;
   chapter: string;
@@ -85,16 +84,16 @@ interface ProfileSubmissionToCamCCULParams {
 // thrown error — when RESEND_API_KEY isn't set, so profile submission
 // keeps working in every environment that doesn't have email configured
 // yet (local dev, CI, a fresh deploy before the key is added).
-export async function sendProfileSubmissionToCamCCUL({
+export async function sendProfileSubmissionToReccucam({
   creditUnionName,
   creditUnionCode,
   chapter,
   submittedAt,
-}: ProfileSubmissionToCamCCULParams) {
+}: ProfileSubmissionToReccucamParams) {
   const preferences = await getNotificationPreferences();
   if (!preferences.profileSubmittedForReview) return;
   if (!resend) {
-    console.log("MOCK EMAIL TO CAMCCUL:", {
+    console.log("MOCK EMAIL TO RECCU-CAM:", {
       creditUnionName,
       creditUnionCode,
       chapter,
@@ -115,7 +114,7 @@ export async function sendProfileSubmissionToCamCCUL({
   });
 }
 
-export async function sendProfileUpdatedToCamCCUL(params: ProfileSubmissionToCamCCULParams) {
+export async function sendProfileUpdatedToReccucam(params: ProfileSubmissionToReccucamParams) {
   const preferences = await getNotificationPreferences();
   if (!preferences.profileUpdated) return;
   if (!resend) {
@@ -214,7 +213,7 @@ export async function sendCreditUnionCredentials({
   chapter,
 }: CreditUnionCredentialsParams) {
   const preferences = await getNotificationPreferences();
-  const website = process.env.NEXT_PUBLIC_SITE_URL || "https://camccul.cm";
+  const website = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const loginUrl = `${website.replace(/\/$/, "")}/login`;
 
   if (!resend) {
@@ -241,7 +240,7 @@ export async function sendCreditUnionCredentials({
   });
 }
 
-export async function sendNewCreditUnionCreatedToCamCCUL(
+export async function sendNewCreditUnionCreatedToReccucam(
   params: Omit<CreditUnionCredentialsParams, "password">
 ) {
   const preferences = await getNotificationPreferences();
