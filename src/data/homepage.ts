@@ -107,21 +107,3 @@ export const knowledgePreview: HomepageFeature[] = [
   { title: "Publications", description: "Approved reports, research, and institutional material.", icon: LibraryBig, href: "/knowledge?category=reports-publications" },
   { title: "Training Resources", description: "Learning material prepared for VTIME participants.", icon: BookOpenCheck, href: "/vtime/resources" },
 ];
-
-export const editorialPreviews = [
-  {
-    category: "Cooperative governance",
-    title: "Why clear roles strengthen cooperative institutions",
-    summary: "An editorial concept exploring practical accountability across boards, committees, and management teams.",
-  },
-  {
-    category: "Institutional development",
-    title: "Preparing people for responsible digital transformation",
-    summary: "A proposed explainer on connecting process, data responsibility, staff capability, and member experience.",
-  },
-  {
-    category: "Knowledge management",
-    title: "What makes an institutional resource trustworthy?",
-    summary: "A planned guide to document ownership, issuing authority, version control, review dates, and publication status.",
-  },
-] as const;

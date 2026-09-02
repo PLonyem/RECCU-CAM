@@ -37,7 +37,7 @@ const footerGroups = [
 export function Footer() {
   const address = institution.contact.streetAddress
     ? `${institution.contact.streetAddress}, ${institution.location.city}, ${institution.location.country}`
-    : `Street address to be confirmed, ${institution.location.city}, ${institution.location.country}`;
+    : `Address not published - ${institution.location.city}, ${institution.location.country}`;
 
   return (
     <footer className="bg-institutional text-white print:hidden">
@@ -75,8 +75,8 @@ export function Footer() {
           <h2 id="footer-contact" className="text-meta uppercase text-accent-300">Contact</h2>
           <address className="mt-4 space-y-4 not-italic text-sm leading-6 text-primary-100">
             <p className="flex gap-2.5"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" /><span>{address}</span></p>
-            <p className="flex gap-2.5"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" /><span>{institution.contact.email ?? "Email to be confirmed"}</span></p>
-            <p className="flex gap-2.5"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" /><span>{institution.contact.phone ?? "Phone to be confirmed"}</span></p>
+            <p className="flex gap-2.5"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" /><span>{institution.contact.email ?? "Email not published"}</span></p>
+            <p className="flex gap-2.5"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" /><span>{institution.contact.phone ?? "Phone not published"}</span></p>
           </address>
           <Link href="/contact" className="mt-5 inline-flex rounded-sm text-sm font-semibold text-white underline decoration-accent-300 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold">
             Contact RECCU-CAM

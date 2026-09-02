@@ -62,7 +62,7 @@ export default function KnowledgePage() {
       <Section>
         <Container>
           <VerificationNote>
-            Public records are source-labelled. Restricted documents are not listed, previewed, or exposed through this prototype.
+            Public records are source-labelled. Restricted documents are not listed, previewed, or exposed in the public collection.
           </VerificationNote>
           <SectionHeader
             eyebrow="Knowledge categories"

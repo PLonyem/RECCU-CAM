@@ -20,7 +20,7 @@ export const platformServices: PlatformService[] = [
   {
     title: "Network directory",
     description:
-      "Explore a source-labelled starter directory of cooperative credit unions connected to the network.",
+      "Explore a source-labelled directory of cooperative credit unions connected to the network.",
     href: "/network/affiliates",
     icon: Building2,
     status: "available",

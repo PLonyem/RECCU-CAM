@@ -41,10 +41,6 @@ export function HomeHero() {
           </div>
         </div>
       </Container>
-
-      <p className="absolute bottom-5 right-5 rounded-pill bg-institutional/70 px-3 py-1.5 text-xs text-primary-100 backdrop-blur-sm">
-        Illustrative institutional imagery
-      </p>
     </section>
   );
 }

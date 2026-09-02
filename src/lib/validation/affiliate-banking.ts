@@ -23,7 +23,7 @@ export const affiliateBankingInquirySchema = z.object({
   affiliateStatus: z.enum(affiliateStatusOptions.map((option) => option.value) as [
     (typeof affiliateStatusOptions)[number]["value"],
     ...(typeof affiliateStatusOptions)[number]["value"][],
-  ]),
+  ], { errorMap: () => ({ message: "Select the institution's affiliate status." }) }),
   contactPerson: z.string().trim().min(2, "Enter the contact person’s name.").max(120),
   role: z.string().trim().min(2, "Enter the contact person’s role.").max(120),
   email: z.string().trim().email("Enter a valid email address.").max(254),
@@ -32,7 +32,7 @@ export const affiliateBankingInquirySchema = z.object({
   supportCategory: z.enum(supportCategoryOptions.map((option) => option.value) as [
     (typeof supportCategoryOptions)[number]["value"],
     ...(typeof supportCategoryOptions)[number]["value"][],
-  ]),
+  ], { errorMap: () => ({ message: "Select a support category." }) }),
   message: z
     .string()
     .trim()

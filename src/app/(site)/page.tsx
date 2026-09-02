@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Landmark, Newspaper } from "lucide-react";
+import { ArrowRight, Landmark, Newspaper } from "lucide-react";
 import { HomeHero } from "@/components/home/HomeHero";
 import { NetworkPreview } from "@/components/home/NetworkPreview";
 import { AffiliatePreview } from "@/components/home/AffiliatePreview";
@@ -15,7 +15,6 @@ import { Section } from "@/components/ui/Section";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { institution } from "@/config/institution";
 import {
-  editorialPreviews,
   homepageServices,
   institutionalPillars,
   knowledgePreview,
@@ -72,7 +71,7 @@ export default function HomePage() {
 
       <Section tone="muted">
         <Container>
-          <SectionHeader eyebrow="Network preview" title="See the cooperative network in context." subtitle="A lightweight view of the source-labelled starter directory. The full map provides institution-level context without third-party tracking." />
+          <SectionHeader eyebrow="Network preview" title="See the cooperative network in context." subtitle="A concise view of the source-labelled directory. Verified coordinates are reserved for the full network map." />
           <div className="mt-10"><NetworkPreview /></div>
         </Container>
       </Section>
@@ -115,7 +114,6 @@ export default function HomePage() {
               sizes="(max-width: 1024px) 100vw, 44vw"
               className="h-auto w-full object-cover"
             />
-            <p className="absolute bottom-4 left-4 rounded-pill bg-institutional/80 px-3 py-1.5 text-xs text-primary-100 backdrop-blur-sm">Illustrative training imagery</p>
           </div>
           <div>
             <SectionHeader eyebrow="VTIME" title="Developing the Next Generation of Microfinance Professionals" subtitle="Practical learning pathways connect cooperative principles with the governance, financial, compliance, leadership, and digital capabilities institutions need." />
@@ -160,22 +158,13 @@ export default function HomePage() {
       <Section tone="surface">
         <Container>
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <SectionHeader eyebrow="News & Events" title="Editorial ideas, awaiting approval." subtitle="Demo content is shown separately from the verified newsroom and is not presented as published RECCU-CAM news." />
+            <SectionHeader eyebrow="News & Events" title="Verified updates, published with care." subtitle="Approved RECCU-CAM stories and announcements appear in the newsroom after editorial review." />
             <Link href="/news" className={buttonVariants({ variant: "secondary" })}>Visit Newsroom <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
           </div>
-          <div className="mt-10 grid gap-5 lg:grid-cols-3">
-            {editorialPreviews.map((story) => (
-              <article key={story.title} className="flex h-full flex-col rounded-card border border-border bg-surface p-6 shadow-card">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="grid h-10 w-10 place-items-center rounded-control bg-gold-subtle text-gold-strong" aria-hidden="true"><Newspaper className="h-5 w-5" /></span>
-                  <span className="rounded-pill bg-warning-subtle px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-wide text-warning">Editorial preview</span>
-                </div>
-                <p className="mt-6 text-meta uppercase text-gold-strong">{story.category}</p>
-                <h3 className="mt-2 font-display text-h4 text-institutional">{story.title}</h3>
-                <p className="mt-3 text-body text-muted-foreground">{story.summary}</p>
-                <p className="mt-auto flex items-center gap-2 pt-6 text-xs font-semibold text-muted-foreground"><BadgeCheck className="h-4 w-4" aria-hidden="true" /> Not published news</p>
-              </article>
-            ))}
+          <div className="mt-10 rounded-panel border border-dashed border-primary-200 bg-primary-50 p-8 text-center sm:p-10">
+            <Newspaper className="mx-auto h-9 w-9 text-forest" aria-hidden="true" />
+            <h3 className="mt-5 font-display text-h4 text-institutional">No verified stories are currently published.</h3>
+            <p className="mx-auto mt-3 max-w-reading text-body text-muted-foreground">The newsroom remains ready for approved institutional announcements and source-verified reporting.</p>
           </div>
         </Container>
       </Section>

@@ -180,8 +180,8 @@ function KnowledgeExplorerContent({ initialSearchParams }: { initialSearchParams
           title={restrictedSelection ? "Restricted documents are not exposed" : "No public documents match these filters"}
           description={
             restrictedSelection
-              ? "Affiliate-only and staff-only resources require authenticated, authorized workflows. This public prototype does not list their metadata or files."
-              : "Try a broader search or clear one or more filters. Unverified documents are not added as placeholders."
+              ? "Affiliate-only and staff-only resources require authenticated, authorized workflows. Their metadata and files are not exposed in the public collection."
+              : "Try a broader search or clear one or more filters. Unverified documents are not added to the public collection."
           }
           action={
             <Button type="button" variant="secondary" onClick={clearFilters}>Clear all filters</Button>

@@ -73,18 +73,18 @@ export const siteNavigation: readonly NavigationLink[] = [
   { label: "Contact", href: "/contact" },
 ] as const;
 
-export const placeholderPages = {
-  "/about/who-we-are": ["Who We Are", "About RECCU-CAM", "A fuller institutional profile is being prepared from verified RECCU-CAM source material."],
-  "/about/history": ["Our History", "About RECCU-CAM", "A verified institutional timeline will be published here after review."],
-  "/about/governance": ["Governance", "About RECCU-CAM", "Governance structures and responsibilities will be published after institutional confirmation."],
-  "/about/leadership": ["Leadership", "About RECCU-CAM", "Verified leadership profiles and responsibilities will be published here."],
-  "/about/institutional-framework": ["Institutional Framework", "About RECCU-CAM", "The approved legal and institutional framework will be presented here with source references."],
-  "/services/consultancy": ["Consultancy", "Services", "Verified consultancy areas and engagement guidance will be published here."],
-  "/vtime/resources": ["VTIME Resources", "VTIME", "Approved learning materials and participant resources will be made available here."],
-  "/privacy": ["Privacy", "Legal", "RECCU-CAM's reviewed privacy notice will be published here."],
-  "/terms": ["Terms of Use", "Legal", "Reviewed terms for use of the RECCU-CAM platform will be published here."],
-  "/accessibility": ["Accessibility", "Platform", "The platform is being developed for inclusive access. A detailed accessibility statement is being prepared."],
+export const informationPages = {
+  "/about/who-we-are": ["Who We Are", "About RECCU-CAM", "A fuller institutional profile is not currently available for public display."],
+  "/about/history": ["Our History", "About RECCU-CAM", "A verified institutional timeline is not currently available for public display."],
+  "/about/governance": ["Governance", "About RECCU-CAM", "Confirmed governance structures and responsibilities are not currently available for public display."],
+  "/about/leadership": ["Leadership", "About RECCU-CAM", "Verified leadership profiles and responsibilities are not currently available for public display."],
+  "/about/institutional-framework": ["Institutional Framework", "About RECCU-CAM", "Approved legal and institutional framework details require source confirmation before public display."],
+  "/services/consultancy": ["Consultancy", "Services", "Confirmed consultancy areas and engagement guidance are not currently available for public display."],
+  "/vtime/resources": ["VTIME Resources", "VTIME", "No approved public learning materials are currently listed."],
+  "/privacy": ["Privacy", "Legal", "A reviewed RECCU-CAM privacy notice is not currently available for public display."],
+  "/terms": ["Terms of Use", "Legal", "Reviewed terms for use of the RECCU-CAM platform are not currently available for public display."],
+  "/accessibility": ["Accessibility", "Platform", "The platform supports keyboard navigation, visible focus, reduced motion, and semantic landmarks. A reviewed accessibility statement is not currently available."],
   "/sitemap": ["Sitemap", "Platform", "Use the navigation below to explore the current public sections of the RECCU-CAM platform."],
 } as const;
 
-export type PlaceholderPath = keyof typeof placeholderPages;
+export type InformationPath = keyof typeof informationPages;

@@ -118,7 +118,7 @@ export default async function AffiliateProfilePage({ params }: Props) {
               <Card padding="spacious">
                 <Heading as="h2" variant="h3">About</Heading>
                 <Text className="mt-4">
-                  {affiliate.shortDescription ?? `${affiliate.name} appears in the cited public source used for this starter directory. A fuller institutional description has not yet been verified for publication.`}
+                  {affiliate.shortDescription ?? `${affiliate.name} appears in the cited public source used for this directory. Additional institutional information is omitted until verified for publication.`}
                 </Text>
                 {affiliate.source && (
                   <a href={affiliate.source.url} target="_blank" rel="noreferrer" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-semibold text-forest underline decoration-accent-400 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2">

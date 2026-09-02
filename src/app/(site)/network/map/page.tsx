@@ -26,7 +26,7 @@ export default function NetworkMapPage() {
       <Section>
         <Container>
           <VerificationNote>
-            Only institutions with complete coordinates in the structured affiliate source appear as markers. The current source contains {mappedCount} mapped {mappedCount === 1 ? "institution" : "institutions"}; missing coordinates are never estimated.
+            Only institutions with complete coordinates in the structured affiliate source appear as markers. {mappedCount > 0 ? `${mappedCount} verified ${mappedCount === 1 ? "location is" : "locations are"} currently available.` : "No verified coordinates are currently published."} Missing coordinates are never estimated.
           </VerificationNote>
           <div className="mt-8">
             <MapExplorerClient affiliates={affiliates} />

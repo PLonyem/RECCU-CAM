@@ -12,9 +12,9 @@ export const metadata: Metadata = createPageMetadata({
 const questions = [
   ["What is RECCU-CAM?", "RECCU-CAM LTD is the Union of Renaissance Cooperative Credit Unions in Cameroon Ltd, listed by Cameroon’s Ministry of Finance as a network headquartered in Bamenda."],
   ["Can I open an account with RECCU-CAM through this website?", "No account-opening service is published on this platform. Use the source-labelled directory to identify an affiliate, then confirm services directly through that institution’s verified channels."],
-  ["Are the affiliate directory and map complete?", "No. They are a carefully labelled starter directory based on a public MINFI source as at 31 December 2021. They must not be interpreted as a current membership total."],
-  ["Are VTIME dates available?", "Not yet. The programme architecture is visible, but no date is published until RECCU-CAM confirms the schedule, venue, facilitator, and registration process."],
-  ["Where can I find official templates?", "The Knowledge Centre will publish controlled documents with version and source information. Placeholder files are never presented as official documents."],
+  ["Are the affiliate directory and map complete?", "No. The directory is based on a labelled public MINFI source as at 31 December 2021. It must not be interpreted as a current membership total, and the map displays only verified coordinates."],
+  ["Are VTIME dates available?", "No dates are currently published. A date is added only after RECCU-CAM confirms the schedule, venue, facilitator, and registration process."],
+  ["Where can I find official templates?", "Approved documents appear in the Knowledge Centre with source, version, and publication information. Unverified files are not presented as official resources."],
 ] as const;
 
 export default function FaqPage() {

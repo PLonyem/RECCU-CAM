@@ -1,35 +1,35 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Clock3 } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import { notFound } from "next/navigation";
 import { PageHero } from "@/components/layout/PageHero";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { buttonVariants } from "@/components/ui/Button";
-import { placeholderPages, siteNavigation, type PlaceholderPath } from "@/data/site-navigation";
+import { informationPages, siteNavigation, type InformationPath } from "@/data/site-navigation";
 import { createPageMetadata } from "@/lib/seo";
 
-interface PlaceholderPageProps {
+interface InformationPageProps {
   params: Promise<{ slug: string[] }>;
 }
 
 function getPage(slug: string[]) {
-  const path = `/${slug.join("/")}` as PlaceholderPath;
-  return { path, content: placeholderPages[path] };
+  const path = `/${slug.join("/")}` as InformationPath;
+  return { path, content: informationPages[path] };
 }
 
 export function generateStaticParams() {
-  return Object.keys(placeholderPages).map((path) => ({ slug: path.slice(1).split("/") }));
+  return Object.keys(informationPages).map((path) => ({ slug: path.slice(1).split("/") }));
 }
 
-export async function generateMetadata({ params }: PlaceholderPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: InformationPageProps): Promise<Metadata> {
   const { slug } = await params;
   const { content, path } = getPage(slug);
   if (!content) return {};
   return createPageMetadata({ title: content[0], description: content[2], path });
 }
 
-export default async function PlaceholderPage({ params }: PlaceholderPageProps) {
+export default async function InformationPage({ params }: InformationPageProps) {
   const { path, content } = getPage((await params).slug);
   if (!content) notFound();
   const [title, , description] = content;
@@ -61,10 +61,10 @@ export default async function PlaceholderPage({ params }: PlaceholderPageProps) 
             </div>
           ) : (
             <div className="rounded-panel border border-border bg-surface p-7 shadow-card sm:p-10">
-              <span className="grid h-12 w-12 place-items-center rounded-control bg-gold-subtle text-gold-strong"><Clock3 className="h-6 w-6" /></span>
-              <p className="mt-6 text-meta uppercase text-gold-strong">Content in preparation</p>
-              <h2 className="mt-2 font-display text-h3 text-institutional">A lightweight route is in place.</h2>
-              <p className="mt-4 text-body text-muted-foreground">This page prevents a dead end while its verified institutional content and service details are reviewed. No unconfirmed claims have been added.</p>
+              <span className="grid h-12 w-12 place-items-center rounded-control bg-gold-subtle text-gold-strong"><ShieldCheck className="h-6 w-6" /></span>
+              <p className="mt-6 text-meta uppercase text-gold-strong">Publication status</p>
+              <h2 className="mt-2 font-display text-h3 text-institutional">Institutional confirmation is required.</h2>
+              <p className="mt-4 text-body text-muted-foreground">This section intentionally excludes unconfirmed names, dates, legal statements, and service commitments. Information can be added after institutional approval.</p>
               <Link href="/contact" className={`${buttonVariants({ variant: "secondary" })} mt-7`}>
                 Contact RECCU-CAM <ArrowRight className="h-4 w-4" />
               </Link>

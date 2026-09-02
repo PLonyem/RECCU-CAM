@@ -1,7 +1,7 @@
 import type { Affiliate, AffiliateSource } from "./types";
 
 export const AFFILIATE_DATA_NOTICE =
-  "Demo-safe starter records: names and locations are transcribed from the cited MINFI list as at 31 December 2021. They are not a complete or current membership register. Unknown operational and contact fields remain null.";
+  "Source note: names and locations are transcribed from the cited MINFI list as at 31 December 2021. This is not a complete or current membership register. Unverified operational and contact fields are omitted.";
 
 export const MINFI_AFFILIATE_SOURCE: AffiliateSource = {
   label: "MINFI list of approved microfinance institutions",

@@ -6,7 +6,6 @@ import Link from "next/link";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
   ArrowRight,
-  Building2,
   ExternalLink,
   ListFilter,
   MapPin,
@@ -219,6 +218,21 @@ export function MapExplorerClient({ affiliates }: MapExplorerClientProps) {
 
   const values = { query, region, city, service };
 
+  if (mappableAffiliates.length === 0) {
+    return (
+      <EmptyState
+        icon={MapPin}
+        title="Verified coordinates are not currently published"
+        description="The map will display institutions only after coordinates are confirmed. Use the affiliate directory for source-listed names and towns."
+        action={
+          <Button asChild variant="secondary">
+            <Link href="/network/affiliates">Browse Affiliate Directory <ArrowRight className="h-4 w-4" /></Link>
+          </Button>
+        }
+      />
+    );
+  }
+
   return (
     <div>
       <div className="overflow-hidden rounded-panel border border-border bg-surface shadow-card lg:grid lg:grid-cols-[22rem_minmax(0,1fr)]">
@@ -274,15 +288,6 @@ export function MapExplorerClient({ affiliates }: MapExplorerClientProps) {
           </Dialog.Portal>
         </Dialog.Root>
       </div>
-
-      {mappableAffiliates.length === 0 && (
-        <div className="mt-6 rounded-card border border-dashed border-border bg-muted/50 p-6 text-center">
-          <Building2 className="mx-auto h-6 w-6 text-forest" aria-hidden="true" />
-          <p className="mt-3 font-semibold text-institutional">Coordinate publication is pending</p>
-          <p className="mx-auto mt-2 max-w-reading text-sm text-muted-foreground">The interactive map remains ready for verified coordinates. Until then, use the affiliate directory for source-listed names and towns.</p>
-          <Button asChild variant="secondary" className="mt-4"><Link href="/network/affiliates">Browse Affiliate Directory <ArrowRight className="h-4 w-4" /></Link></Button>
-        </div>
-      )}
     </div>
   );
 }
