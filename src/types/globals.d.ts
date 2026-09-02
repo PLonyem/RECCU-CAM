@@ -1,3 +1,5 @@
+import type { AuthRole } from "@/lib/auth/roles";
+
 export {};
 
 // role is "admin" or "credit_union"; the affiliate* fields are only ever
@@ -15,7 +17,7 @@ export {};
 declare global {
   interface CustomJwtSessionClaims {
     metadata: {
-      role?: "admin" | "credit_union";
+      role?: AuthRole;
       affiliateId?: string;
       affiliateName?: string;
       affiliateCode?: string;
@@ -24,7 +26,7 @@ declare global {
   }
 
   interface UserPublicMetadata {
-    role?: "admin" | "credit_union";
+    role?: AuthRole;
     affiliateId?: string;
     affiliateName?: string;
     affiliateCode?: string;

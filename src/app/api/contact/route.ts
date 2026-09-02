@@ -6,17 +6,23 @@ import {
   isLikelyAutomatedSubmission,
 } from "@/lib/validation/form-security";
 import { sendContactFormNotification } from "@/lib/email";
+import { enforceRateLimit, readBoundedJson } from "@/lib/security/request";
+import { reportServerError } from "@/lib/security/logging";
 
 // Public endpoint — the site's contact form, not an admin route. No auth
 // check by design; mirrors the same min-length rules as the client-side
 // form validation as a defense-in-depth backstop.
 export async function POST(request: NextRequest) {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
-  }
+  const limited = enforceRateLimit(request, {
+    scope: "contact",
+    limit: 5,
+    windowMs: 10 * 60_000,
+  });
+  if (limited) return limited;
+
+  const bodyResult = await readBoundedJson(request);
+  if (!bodyResult.ok) return bodyResult.response;
+  const body = bodyResult.data;
 
   if (isLikelyAutomatedSubmission(body)) {
     return NextResponse.json(acceptedSubmissionResponse, { status: 201 });
@@ -44,7 +50,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Contact message could not be stored:", error);
+    reportServerError("contact.store_failed", error);
     return NextResponse.json(
       { error: "The contact service is temporarily unavailable. Please try again later." },
       { status: 503 },
@@ -54,7 +60,7 @@ export async function POST(request: NextRequest) {
   try {
     await sendContactFormNotification(message.email);
   } catch (error) {
-    console.error("Contact form notification failed:", error);
+    reportServerError("contact.notification_failed", error);
   }
 
   return NextResponse.json({ success: true }, { status: 201 });

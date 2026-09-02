@@ -4,19 +4,21 @@ import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { regions } from "@/data/admin-options";
+import { isSafeCsvFile } from "@/lib/security/file-upload";
 
 const MAX_ROWS = 2000;
+const MAX_FILE_SIZE = 2 * 1024 * 1024;
 
 const csvRowSchema = z.object({
-  code: z.string().min(1, "code is required"),
-  name: z.string().min(1, "name is required"),
+  code: z.string().min(1, "code is required").max(40),
+  name: z.string().min(1, "name is required").max(200),
   region: z
     .string()
     .refine((value) => regions.includes(value), "invalid region"),
-  city: z.string().optional(),
-  address: z.string().optional(),
-  phone: z.string().optional(),
-  email: z.string().optional(),
+  city: z.string().max(120).optional(),
+  address: z.string().max(300).optional(),
+  phone: z.string().max(40).optional(),
+  email: z.string().email().max(254).optional(),
 });
 
 function cell(value: unknown): string | undefined {
@@ -39,8 +41,17 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+  if (!isSafeCsvFile(file) || file.size === 0 || file.size > MAX_FILE_SIZE) {
+    return NextResponse.json(
+      { error: "Upload a non-empty CSV file no larger than 2MB." },
+      { status: 400 },
+    );
+  }
 
   const text = await file.text();
+  if (text.includes("\0")) {
+    return NextResponse.json({ error: "The CSV contains invalid binary data." }, { status: 400 });
+  }
   const parsed = Papa.parse<Record<string, string>>(text, {
     header: true,
     skipEmptyLines: true,

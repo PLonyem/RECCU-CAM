@@ -9,20 +9,21 @@ import {
   extractTextFromFile,
   parseChapterFieldsFromText,
 } from "@/lib/chapter-profile-extraction";
+import {
+  contentMatchesMime,
+  storageFileName,
+  UPLOAD_MIME_TYPES,
+} from "@/lib/security/file-upload";
+import { reportServerError } from "@/lib/security/logging";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-const ALLOWED_TYPES = new Set([
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/msword",
-  "image/jpeg",
-  "image/png",
+const ALLOWED_TYPES = new Set<string>([
+  UPLOAD_MIME_TYPES.pdf,
+  UPLOAD_MIME_TYPES.docx,
+  UPLOAD_MIME_TYPES.jpeg,
+  UPLOAD_MIME_TYPES.png,
 ]);
-
-function sanitizeFileName(name: string) {
-  return name.replace(/[^a-zA-Z0-9._-]/g, "_");
-}
 
 export async function POST(request: NextRequest) {
   const { userId, sessionClaims } = await auth();
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  if (file.size > MAX_FILE_SIZE) {
+  if (file.size === 0 || file.size > MAX_FILE_SIZE) {
     return NextResponse.json(
       { error: "File is too large. Maximum size is 10MB." },
       { status: 400 }
@@ -80,12 +81,18 @@ export async function POST(request: NextRequest) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const storagePath = `${affiliate.id}/${Date.now()}-${sanitizeFileName(file.name)}`;
+  if (!contentMatchesMime(buffer, file.type)) {
+    return NextResponse.json(
+      { error: "The file contents do not match the selected file type." },
+      { status: 400 },
+    );
+  }
+  const storagePath = `${affiliate.id}/${storageFileName(file.type)}`;
 
   try {
     await uploadToSupabaseStorage(storagePath, buffer, file.type);
   } catch (error) {
-    console.error("Chapter profile document upload failed:", error);
+    reportServerError("chapter-profile.upload_failed", error);
     return NextResponse.json(
       { error: "Failed to save the uploaded file. Please try again." },
       { status: 502 }

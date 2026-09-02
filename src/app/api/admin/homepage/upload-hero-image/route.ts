@@ -4,14 +4,20 @@ import {
   isSupabaseStorageConfigured,
   uploadPublicSupabaseImage,
 } from "@/lib/supabase-storage";
+import {
+  contentMatchesMime,
+  storageFileName,
+  UPLOAD_MIME_TYPES,
+} from "@/lib/security/file-upload";
+import { reportServerError } from "@/lib/security/logging";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB — hero images, not documents
 
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-
-function sanitizeFileName(name: string) {
-  return name.replace(/[^a-zA-Z0-9._-]/g, "_");
-}
+const ALLOWED_TYPES = new Set<string>([
+  UPLOAD_MIME_TYPES.jpeg,
+  UPLOAD_MIME_TYPES.png,
+  UPLOAD_MIME_TYPES.webp,
+]);
 
 export async function POST(request: NextRequest) {
   const { userId, sessionClaims } = await auth();
@@ -39,7 +45,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  if (file.size > MAX_FILE_SIZE) {
+  if (file.size === 0 || file.size > MAX_FILE_SIZE) {
     return NextResponse.json(
       { error: "Image is too large. Maximum size is 5MB." },
       { status: 400 }
@@ -57,13 +63,19 @@ export async function POST(request: NextRequest) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const path = `${Date.now()}-${sanitizeFileName(file.name)}`;
+  if (!contentMatchesMime(buffer, file.type)) {
+    return NextResponse.json(
+      { error: "The image contents do not match the selected file type." },
+      { status: 400 },
+    );
+  }
+  const path = storageFileName(file.type);
 
   try {
     const url = await uploadPublicSupabaseImage(path, buffer, file.type);
     return NextResponse.json({ url });
   } catch (error) {
-    console.error("Hero image upload failed:", error);
+    reportServerError("homepage.hero_upload_failed", error);
     return NextResponse.json(
       { error: "Failed to save the uploaded image. Please try again." },
       { status: 502 }

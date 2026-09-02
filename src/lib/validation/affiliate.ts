@@ -1,17 +1,18 @@
 import { z } from "zod";
 import { regions } from "@/data/admin-options";
+import { httpsUrlSchema } from "@/lib/validation/url";
 
 export const affiliateSchema = z.object({
-  code: z.string().min(1, "Code is required"),
-  name: z.string().min(1, "Name is required"),
+  code: z.string().trim().min(1, "Code is required").max(40),
+  name: z.string().trim().min(1, "Name is required").max(200),
   region: z
     .string()
     .refine((value) => regions.includes(value), "Invalid region"),
-  city: z.string().nullable().optional(),
-  address: z.string().nullable().optional(),
-  phone: z.string().nullable().optional(),
-  email: z.string().nullable().optional(),
-  website: z.string().nullable().optional(),
+  city: z.string().trim().max(120).nullable().optional(),
+  address: z.string().trim().max(300).nullable().optional(),
+  phone: z.string().trim().max(40).nullable().optional(),
+  email: z.string().trim().email().max(254).nullable().optional(),
+  website: httpsUrlSchema.nullable().optional(),
   isActive: z.boolean().default(true),
 });
 

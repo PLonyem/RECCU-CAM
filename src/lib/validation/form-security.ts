@@ -9,3 +9,10 @@ export function isLikelyAutomatedSubmission(body: unknown) {
 }
 
 export const acceptedSubmissionResponse = { success: true } as const;
+
+const sensitiveCredentialPattern =
+  /\b(password|passcode|pin|one[- ]?time password|otp|banking credential|login credential)\b/i;
+
+export function excludesSensitiveCredentials(value: string) {
+  return !sensitiveCredentialPattern.test(value);
+}

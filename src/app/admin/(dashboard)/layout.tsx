@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { AdminNavGuard } from "@/components/admin/AdminNavGuard";
+import { isAdminRole } from "@/lib/auth/roles";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ export default async function AdminLayout({
 
   // Any authenticated Clerk user could be a credit_union account — a
   // chapter session must never reach the admin shell.
-  if (!userId || sessionClaims?.metadata?.role !== "admin") {
+  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
     redirect("/login");
   }
 

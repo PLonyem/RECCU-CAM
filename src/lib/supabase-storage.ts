@@ -47,8 +47,7 @@ export async function uploadToSupabaseStorage(
   );
 
   if (!response.ok) {
-    const detail = await response.text().catch(() => "");
-    throw new Error(`Supabase Storage upload failed (${response.status}): ${detail}`);
+    throw new Error(`Supabase Storage upload failed with status ${response.status}.`);
   }
 
   return { bucket: BUCKET, path };
@@ -82,8 +81,7 @@ export async function uploadPublicSupabaseImage(
   );
 
   if (!response.ok) {
-    const detail = await response.text().catch(() => "");
-    throw new Error(`Supabase Storage upload failed (${response.status}): ${detail}`);
+    throw new Error(`Supabase Storage upload failed with status ${response.status}.`);
   }
 
   return `${SUPABASE_URL}/storage/v1/object/public/${HERO_IMAGES_BUCKET}/${path}`;
@@ -115,8 +113,7 @@ export async function getSignedSupabaseUrl(
   );
 
   if (!response.ok) {
-    const detail = await response.text().catch(() => "");
-    throw new Error(`Supabase Storage sign request failed (${response.status}): ${detail}`);
+    throw new Error(`Supabase Storage sign request failed with status ${response.status}.`);
   }
 
   const data = (await response.json()) as { signedURL?: string };
@@ -126,3 +123,4 @@ export async function getSignedSupabaseUrl(
 
   return `${SUPABASE_URL}/storage/v1${data.signedURL}`;
 }
+import "server-only";

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { CreditUnionNavbar } from "@/components/dashboard/CreditUnionNavbar";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
+import { isAdminRole, isAffiliateRole } from "@/lib/auth/roles";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -22,8 +23,8 @@ export default async function DashboardLayout({
   }
 
   const role = sessionClaims?.metadata?.role;
-  if (role === "admin") redirect("/admin");
-  if (role !== "credit_union") redirect("/login");
+  if (isAdminRole(role)) redirect("/admin");
+  if (!isAffiliateRole(role)) redirect("/login");
 
   return (
     <div className="min-h-screen bg-gray-50">

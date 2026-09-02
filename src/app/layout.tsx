@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { institution, siteUrl } from "@/config/institution";
 import { designTokens } from "@/config/design-tokens";
+import { isClerkConfigured } from "@/lib/auth/config";
 import "./globals.css";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "swap" });
@@ -58,7 +59,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 
-  return process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? (
+  return isClerkConfigured() ? (
     <ClerkProvider>{document}</ClerkProvider>
   ) : document;
 }

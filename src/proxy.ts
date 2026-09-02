@@ -1,95 +1,98 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/about(.*)",
-  "/network(.*)",
-  "/services(.*)",
-  "/vtime(.*)",
-  "/knowledge(.*)",
-  "/affiliates(.*)",
-  "/resources(.*)",
-  "/news(.*)",
-  "/faq(.*)",
-  "/contact(.*)",
-  "/loan-calculator(.*)",
-  "/privacy",
-  "/terms",
-  "/accessibility",
-  "/sitemap",
-  "/api/affiliates(.*)",
-  "/api/affiliate-banking-inquiry",
-  "/api/affiliation-inquiry",
-  "/api/contact",
-  "/api/vtime-registration",
-]);
+import { isClerkConfigured } from "@/lib/auth/config";
+import {
+  isAdminRole,
+  isAffiliateRole,
+  privateHomeForRole,
+} from "@/lib/auth/roles";
 
 const isAuthPage = createRouteMatcher(["/login(.*)", "/signup(.*)"]);
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+const isAdminApiRoute = createRouteMatcher(["/api/admin(.*)"]);
 const isDashboardRoute = createRouteMatcher(["/dashboard(.*)"]);
 const isAffiliatePortalRoute = createRouteMatcher(["/affiliate-portal(.*)"]);
 
-const configuredProxy = clerkMiddleware(async (auth, req) => {
-  const authObject = await auth();
-  const { userId, sessionClaims } = authObject;
-  const isAuthenticated = !!userId;
-  const role = sessionClaims?.metadata?.role;
+function isCrossOriginMutation(request: NextRequest) {
+  if (["GET", "HEAD", "OPTIONS"].includes(request.method)) return false;
+  if (request.headers.get("sec-fetch-site") === "cross-site") return true;
 
+  const origin = request.headers.get("origin");
+  return Boolean(origin && origin !== request.nextUrl.origin);
+}
+
+const configuredProxy = clerkMiddleware(async (auth, req) => {
   // Logged-in users visiting an auth page go to their assigned dashboard.
   // instead of seeing the form again.
-  if (isAuthPage(req) && isAuthenticated) {
-    return NextResponse.redirect(
-      new URL(role === "admin" ? "/admin" : "/dashboard", req.url)
-    );
-  }
   if (isAuthPage(req)) {
+    const { userId, sessionClaims } = await auth();
+    if (userId) {
+      return NextResponse.redirect(
+        new URL(privateHomeForRole(sessionClaims?.metadata?.role), req.url),
+      );
+    }
+    return NextResponse.next();
+  }
+
+  if (isAdminApiRoute(req)) {
+    if (isCrossOriginMutation(req)) {
+      return NextResponse.json({ error: "Cross-origin request rejected." }, { status: 403 });
+    }
+    const { userId, sessionClaims } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+    }
+    if (!isAdminRole(sessionClaims?.metadata?.role)) {
+      return NextResponse.json({ error: "Insufficient permissions." }, { status: 403 });
+    }
     return NextResponse.next();
   }
 
   if (isAdminRoute(req)) {
-    if (!isAuthenticated) {
+    const authObject = await auth();
+    if (!authObject.userId) {
       return authObject.redirectToSignIn({ returnBackUrl: req.url });
     }
-    if (role !== "admin") {
+    if (!isAdminRole(authObject.sessionClaims?.metadata?.role)) {
       return NextResponse.redirect(new URL("/", req.url));
     }
     return NextResponse.next();
   }
 
   if (isDashboardRoute(req) || isAffiliatePortalRoute(req)) {
-    if (!isAuthenticated) {
+    const authObject = await auth();
+    if (!authObject.userId) {
       return authObject.redirectToSignIn({ returnBackUrl: req.url });
     }
-    if (role !== "credit_union") {
-      return NextResponse.redirect(new URL("/", req.url));
+    if (!isAffiliateRole(authObject.sessionClaims?.metadata?.role)) {
+      return NextResponse.redirect(
+        new URL(privateHomeForRole(authObject.sessionClaims?.metadata?.role), req.url),
+      );
     }
     return NextResponse.next();
   }
 
-  if (!isPublicRoute(req)) {
-    await auth.protect();
-  }
+  // Everything outside the explicit private families remains public. This
+  // includes metadata/static routes and intentionally public API handlers.
+  return NextResponse.next();
 });
 
 function unconfiguredProxy(req: NextRequest) {
-  if (isPublicRoute(req)) return NextResponse.next();
-
-  if (req.nextUrl.pathname.startsWith("/api/")) {
+  if (isAdminApiRoute(req)) {
     return NextResponse.json(
       { error: "Authentication is not configured." },
       { status: 503 },
     );
   }
 
-  return NextResponse.redirect(new URL("/", req.url));
+  if (isAdminRoute(req) || isDashboardRoute(req) || isAffiliatePortalRoute(req)) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
+  return NextResponse.next();
 }
 
-const hasClerkConfiguration = Boolean(
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY,
-);
-
-export default hasClerkConfiguration ? configuredProxy : unconfiguredProxy;
+export default isClerkConfigured() ? configuredProxy : unconfiguredProxy;
 
 export const config = {
   matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],

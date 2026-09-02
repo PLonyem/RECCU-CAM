@@ -4,7 +4,7 @@ import { simulateLoan, validateLoanPolicy } from "@/lib/loan-calculator/engine";
 import { resolveLoanPolicy } from "@/lib/loan-calculator/policy";
 import { simulationRequestSchema } from "@/lib/loan-calculator/validation";
 import type { Prisma } from "@/generated/prisma/client";
-import { checkSimulationRateLimit } from "@/lib/loan-calculator/rate-limit";
+import { enforceRateLimit, readBoundedJson } from "@/lib/security/request";
 
 function simulationReference() {
   const year = new Date().getUTCFullYear().toString().slice(-2);
@@ -13,15 +13,15 @@ function simulationReference() {
 }
 
 export async function POST(request: Request) {
-  const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const rateLimit = checkSimulationRateLimit(forwardedFor || "anonymous");
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: "Too many simulation requests. Please wait and try again." },
-      { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
-    );
-  }
-  const body = await request.json().catch(() => null);
+  const limited = enforceRateLimit(request, {
+    scope: "loan-simulation",
+    limit: 20,
+    windowMs: 60_000,
+  });
+  if (limited) return limited;
+  const bodyResult = await readBoundedJson(request);
+  if (!bodyResult.ok) return bodyResult.response;
+  const body = bodyResult.data;
   const parsed = simulationRequestSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid simulation details.", details: parsed.error.flatten() }, { status: 400 });

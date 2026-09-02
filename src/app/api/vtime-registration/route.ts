@@ -7,14 +7,20 @@ import {
   isLikelyAutomatedSubmission,
 } from "@/lib/validation/form-security";
 import { vtimeRegistrationSchema } from "@/lib/validation/vtime-registration";
+import { enforceRateLimit, readBoundedJson } from "@/lib/security/request";
+import { reportServerError } from "@/lib/security/logging";
 
 export async function POST(request: Request) {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
-  }
+  const limited = enforceRateLimit(request, {
+    scope: "vtime-registration",
+    limit: 10,
+    windowMs: 10 * 60_000,
+  });
+  if (limited) return limited;
+
+  const bodyResult = await readBoundedJson(request);
+  if (!bodyResult.ok) return bodyResult.response;
+  const body = bodyResult.data;
 
   if (isLikelyAutomatedSubmission(body)) {
     return NextResponse.json(acceptedSubmissionResponse, { status: 201 });
@@ -55,7 +61,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("VTIME registration could not be stored:", error);
+    reportServerError("vtime-registration.store_failed", error);
     return NextResponse.json(
       { error: "The registration service is temporarily unavailable. Please try again later." },
       { status: 503 },
@@ -65,7 +71,7 @@ export async function POST(request: Request) {
   try {
     await sendContactFormNotification(registration.email);
   } catch (error) {
-    console.error("VTIME registration notification failed:", error);
+    reportServerError("vtime-registration.notification_failed", error);
   }
 
   return NextResponse.json({ success: true }, { status: 201 });

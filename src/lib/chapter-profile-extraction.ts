@@ -1,5 +1,6 @@
 import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
+import { reportServerError } from "@/lib/security/logging";
 
 export interface ExtractedChapterFields {
   yearEstablished?: number;
@@ -20,7 +21,6 @@ export interface ExtractedChapterFields {
 const PDF_MIME = "application/pdf";
 const DOCX_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-const DOC_MIME = "application/msword";
 
 // Images (JPG/PNG) have no extraction path — OCR isn't wired up in this
 // app, and faking a result would violate the no-fabrication rule. Staff
@@ -37,13 +37,13 @@ export async function extractTextFromFile(
       await parser.destroy();
       return result.text || null;
     }
-    if (mimeType === DOCX_MIME || mimeType === DOC_MIME) {
+    if (mimeType === DOCX_MIME) {
       const result = await mammoth.extractRawText({ buffer });
       return result.value || null;
     }
     return null;
   } catch (error) {
-    console.error("Chapter profile text extraction failed:", error);
+    reportServerError("chapter-profile.extract_failed", error);
     return null;
   }
 }

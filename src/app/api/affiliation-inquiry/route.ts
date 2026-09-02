@@ -6,14 +6,20 @@ import {
   acceptedSubmissionResponse,
   isLikelyAutomatedSubmission,
 } from "@/lib/validation/form-security";
+import { enforceRateLimit, readBoundedJson } from "@/lib/security/request";
+import { reportServerError } from "@/lib/security/logging";
 
 export async function POST(request: Request) {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
-  }
+  const limited = enforceRateLimit(request, {
+    scope: "affiliation-inquiry",
+    limit: 5,
+    windowMs: 10 * 60_000,
+  });
+  if (limited) return limited;
+
+  const bodyResult = await readBoundedJson(request);
+  if (!bodyResult.ok) return bodyResult.response;
+  const body = bodyResult.data;
 
   if (isLikelyAutomatedSubmission(body)) {
     return NextResponse.json(acceptedSubmissionResponse, { status: 201 });
@@ -48,7 +54,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Affiliation inquiry could not be stored:", error);
+    reportServerError("affiliation-inquiry.store_failed", error);
     return NextResponse.json(
       { error: "The inquiry service is temporarily unavailable. Please try again later." },
       { status: 503 },
@@ -58,7 +64,7 @@ export async function POST(request: Request) {
   try {
     await sendContactFormNotification(inquiry.email);
   } catch (error) {
-    console.error("Affiliation inquiry notification failed:", error);
+    reportServerError("affiliation-inquiry.notification_failed", error);
   }
 
   return NextResponse.json({ success: true }, { status: 201 });

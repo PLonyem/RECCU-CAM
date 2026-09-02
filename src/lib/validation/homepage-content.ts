@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { httpsUrlSchema, internalPathSchema } from "@/lib/validation/url";
 
 const hexColor = z
   .string()
@@ -14,18 +15,10 @@ export const homepageContentSchema = z.object({
   heroTitle: z.string().trim().min(1, "Headline is required"),
   heroSubtitle: z.string().trim().min(1, "Subtitle is required"),
   primaryButtonText: z.string().trim().min(1, "Primary button text is required"),
-  primaryButtonLink: z
-    .string()
-    .trim()
-    .min(1, "Primary button link is required")
-    .refine((v) => v.startsWith("/"), "Link must start with /"),
+  primaryButtonLink: internalPathSchema,
   secondaryButtonText: z.string().trim().min(1, "Secondary button text is required"),
-  secondaryButtonLink: z
-    .string()
-    .trim()
-    .min(1, "Secondary button link is required")
-    .refine((v) => v.startsWith("/"), "Link must start with /"),
-  heroImages: z.array(z.string().url()).max(5, "Up to 5 images"),
+  secondaryButtonLink: internalPathSchema,
+  heroImages: z.array(httpsUrlSchema).max(5, "Up to 5 images"),
   statsAffiliates: z.number().int().min(0),
   statsMembers: z.string().trim().min(1, "Members figure is required"),
   statsAssets: z.string().trim(),

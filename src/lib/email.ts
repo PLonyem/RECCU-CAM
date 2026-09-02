@@ -1,3 +1,5 @@
+import "server-only";
+
 import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
 import {
@@ -6,6 +8,7 @@ import {
   type EmailTemplate,
   type EmailTemplates,
 } from "@/lib/notification-settings";
+import { reportServerError, reportServerEvent } from "@/lib/security/logging";
 
 const resend =
   process.env.RESEND_API_KEY && process.env.RESEND_FROM
@@ -39,20 +42,30 @@ async function getNotificationPreferences() {
       emailTemplates: { ...DEFAULT_EMAIL_TEMPLATES, ...savedTemplates },
     };
   } catch (error) {
-    console.error("Could not read notification preferences; using defaults:", error);
+    reportServerError("email.preferences_read_failed", error);
     return DEFAULT_NOTIFICATION_SETTINGS;
   }
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 function renderTemplate(template: EmailTemplate, variables: Record<string, string>) {
-  const replace = (value: string) =>
+  const replace = (value: string, escapeValues: boolean) =>
     Object.entries(variables).reduce(
-      (result, [key, replacement]) => result.replaceAll(`{${key}}`, replacement),
-      value
+      (result, [key, replacement]) =>
+        result.replaceAll(`{${key}}`, escapeValues ? escapeHtml(replacement) : replacement),
+      value,
     );
   return {
-    subject: replace(template.subject),
-    html: replace(template.body)
+    subject: replace(template.subject, false).replace(/[\r\n]+/g, " ").slice(0, 240),
+    html: replace(escapeHtml(template.body), true)
       .split("\n")
       .map((line) => (line ? `<p>${line}</p>` : "<br />"))
       .join(""),
@@ -93,12 +106,7 @@ export async function sendProfileSubmissionToReccucam({
   const preferences = await getNotificationPreferences();
   if (!preferences.profileSubmittedForReview) return;
   if (!resend) {
-    console.log("MOCK EMAIL TO RECCU-CAM:", {
-      creditUnionName,
-      creditUnionCode,
-      chapter,
-      submittedAt,
-    });
+    reportServerEvent("email.profile_submission.skipped_not_configured");
     return;
   }
 
@@ -110,7 +118,7 @@ export async function sendProfileSubmissionToReccucam({
     from: FROM_NOTIFICATIONS,
     to: preferences.adminNotificationEmail || ADMIN_EMAIL,
     subject: rendered.subject,
-    html: `${rendered.html}<p><strong>Code:</strong> ${creditUnionCode}</p><p><strong>Submitted:</strong> ${submittedAt}</p>`,
+    html: `${rendered.html}<p><strong>Code:</strong> ${escapeHtml(creditUnionCode)}</p><p><strong>Submitted:</strong> ${escapeHtml(submittedAt)}</p>`,
   });
 }
 
@@ -118,7 +126,7 @@ export async function sendProfileUpdatedToReccucam(params: ProfileSubmissionToRe
   const preferences = await getNotificationPreferences();
   if (!preferences.profileUpdated) return;
   if (!resend) {
-    console.log("MOCK PROFILE UPDATED EMAIL:", params);
+    reportServerEvent("email.profile_updated.skipped_not_configured");
     return;
   }
   const rendered = renderTemplate(preferences.emailTemplates.profileUpdated, {
@@ -129,7 +137,7 @@ export async function sendProfileUpdatedToReccucam(params: ProfileSubmissionToRe
     from: FROM_NOTIFICATIONS,
     to: preferences.adminNotificationEmail || ADMIN_EMAIL,
     subject: rendered.subject,
-    html: `${rendered.html}<p><strong>Code:</strong> ${params.creditUnionCode}</p><p><strong>Updated:</strong> ${params.submittedAt}</p>`,
+    html: `${rendered.html}<p><strong>Code:</strong> ${escapeHtml(params.creditUnionCode)}</p><p><strong>Updated:</strong> ${escapeHtml(params.submittedAt)}</p>`,
   });
 }
 
@@ -147,7 +155,7 @@ export async function sendProfileConfirmationToCreditUnion({
   const preferences = await getNotificationPreferences();
   if (!preferences.profileSubmissionConfirmation) return;
   if (!resend) {
-    console.log("MOCK EMAIL TO CREDIT UNION:", { creditUnionName, creditUnionEmail });
+    reportServerEvent("email.profile_confirmation.skipped_not_configured");
     return;
   }
 
@@ -175,7 +183,7 @@ export async function sendProfileApprovalEmail({
   const preferences = await getNotificationPreferences();
   if (!preferences.profileApprovedEmail) return;
   if (!resend) {
-    console.log("MOCK APPROVAL EMAIL:", { creditUnionName, creditUnionEmail });
+    reportServerEvent("email.profile_approval.skipped_not_configured");
     return;
   }
 
@@ -192,7 +200,7 @@ export async function sendProfileRejectedEmail({ creditUnionName, creditUnionEma
   const preferences = await getNotificationPreferences();
   if (!preferences.profileRejectedEmail) return;
   if (!resend) {
-    console.log("MOCK PROFILE REJECTED EMAIL:", { creditUnionName, creditUnionEmail, rejectionReason });
+    reportServerEvent("email.profile_rejection.skipped_not_configured");
     return;
   }
   const rendered = renderTemplate(preferences.emailTemplates.profileRejectedEmail, { creditUnionName, rejectionReason });
@@ -217,12 +225,7 @@ export async function sendCreditUnionCredentials({
   const loginUrl = `${website.replace(/\/$/, "")}/login`;
 
   if (!resend) {
-    console.log("MOCK CREDIT UNION CREDENTIALS EMAIL:", {
-      creditUnionName,
-      email,
-      chapter,
-      loginUrl,
-    });
+    reportServerEvent("email.credentials.skipped_not_configured");
     return;
   }
 
@@ -236,7 +239,7 @@ export async function sendCreditUnionCredentials({
     from: FROM_HEADQUARTERS,
     to: email,
     subject: rendered.subject,
-    html: `${rendered.html}<p><strong>Login URL:</strong> <a href="${loginUrl}">${loginUrl}</a></p>`,
+    html: `${rendered.html}<p><strong>Login URL:</strong> <a href="${escapeHtml(loginUrl)}">${escapeHtml(loginUrl)}</a></p>`,
   });
 }
 
@@ -246,7 +249,7 @@ export async function sendNewCreditUnionCreatedToReccucam(
   const preferences = await getNotificationPreferences();
   if (!preferences.newCreditUnionCreated) return;
   if (!resend) {
-    console.log("MOCK NEW CREDIT UNION ADMIN EMAIL:", params);
+    reportServerEvent("email.new_credit_union.skipped_not_configured");
     return;
   }
   const rendered = renderTemplate(preferences.emailTemplates.newCreditUnionCreated, params);
@@ -262,7 +265,7 @@ export async function sendContactFormNotification(email: string) {
   const preferences = await getNotificationPreferences();
   if (!preferences.contactFormMessage) return;
   if (!resend) {
-    console.log("MOCK CONTACT FORM ADMIN EMAIL:", { email });
+    reportServerEvent("email.contact_form.skipped_not_configured");
     return;
   }
   const rendered = renderTemplate(preferences.emailTemplates.contactFormMessage, { email });
