@@ -1,29 +1,21 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Landmark, Newspaper } from "lucide-react";
+import { ArrowRight, Newspaper } from "lucide-react";
 import { HomeHero } from "@/components/home/HomeHero";
-import { NetworkPreview } from "@/components/home/NetworkPreview";
-import { AffiliatePreview } from "@/components/home/AffiliatePreview";
 import { VerificationNote } from "@/components/layout/VerificationNote";
 import { buttonVariants } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
-import { CTASection } from "@/components/ui/CTASection";
-import { IconFeature } from "@/components/ui/IconFeature";
 import { Section } from "@/components/ui/Section";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { institution } from "@/config/institution";
-import {
-  institutionalPillars,
-  knowledgePreview,
-  vtimeTopics,
-} from "@/data/homepage";
+import { knowledgePreview, vtimeTopics } from "@/data/homepage";
 import trainingImage from "../../../public/images/home/vtime-training.webp";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Building Stronger Credit Unions. Building Stronger Communities.",
-  description: institution.platformStatement,
+  description: "Learn about RECCU-CAM, access professional learning and source-labelled institutional resources, and follow approved public updates.",
   path: "/",
 });
 
@@ -35,72 +27,12 @@ export default function HomePage() {
       <Section tone="surface" spacing="compact" className="border-b border-border">
         <Container>
           <VerificationNote>
-            <strong>Verified institutional reference:</strong> Cameroon&apos;s Ministry of Finance lists {institution.legalName} in {institution.location.city} under approval order {institution.approval.order}, dated 5 April 2018. No unconfirmed network totals, rates, financial figures, or leadership claims are presented here.
+            <strong>Verified institutional reference:</strong> Cameroon&apos;s Ministry of Finance lists {institution.legalName} in {institution.location.city} under approval order {institution.approval.order}, dated 5 April 2018. No unconfirmed operational totals, rates, financial figures, or leadership claims are presented here.
           </VerificationNote>
         </Container>
       </Section>
 
       <Section tone="muted">
-        <Container>
-          <SectionHeader eyebrow="Institutional pillars" title="A stronger foundation for cooperative finance." subtitle="RECCU-CAM brings institutional support, shared capability, and responsible cooperation together around the needs of credit unions and their communities." />
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-            {institutionalPillars.map((pillar) => <IconFeature key={pillar.title} {...pillar} />)}
-          </div>
-        </Container>
-      </Section>
-
-      <Section tone="surface" spacing="compact">
-        <Container>
-          <div className="grid gap-6 rounded-panel border border-border bg-primary-50 p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div className="max-w-reading">
-              <p className="text-meta uppercase text-gold-strong">Institutional services</p>
-              <h2 className="mt-2 font-display text-h3 text-institutional">Explore every service area in one dedicated place.</h2>
-              <p className="mt-3 text-body text-muted-foreground">Review the service architecture, publication status, and available pathways without interrupting the homepage overview.</p>
-            </div>
-            <Link href="/services" className={buttonVariants({ variant: "secondary", size: "lg" })}>
-              View Services <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </div>
-        </Container>
-      </Section>
-
-      <Section tone="muted">
-        <Container>
-          <SectionHeader eyebrow="Network preview" title="See the cooperative network in context." subtitle="A concise view of the source-labelled directory. Verified coordinates are reserved for the full network map." />
-          <div className="mt-10"><NetworkPreview /></div>
-        </Container>
-      </Section>
-
-      <Section tone="surface">
-        <Container>
-          <SectionHeader eyebrow="Affiliate preview" title="Meet institutions in the source-listed directory." subtitle="These entries are transcribed from the cited MINFI list as at 31 December 2021 and are not presented as a complete or current membership count." />
-          <div className="mt-10"><AffiliatePreview /></div>
-        </Container>
-      </Section>
-
-      <Section tone="brand" className="overflow-hidden">
-        <Container>
-          <div className="relative overflow-hidden rounded-panel border border-white/10 bg-institutional p-8 shadow-raised sm:p-10 lg:p-14">
-            <div className="absolute -right-24 -top-24 h-72 w-72 rounded-pill border border-accent-300/20" aria-hidden="true" />
-            <div className="absolute -bottom-36 right-24 h-80 w-80 rounded-pill border border-primary-400/20" aria-hidden="true" />
-            <div className="relative grid gap-10 lg:grid-cols-[1fr_.72fr] lg:items-end">
-              <div className="max-w-reading">
-                <span className="grid h-12 w-12 place-items-center rounded-control bg-white/10 text-accent-300" aria-hidden="true"><Landmark className="h-6 w-6" /></span>
-                <p className="mt-6 text-meta uppercase text-accent-300">Affiliate Banking</p>
-                <h2 className="mt-3 font-display text-h2 text-white">Financial Strength Within the Network</h2>
-                <p className="mt-5 text-lead text-primary-100">Structured network-based support focused on institutional liquidity, financial resilience, cooperative growth, and responsible relationship management—without guaranteed finance or unverified rates.</p>
-              </div>
-              <div className="lg:text-right">
-                <Link href="/services/affiliate-banking" className={buttonVariants({ variant: "accent", size: "lg" })}>
-                  Explore Affiliate Banking <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </Section>
-
-      <Section tone="surface">
         <Container className="grid gap-12 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
           <div className="relative overflow-hidden rounded-panel bg-muted shadow-card">
             <Image
@@ -114,7 +46,7 @@ export default function HomePage() {
             <SectionHeader eyebrow="VTIME" title="Developing the Next Generation of Microfinance Professionals" subtitle="Practical learning pathways connect cooperative principles with the governance, financial, compliance, leadership, and digital capabilities institutions need." />
             <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
               {vtimeTopics.map(([topic, Icon]) => (
-                <div key={topic} className="rounded-control border border-border bg-muted p-4">
+                <div key={topic} className="rounded-control border border-border bg-surface p-4">
                   <Icon className="h-5 w-5 text-gold-strong" aria-hidden="true" />
                   <p className="mt-3 text-sm font-semibold text-institutional">{topic}</p>
                 </div>
@@ -127,7 +59,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section tone="muted">
+      <Section tone="surface">
         <Container>
           <div className="grid gap-10 lg:grid-cols-[.72fr_1.28fr] lg:items-start">
             <div>
@@ -150,7 +82,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section tone="surface">
+      <Section tone="muted">
         <Container>
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <SectionHeader eyebrow="News & Events" title="Verified updates, published with care." subtitle="Approved RECCU-CAM stories and announcements appear in the newsroom after editorial review." />
@@ -163,17 +95,6 @@ export default function HomePage() {
           </div>
         </Container>
       </Section>
-
-      <CTASection
-        eyebrow="Affiliation"
-        title="Grow Within a Stronger Cooperative Network"
-        description="Begin a structured conversation about institutional alignment, affiliation expectations, and the next verified steps."
-        actions={
-          <Link href="/network/become-an-affiliate" className={buttonVariants({ variant: "accent", size: "lg" })}>
-            Start Affiliation Inquiry <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
-        }
-      />
     </>
   );
 }

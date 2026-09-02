@@ -26,7 +26,7 @@ export const siteNavigation: readonly NavigationLink[] = [
   },
   {
     label: "Our Network",
-    href: "/network/affiliates",
+    href: "/network",
     children: [
       { label: "Affiliate Directory", href: "/network/affiliates", description: "Find participating credit unions." },
       { label: "Network Map", href: "/network/map", description: "Explore the network geographically." },

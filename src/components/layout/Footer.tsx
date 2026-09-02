@@ -8,6 +8,7 @@ const footerGroups = [
   {
     title: "Network",
     links: [
+      ["Network Overview", "/network"],
       ["Affiliate Directory", "/network/affiliates"],
       ["Network Map", "/network/map"],
       ["Become an Affiliate", "/network/become-an-affiliate"],

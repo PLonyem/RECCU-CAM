@@ -12,6 +12,7 @@ const routes = [
   "/about/governance",
   "/about/leadership",
   "/about/institutional-framework",
+  "/network",
   "/network/affiliates",
   ...affiliates.map((affiliate) => `/network/affiliates/${affiliate.slug}`),
   "/network/map",

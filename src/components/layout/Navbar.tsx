@@ -30,6 +30,12 @@ function isSectionActive(pathname: string, item: NavigationLink) {
     || false;
 }
 
+function getOverviewLabel(item: NavigationLink, fallback: string) {
+  if (item.label === "Our Network") return "Network Overview";
+  if (item.label === "Services") return "Services overview";
+  return fallback;
+}
+
 function canUseDesktopHover(event: ReactPointerEvent<HTMLElement>) {
   return event.pointerType === "mouse" && window.matchMedia(DESKTOP_HOVER_QUERY).matches;
 }
@@ -158,7 +164,7 @@ function DesktopNavigationItem({
           <div className="border-b border-border px-3 pb-3 pt-1">
             <p className="font-display text-sm font-bold text-institutional">{item.label}</p>
             <Link href={item.href} onClick={() => setOpenMenu(null)} className="mt-1 inline-flex text-xs font-semibold text-gold-strong hover:text-institutional">
-              {item.label === "Services" ? "Services overview" : "View section overview"}
+              {getOverviewLabel(item, "View section overview")}
             </Link>
           </div>
           <ul className="mt-2 grid gap-1">
@@ -358,7 +364,7 @@ export function Navbar() {
                       {expanded && (
                         <div id={sectionId} className="ml-4 border-l border-primary-200 py-2 pl-3">
                           <Link href={item.href} onClick={() => setMobileOpen(false)} className="block rounded-control px-3 py-2 text-sm font-bold text-gold-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest">
-                            {item.label === "Services" ? "Services overview" : "Section overview"}
+                            {getOverviewLabel(item, "Section overview")}
                           </Link>
                           {item.children.map((child) => (
                             <Link
