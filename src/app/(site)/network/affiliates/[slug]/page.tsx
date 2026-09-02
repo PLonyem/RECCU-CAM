@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft,
   ArrowRight,
   ArrowUpRight,
   BookOpen,
@@ -23,6 +22,7 @@ import {
   getInstitutionTypeLabel,
 } from "@/components/network/AffiliateCard";
 import { VerificationNote } from "@/components/layout/VerificationNote";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -35,6 +35,7 @@ import {
   affiliates,
   getAffiliateBySlug,
 } from "@/data/affiliates";
+import { createPageMetadata } from "@/lib/seo";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -52,13 +53,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const affiliate = getAffiliateBySlug(affiliates, slug);
 
-  if (!affiliate) return { title: "Affiliate not found" };
+  if (!affiliate) return { title: "Affiliate not found", robots: { index: false, follow: false } };
 
   const location = getAffiliateLocation(affiliate);
-  return {
+  return createPageMetadata({
     title: `${affiliate.acronym} | Affiliate Profile`,
     description: [affiliate.name, location ? `located in ${location}` : null, "in the RECCU-CAM network directory."].filter(Boolean).join(" "),
-  };
+    path: `/network/affiliates/${affiliate.slug}`,
+  });
 }
 
 export default async function AffiliateProfilePage({ params }: Props) {
@@ -79,9 +81,14 @@ export default async function AffiliateProfilePage({ params }: Props) {
         <div aria-hidden="true" className="absolute -left-24 -top-24 h-72 w-72 rounded-pill bg-gold/15 blur-3xl" />
         <div aria-hidden="true" className="absolute -bottom-32 right-0 h-80 w-80 rounded-pill bg-forest/30 blur-3xl" />
         <Container className="relative">
-          <Link href="/network/affiliates" className="inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-semibold text-primary-100 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-institutional">
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to directory
-          </Link>
+          <Breadcrumbs
+            inverted
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Affiliate Directory", href: "/network/affiliates" },
+              { label: affiliate.acronym, href: `/network/affiliates/${affiliate.slug}` },
+            ]}
+          />
           <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-start">
             <AffiliateLogo affiliate={affiliate} large />
             <div className="min-w-0">

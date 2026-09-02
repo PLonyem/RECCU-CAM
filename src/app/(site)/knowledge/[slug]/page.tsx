@@ -31,6 +31,7 @@ import {
   knowledgeAccessLevelLabels,
   publicKnowledgeDocuments,
 } from "@/data/knowledge";
+import { createPageMetadata } from "@/lib/seo";
 
 interface KnowledgeDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -42,8 +43,12 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: KnowledgeDetailPageProps): Promise<Metadata> {
   const document = getPublicKnowledgeDocumentBySlug((await params).slug);
-  if (!document) return {};
-  return { title: document.title, description: document.description };
+  if (!document) return { title: "Resource not found", robots: { index: false, follow: false } };
+  return createPageMetadata({
+    title: document.title,
+    description: document.description,
+    path: `/knowledge/${document.slug}`,
+  });
 }
 
 export default async function KnowledgeDetailPage({ params }: KnowledgeDetailPageProps) {
@@ -55,6 +60,11 @@ export default async function KnowledgeDetailPage({ params }: KnowledgeDetailPag
   return (
     <>
       <PageIntro
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Knowledge Centre", href: "/knowledge" },
+          { label: document.title, href: `/knowledge/${document.slug}` },
+        ]}
         eyebrow={category?.title ?? "Knowledge Centre"}
         title={document.title}
         description={document.description}

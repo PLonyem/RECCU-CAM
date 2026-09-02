@@ -4,11 +4,13 @@ import { Suspense } from "react";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { TrainingRegistrationForm } from "@/components/vtime/TrainingRegistrationForm";
 import { Card, Container, LoadingSkeleton, Section } from "@/components/ui";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "VTIME Training Registration",
   description: "Submit participant details for a VTIME training program.",
-};
+  path: "/vtime/registration",
+});
 
 export default function TrainingRegistrationPage() {
   return (

@@ -3,11 +3,13 @@ import { ClipboardCheck, FileSearch, ShieldCheck } from "lucide-react";
 import { AffiliationInquiryForm } from "@/components/network/AffiliationInquiryForm";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { Card, Container, Section, SectionHeader } from "@/components/ui";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "Become an Affiliate",
   description: "Submit an institutional inquiry about the verified RECCU-CAM affiliation pathway.",
-};
+  path: "/network/become-an-affiliate",
+});
 
 const inquirySteps = [
   [FileSearch, "Initial review", "RECCU-CAM reviews the institution and the nature of its request."],

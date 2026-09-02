@@ -25,12 +25,14 @@ import {
   knowledgeCategories,
   type KnowledgeCategorySlug,
 } from "@/data/knowledge";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "Knowledge and Compliance Centre",
   description:
     "Search source-labelled regulatory guidance, circulars, publications, governance resources, and professional materials for cooperative financial institutions.",
-};
+  path: "/knowledge",
+});
 
 const categoryIcons: Record<KnowledgeCategorySlug, LucideIcon> = {
   "regulatory-library": Library,
@@ -81,7 +83,7 @@ export default function KnowledgePage() {
                     <span className="grid h-10 w-10 place-items-center rounded-control bg-primary-50 text-forest" aria-hidden="true">
                       <Icon className="h-5 w-5" />
                     </span>
-                    <h2 className="mt-4 font-display text-lg font-semibold text-institutional">{category.title}</h2>
+                    <h3 className="mt-4 font-display text-lg font-semibold text-institutional">{category.title}</h3>
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">{category.description}</p>
                   </Card>
                 </Link>

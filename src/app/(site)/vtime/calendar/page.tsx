@@ -5,11 +5,13 @@ import { PageIntro } from "@/components/layout/PageIntro";
 import { TrainingCalendar } from "@/components/vtime/TrainingCalendar";
 import { Button, Container, Section } from "@/components/ui";
 import { publishedTrainingEvents } from "@/data/training-programs";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "VTIME Training Calendar",
   description: "Navigate confirmed VTIME training cohorts by month or list view.",
-};
+  path: "/vtime/calendar",
+});
 
 export default function CalendarPage() {
   return (

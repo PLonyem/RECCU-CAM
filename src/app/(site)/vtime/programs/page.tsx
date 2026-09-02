@@ -6,11 +6,13 @@ import { PageIntro } from "@/components/layout/PageIntro";
 import { VerificationNote } from "@/components/layout/VerificationNote";
 import { ProgramsExplorer } from "@/components/vtime/ProgramsExplorer";
 import { Button, Card, Container, LoadingSkeleton, Section, SectionHeader } from "@/components/ui";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "VTIME Programs",
   description: "Review VTIME training program outlines, audiences, objectives, and core modules.",
-};
+  path: "/vtime/programs",
+});
 
 export default function ProgramsPage() {
   return (

@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { siteUrl } from "@/config/institution";
 import { trainingPrograms } from "@/data/training-programs";
 import { publicKnowledgeDocuments } from "@/data/knowledge";
+import { affiliates } from "@/data/affiliates";
 
 const routes = [
   "",
@@ -12,13 +13,10 @@ const routes = [
   "/about/leadership",
   "/about/institutional-framework",
   "/network/affiliates",
+  ...affiliates.map((affiliate) => `/network/affiliates/${affiliate.slug}`),
   "/network/map",
   "/network/become-an-affiliate",
-  "/services/regulatory-supervision",
-  "/services/financial-auditing",
-  "/services/capacity-building",
   "/services/affiliate-banking",
-  "/services/digitalization",
   "/services/consultancy",
   "/vtime",
   "/vtime/programs",
@@ -28,7 +26,6 @@ const routes = [
   "/vtime/resources",
   "/knowledge",
   ...publicKnowledgeDocuments.map((document) => `/knowledge/${document.slug}`),
-  "/resources",
   "/faq",
   "/news",
   "/contact",
@@ -39,10 +36,16 @@ const routes = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return routes.map((route) => ({
-    url: `${siteUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: route === "" ? "weekly" : "monthly",
-    priority: route === "" ? 1 : 0.7,
-  }));
+  return routes.map((route) => {
+    const isDetailPage =
+      route.startsWith("/network/affiliates/") ||
+      route.startsWith("/vtime/programs/") ||
+      route.startsWith("/knowledge/");
+
+    return {
+      url: `${siteUrl}${route}`,
+      changeFrequency: route === "" ? "weekly" : "monthly",
+      priority: route === "" ? 1 : isDetailPage ? 0.6 : 0.7,
+    };
+  });
 }

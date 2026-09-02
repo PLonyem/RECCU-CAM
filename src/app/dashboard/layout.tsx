@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { CreditUnionNavbar } from "@/components/dashboard/CreditUnionNavbar";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "Affiliate Portal",
+  robots: { index: false, follow: false, noarchive: true },
+};
 
 export default async function DashboardLayout({
   children,

@@ -5,11 +5,13 @@ import { VerificationNote } from "@/components/layout/VerificationNote";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { affiliates, getMappableAffiliates } from "@/data/affiliates";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "Interactive Network Map",
   description: "Explore RECCU-CAM network affiliates with verified geographic coordinates on an interactive OpenStreetMap.",
-};
+  path: "/network/map",
+});
 
 export default function NetworkMapPage() {
   const mappedCount = getMappableAffiliates(affiliates).length;

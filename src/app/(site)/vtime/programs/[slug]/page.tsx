@@ -32,6 +32,7 @@ import {
   trainingLevelLabels,
   trainingPrograms,
 } from "@/data/training-programs";
+import { createPageMetadata } from "@/lib/seo";
 
 interface ProgramDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -43,11 +44,12 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: ProgramDetailPageProps): Promise<Metadata> {
   const program = getTrainingProgramBySlug((await params).slug);
-  if (!program) return {};
-  return {
+  if (!program) return { title: "Program not found", robots: { index: false, follow: false } };
+  return createPageMetadata({
     title: `${program.title} | VTIME`,
     description: program.summary,
-  };
+    path: `/vtime/programs/${program.slug}`,
+  });
 }
 
 export default async function ProgramDetailPage({ params }: ProgramDetailPageProps) {
@@ -58,6 +60,12 @@ export default async function ProgramDetailPage({ params }: ProgramDetailPagePro
   return (
     <>
       <PageIntro
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "VTIME", href: "/vtime" },
+          { label: "Programs", href: "/vtime/programs" },
+          { label: program.title, href: `/vtime/programs/${program.slug}` },
+        ]}
         eyebrow={category?.title ?? "VTIME program"}
         title={program.title}
         description={program.summary}

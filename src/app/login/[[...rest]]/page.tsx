@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { SignIn } from "@clerk/nextjs";
+
+export const metadata: Metadata = {
+  title: "Sign In",
+  description: "Secure sign in for authorised RECCU-CAM portal users.",
+  robots: { index: false, follow: false, noarchive: true },
+};
 
 export default function LoginPage() {
   return (

@@ -6,8 +6,8 @@ import { institution, siteUrl } from "@/config/institution";
 import { designTokens } from "@/config/design-tokens";
 import "./globals.css";
 
-const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
-const lexend = Lexend({ variable: "--font-lexend", subsets: ["latin"] });
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "swap" });
+const lexend = Lexend({ variable: "--font-lexend", subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -25,11 +25,20 @@ export const metadata: Metadata = {
     title: `${institution.brandName} | Cooperative network platform`,
     description: institution.platformStatement,
     url: "/",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: `${institution.brandName} cooperative network platform`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: institution.brandName,
     description: institution.platformStatement,
+    images: ["/opengraph-image"],
   },
 };
 

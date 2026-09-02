@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Landmark, Newspaper } from "lucide-react";
@@ -21,6 +22,13 @@ import {
   vtimeTopics,
 } from "@/data/homepage";
 import trainingImage from "../../../public/images/home/vtime-training.webp";
+import { createPageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Building Stronger Credit Unions. Building Stronger Communities.",
+  description: institution.platformStatement,
+  path: "/",
+});
 
 export default function HomePage() {
   return (

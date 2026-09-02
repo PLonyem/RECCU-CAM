@@ -41,12 +41,14 @@ import {
   trainingCategories,
   type TrainingCategorySlug,
 } from "@/data/training-programs";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "VTIME",
   description:
     "Explore VTIME training foundations for microfinance professionals, cooperative leaders, entrepreneurs, and institutional teams.",
-};
+  path: "/vtime",
+});
 
 const categoryIcons: Record<TrainingCategorySlug, LucideIcon> = {
   "governance-leadership": Landmark,

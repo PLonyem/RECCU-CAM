@@ -33,8 +33,18 @@ export const institution = {
   },
 } as const;
 
+const deploymentHost =
+  process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+
+function normalizeSiteUrl(value: string | undefined) {
+  if (!value) return null;
+  const withProtocol = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+  return withProtocol.replace(/\/$/, "");
+}
+
 export const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+  normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL) ||
+  normalizeSiteUrl(deploymentHost) ||
   "http://localhost:3000";
 
 export const verificationNotice =

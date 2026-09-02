@@ -11,11 +11,13 @@ import {
   affiliates,
   deriveAffiliateFilterOptions,
 } from "@/data/affiliates";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "Our Network | Affiliate Directory",
   description: "Explore cooperative financial institutions affiliated with the RECCU-CAM network by name, city, region, type, or service.",
-};
+  path: "/network/affiliates",
+});
 
 const filterOptions = deriveAffiliateFilterOptions(affiliates);
 

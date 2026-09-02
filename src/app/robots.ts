@@ -4,8 +4,20 @@ import { siteUrl } from "@/config/institution";
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      { userAgent: "*", allow: "/", disallow: ["/admin/", "/dashboard/", "/api/"] },
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: [
+          "/admin",
+          "/dashboard",
+          "/api",
+          "/affiliate-portal",
+          "/login",
+          "/signup",
+        ],
+      },
     ],
+    host: siteUrl,
     sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

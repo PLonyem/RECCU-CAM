@@ -1,4 +1,6 @@
 import { Container } from "@/components/ui/Container";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
+import type { BreadcrumbItem } from "@/lib/structured-data";
 import type { ReactNode } from "react";
 
 interface PageIntroProps {
@@ -6,14 +8,16 @@ interface PageIntroProps {
   title: string;
   description: string;
   actions?: ReactNode;
+  breadcrumbs?: BreadcrumbItem[];
 }
 
-export function PageIntro({ actions, eyebrow, title, description }: PageIntroProps) {
+export function PageIntro({ actions, breadcrumbs, eyebrow, title, description }: PageIntroProps) {
   return (
     <section className="relative overflow-hidden border-b border-white/10 bg-institutional py-section-sm text-white sm:py-section">
       <div aria-hidden="true" className="absolute -left-24 -top-24 h-72 w-72 rounded-pill bg-gold/15 blur-3xl" />
       <div aria-hidden="true" className="absolute -bottom-32 right-0 h-80 w-80 rounded-pill bg-forest/30 blur-3xl" />
       <Container className="relative">
+        {breadcrumbs && <Breadcrumbs items={breadcrumbs} inverted />}
         <p className="text-meta uppercase text-accent-300">{eyebrow}</p>
         <h1 className="mt-4 max-w-4xl font-display text-h1 text-white">
           {title}

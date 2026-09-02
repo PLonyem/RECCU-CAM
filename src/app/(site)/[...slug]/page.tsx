@@ -7,6 +7,7 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { buttonVariants } from "@/components/ui/Button";
 import { placeholderPages, siteNavigation, type PlaceholderPath } from "@/data/site-navigation";
+import { createPageMetadata } from "@/lib/seo";
 
 interface PlaceholderPageProps {
   params: Promise<{ slug: string[] }>;
@@ -22,9 +23,10 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PlaceholderPageProps): Promise<Metadata> {
-  const { content } = getPage((await params).slug);
+  const { slug } = await params;
+  const { content, path } = getPage(slug);
   if (!content) return {};
-  return { title: content[0], description: content[2] };
+  return createPageMetadata({ title: content[0], description: content[2], path });
 }
 
 export default async function PlaceholderPage({ params }: PlaceholderPageProps) {
