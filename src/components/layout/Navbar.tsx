@@ -10,7 +10,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, ChevronRight, Menu, Search, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { Container } from "@/components/ui/Container";
 import { buttonVariants } from "@/components/ui/Button";
@@ -279,9 +279,6 @@ export function Navbar() {
           <Link href="/affiliate-portal" prefetch={false} onClick={() => setOpenMenu(null)} className={buttonVariants({ variant: "secondary", size: "sm" })}>
             Affiliate Portal
           </Link>
-          <Link href="/network/affiliates" onClick={() => setOpenMenu(null)} className={buttonVariants({ variant: "default", size: "sm" })}>
-            <Search className="h-4 w-4" /> Find a Credit Union
-          </Link>
         </div>
 
         <button
@@ -384,10 +381,7 @@ export function Navbar() {
                 })}
               </ul>
             </nav>
-            <div className="mt-6 grid gap-3 border-t border-border pt-5 sm:grid-cols-2">
-              <Link href="/network/affiliates" onClick={() => setMobileOpen(false)} className={buttonVariants({ variant: "default" })}>
-                <Search className="h-4 w-4" /> Find a Credit Union
-              </Link>
+            <div className="mt-6 border-t border-border pt-5">
               <Link href="/affiliate-portal" prefetch={false} onClick={() => setMobileOpen(false)} className={buttonVariants({ variant: "secondary" })}>
                 Affiliate Portal
               </Link>
