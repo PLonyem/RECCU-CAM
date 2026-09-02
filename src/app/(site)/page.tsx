@@ -27,7 +27,7 @@ export default function HomePage() {
       <Section tone="surface" spacing="compact" className="border-b border-border">
         <Container>
           <VerificationNote>
-            <strong>Verified institutional reference:</strong> Cameroon&apos;s Ministry of Finance lists {institution.legalName} in {institution.location.city} under approval order {institution.approval.order}, dated 5 April 2018. No unconfirmed operational totals, rates, financial figures, or leadership claims are presented here.
+            <strong>Verified institutional reference:</strong> Cameroon&apos;s Ministry of Finance lists {institution.legalName} in {institution.location.city} under approval order {institution.approval.order}, dated 5 April 2018. No unconfirmed operational totals, financial figures, or leadership claims are presented here.
           </VerificationNote>
         </Container>
       </Section>
