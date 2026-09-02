@@ -16,10 +16,13 @@ const footerGroups = [
   {
     title: "Services",
     links: [
+      ["Services Overview", "/services"],
       ["Supervision & Compliance", "/services/regulatory-supervision"],
+      ["Audit & Internal Control", "/services/financial-auditing"],
       ["Capacity Building", "/services/capacity-building"],
       ["Affiliate Banking", "/services/affiliate-banking"],
       ["Digital Transformation", "/services/digitalization"],
+      ["Consultancy", "/services/consultancy"],
     ],
   },
   {

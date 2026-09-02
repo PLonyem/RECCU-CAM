@@ -3,7 +3,7 @@ import { ServiceDetailOverview } from "@/components/services/ServiceDetailOvervi
 import { serviceAreas } from "@/data/services";
 import { createPageMetadata } from "@/lib/seo";
 
-const service = serviceAreas.auditInternalControl;
+const service = serviceAreas.consultancy;
 
 export const metadata: Metadata = createPageMetadata({
   title: service.title,
@@ -11,6 +11,6 @@ export const metadata: Metadata = createPageMetadata({
   path: service.href,
 });
 
-export default function AuditInternalControlPage() {
+export default function ConsultancyPage() {
   return <ServiceDetailOverview service={service} />;
 }

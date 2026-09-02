@@ -8,13 +8,10 @@ import {
   FileText,
   GraduationCap,
   HandCoins,
-  Landmark,
   Laptop,
   LibraryBig,
   Network,
-  Presentation,
   Scale,
-  ShieldCheck,
   Sparkles,
   Users,
   type LucideIcon,
@@ -47,45 +44,6 @@ export const institutionalPillars: HomepageFeature[] = [
     title: "Training & Capacity Building",
     description: "Developing the practical knowledge, leadership, and operational discipline that resilient institutions need.",
     icon: GraduationCap,
-  },
-];
-
-export const homepageServices: HomepageFeature[] = [
-  {
-    title: "Supervision & Compliance",
-    description: "Support for consistent governance, regulatory awareness, and responsible institutional practice.",
-    icon: ShieldCheck,
-    href: "/services/regulatory-supervision",
-  },
-  {
-    title: "Audit & Internal Control",
-    description: "Practical support for sound controls, accountable processes, and stronger institutional oversight.",
-    icon: ClipboardCheck,
-    href: "/services/financial-auditing",
-  },
-  {
-    title: "Capacity Building",
-    description: "Role-relevant learning designed around the realities of cooperative financial institutions.",
-    icon: Presentation,
-    href: "/services/capacity-building",
-  },
-  {
-    title: "Affiliate Banking",
-    description: "Structured network-based support focused on institutional liquidity, financial resilience, and cooperative growth.",
-    icon: Landmark,
-    href: "/services/affiliate-banking",
-  },
-  {
-    title: "Digital Transformation",
-    description: "Structured guidance for secure digital operations, responsible data use, and sustainable adoption.",
-    icon: Laptop,
-    href: "/services/digitalization",
-  },
-  {
-    title: "Consultancy & Institutional Support",
-    description: "Focused technical assistance for governance, operations, strategy, and institutional development.",
-    icon: Sparkles,
-    href: "/services/consultancy",
   },
 ];
 

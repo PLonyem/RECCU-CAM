@@ -79,7 +79,6 @@ export const informationPages = {
   "/about/governance": ["Governance", "About RECCU-CAM", "Confirmed governance structures and responsibilities are not currently available for public display."],
   "/about/leadership": ["Leadership", "About RECCU-CAM", "Verified leadership profiles and responsibilities are not currently available for public display."],
   "/about/institutional-framework": ["Institutional Framework", "About RECCU-CAM", "Approved legal and institutional framework details require source confirmation before public display."],
-  "/services/consultancy": ["Consultancy", "Services", "Confirmed consultancy areas and engagement guidance are not currently available for public display."],
   "/vtime/resources": ["VTIME Resources", "VTIME", "No approved public learning materials are currently listed."],
   "/privacy": ["Privacy", "Legal", "A reviewed RECCU-CAM privacy notice is not currently available for public display."],
   "/terms": ["Terms of Use", "Legal", "Reviewed terms for use of the RECCU-CAM platform are not currently available for public display."],

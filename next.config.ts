@@ -42,10 +42,6 @@ const nextConfig: NextConfig = {
       { source: "/loan-calculator", destination: "/services/affiliate-banking", permanent: true },
       { source: "/resources", destination: "/knowledge", permanent: true },
       { source: "/resources/chapter-profile-template", destination: "/knowledge", permanent: true },
-      { source: "/services/capacity-building", destination: "/vtime", permanent: true },
-      { source: "/services/digitalization", destination: "/services/affiliate-banking", permanent: true },
-      { source: "/services/financial-auditing", destination: "/services/affiliate-banking", permanent: true },
-      { source: "/services/regulatory-supervision", destination: "/knowledge", permanent: true },
       { source: "/news/:slug", destination: "/news", permanent: true },
       { source: "/affiliate-portal", destination: "/dashboard", permanent: false },
     ];

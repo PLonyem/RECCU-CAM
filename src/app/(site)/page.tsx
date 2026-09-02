@@ -7,7 +7,6 @@ import { NetworkPreview } from "@/components/home/NetworkPreview";
 import { AffiliatePreview } from "@/components/home/AffiliatePreview";
 import { VerificationNote } from "@/components/layout/VerificationNote";
 import { buttonVariants } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { CTASection } from "@/components/ui/CTASection";
 import { IconFeature } from "@/components/ui/IconFeature";
@@ -15,7 +14,6 @@ import { Section } from "@/components/ui/Section";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { institution } from "@/config/institution";
 import {
-  homepageServices,
   institutionalPillars,
   knowledgePreview,
   vtimeTopics,
@@ -51,20 +49,17 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section tone="surface">
+      <Section tone="surface" spacing="compact">
         <Container>
-          <SectionHeader eyebrow="Services" title="Institutional support across the cooperative lifecycle." subtitle="Explore six connected service areas designed to help affiliate institutions strengthen governance, operations, people, and shared infrastructure." />
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {homepageServices.map((service) => (
-              <Link key={service.title} href={service.href ?? "/services"} className="group rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-4">
-                <Card padding="default" className="h-full transition-[border-color,box-shadow,transform] duration-base motion-safe:group-hover:-translate-y-1 group-hover:border-primary-200 group-hover:shadow-raised">
-                  <span className="grid h-12 w-12 place-items-center rounded-control bg-primary-50 text-forest" aria-hidden="true"><service.icon className="h-6 w-6" /></span>
-                  <h3 className="mt-6 font-display text-h4 text-institutional">{service.title}</h3>
-                  <p className="mt-3 text-body text-muted-foreground">{service.description}</p>
-                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-forest">Explore service <ArrowRight className="h-4 w-4 transition-transform duration-fast group-hover:translate-x-1" aria-hidden="true" /></span>
-                </Card>
-              </Link>
-            ))}
+          <div className="grid gap-6 rounded-panel border border-border bg-primary-50 p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="max-w-reading">
+              <p className="text-meta uppercase text-gold-strong">Institutional services</p>
+              <h2 className="mt-2 font-display text-h3 text-institutional">Explore every service area in one dedicated place.</h2>
+              <p className="mt-3 text-body text-muted-foreground">Review the service architecture, publication status, and available pathways without interrupting the homepage overview.</p>
+            </div>
+            <Link href="/services" className={buttonVariants({ variant: "secondary", size: "lg" })}>
+              View Services <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
           </div>
         </Container>
       </Section>
