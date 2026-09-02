@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type PointerEvent as ReactPointerEvent,
+  type SetStateAction,
+} from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronRight, Menu, Search, X } from "lucide-react";
@@ -9,6 +16,8 @@ import { Container } from "@/components/ui/Container";
 import { buttonVariants } from "@/components/ui/Button";
 import { siteNavigation, type NavigationLink } from "@/data/site-navigation";
 import { cn } from "@/lib/utils";
+
+const DESKTOP_HOVER_QUERY = "(any-hover: hover) and (any-pointer: fine)";
 
 function isActivePath(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
@@ -21,6 +30,10 @@ function isSectionActive(pathname: string, item: NavigationLink) {
     || false;
 }
 
+function canUseDesktopHover(event: ReactPointerEvent<HTMLElement>) {
+  return event.pointerType === "mouse" && window.matchMedia(DESKTOP_HOVER_QUERY).matches;
+}
+
 function DesktopNavigationItem({
   item,
   openMenu,
@@ -30,21 +43,37 @@ function DesktopNavigationItem({
   item: NavigationLink;
   openMenu: string | null;
   pathname: string;
-  setOpenMenu: (label: string | null) => void;
+  setOpenMenu: Dispatch<SetStateAction<string | null>>;
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastPointerType = useRef<string | null>(null);
   const active = isSectionActive(pathname, item);
   const isOpen = openMenu === item.label;
   const menuId = `desktop-menu-${item.label.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-")}`;
 
   const cancelClose = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
   };
   const scheduleClose = () => {
     cancelClose();
-    closeTimer.current = setTimeout(() => setOpenMenu(null), 140);
+    closeTimer.current = setTimeout(() => {
+      setOpenMenu((currentMenu) => currentMenu === item.label ? null : currentMenu);
+      closeTimer.current = null;
+    }, 140);
+  };
+  const openFromPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!canUseDesktopHover(event)) return;
+    cancelClose();
+    setOpenMenu(item.label);
+  };
+  const closeFromPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!canUseDesktopHover(event)) return;
+    scheduleClose();
   };
 
   useEffect(() => () => cancelClose(), []);
@@ -66,14 +95,35 @@ function DesktopNavigationItem({
   }
 
   return (
-    <div className="relative" onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
+    <div
+      className="relative"
+      onPointerEnter={openFromPointer}
+      onPointerLeave={closeFromPointer}
+      onBlur={(event) => {
+        if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+        setOpenMenu((currentMenu) => currentMenu === item.label ? null : currentMenu);
+      }}
+    >
       <button
         ref={buttonRef}
         type="button"
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={menuId}
-        onClick={() => setOpenMenu(isOpen ? null : item.label)}
+        onPointerDown={(event) => {
+          lastPointerType.current = event.pointerType;
+        }}
+        onClick={(event) => {
+          const finePointerClick = event.detail > 0
+            && lastPointerType.current === "mouse"
+            && window.matchMedia(DESKTOP_HOVER_QUERY).matches;
+          lastPointerType.current = null;
+          if (finePointerClick) {
+            setOpenMenu(item.label);
+            return;
+          }
+          setOpenMenu(isOpen ? null : item.label);
+        }}
         onKeyDown={(event) => {
           if (event.key === "ArrowDown") {
             event.preventDefault();
@@ -94,7 +144,7 @@ function DesktopNavigationItem({
         <div
           id={menuId}
           className={cn(
-            "absolute top-full z-50 w-[23rem] animate-fade-in rounded-b-panel border border-border bg-surface p-3 shadow-raised",
+            "absolute top-full z-[60] w-[23rem] animate-fade-in rounded-b-panel border border-border bg-surface p-3 shadow-raised motion-reduce:animate-none",
             item.align === "right" ? "right-0" : "left-0",
           )}
           onKeyDown={(event) => {
@@ -241,9 +291,9 @@ export function Navbar() {
         </button>
       </Container>
 
-      <div className="hidden border-t border-border xl:block">
-        <Container>
-          <nav aria-label="Primary navigation" className="flex min-w-0 items-center justify-between">
+      <div className="hidden overflow-visible border-t border-border xl:block">
+        <Container className="overflow-visible">
+          <nav aria-label="Primary navigation" className="flex min-w-0 items-center justify-between overflow-visible">
             {siteNavigation.map((item) => (
               <DesktopNavigationItem
                 key={item.label}
