@@ -1,16 +1,115 @@
-
 import type { Metadata } from "next";
-import { Newspaper } from "lucide-react";
+import { CalendarDays, Newspaper, Tags } from "lucide-react";
 import { PageIntro } from "@/components/layout/PageIntro";
-import { Container } from "@/components/ui/Container";
-import { Section } from "@/components/ui/Section";
+import { EventCard, NewsCard } from "@/components/news/NewsCards";
+import { Card, Container, EmptyState, Section, SectionHeader } from "@/components/ui";
+import {
+  featuredNews,
+  latestNews,
+  newsCategories,
+  upcomingEvents,
+} from "@/data/news";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   title: "News and Events",
-  description: "Verified RECCU-CAM news, institutional updates, and events.",
+  description: "Verified RECCU-CAM news, institutional updates, announcements, and confirmed events.",
   path: "/news",
 });
+
 export default function NewsPage() {
-  return <><PageIntro eyebrow="Newsroom" title="Updates with accountable sources." description="Only approved RECCU-CAM announcements and source-verified stories will be published here." /><Section><Container><div className="rounded-panel border border-dashed border-primary-200 bg-primary-50 p-12 text-center"><Newspaper aria-hidden="true" className="mx-auto h-10 w-10 text-forest" /><h2 className="mt-5 font-display text-2xl font-bold text-institutional">No verified stories published yet</h2><p className="mx-auto mt-3 max-w-xl text-muted-foreground">Unverified legacy articles were intentionally not relabelled as RECCU-CAM news. Approved stories can be added through the preserved admin workflow.</p></div></Container></Section></>;
+  return (
+    <>
+      <PageIntro
+        eyebrow="News & Events"
+        title="Updates with accountable sources."
+        description="The RECCU-CAM newsroom is the dedicated home for approved network news, announcements, affiliate updates, partnerships, and confirmed events."
+      />
+
+      <Section spacing="compact" className="border-b border-border">
+        <Container>
+          <SectionHeader
+            eyebrow="Categories"
+            title="Follow the areas relevant to your institution."
+            subtitle="The public newsroom supports six editorial categories. Categories remain visible even when no approved item is currently available."
+          />
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {newsCategories.map((category) => (
+              <Card key={category.slug} padding="compact" variant="outlined" className="h-full">
+                <Tags className="h-5 w-5 text-forest" aria-hidden="true" />
+                <h3 className="mt-3 font-display text-lg font-semibold text-institutional">{category.label}</h3>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">{category.description}</p>
+              </Card>
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      <Section tone="muted">
+        <Container>
+          <SectionHeader
+            eyebrow="Featured news"
+            title="Selected institutional stories."
+            subtitle="Only approved, source-verified stories can appear as featured content."
+          />
+          {featuredNews.length > 0 ? (
+            <div className="mt-10 grid gap-5 lg:grid-cols-2">
+              {featuredNews.map((article) => <NewsCard key={article.id} article={article} />)}
+            </div>
+          ) : (
+            <EmptyState
+              className="mt-10"
+              icon={Newspaper}
+              title="No featured stories are currently published"
+              description="A story will appear here only after its source, publication status, and public details have been approved."
+            />
+          )}
+        </Container>
+      </Section>
+
+      <Section>
+        <Container>
+          <SectionHeader
+            eyebrow="Latest news"
+            title="Recent verified updates."
+            subtitle="Article cards link to complete public detail pages when approved content is available."
+          />
+          {latestNews.length > 0 ? (
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {latestNews.map((article) => <NewsCard key={article.id} article={article} />)}
+            </div>
+          ) : (
+            <EmptyState
+              className="mt-10"
+              icon={Newspaper}
+              title="No verified news is currently published"
+              description="Unverified legacy articles and administrative drafts are not presented as RECCU-CAM news."
+            />
+          )}
+        </Container>
+      </Section>
+
+      <Section tone="muted">
+        <Container>
+          <SectionHeader
+            eyebrow="Upcoming events"
+            title="Confirmed dates and event details."
+            subtitle="Event cards display only dates, locations, and detail links that have been verified for public release."
+          />
+          {upcomingEvents.length > 0 ? (
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {upcomingEvents.map((event) => <EventCard key={event.id} event={event} />)}
+            </div>
+          ) : (
+            <EmptyState
+              className="mt-10"
+              icon={CalendarDays}
+              title="No upcoming events are currently confirmed"
+              description="Dates are never inferred. Confirmed AGMs, training activities, and institutional events will appear here after approval."
+            />
+          )}
+        </Container>
+      </Section>
+    </>
+  );
 }

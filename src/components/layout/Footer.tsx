@@ -29,7 +29,6 @@ const footerGroups = [
   {
     title: "Resources",
     links: [
-      ["News & Events", "/news"],
       ["FAQs", "/faq"],
     ],
   },

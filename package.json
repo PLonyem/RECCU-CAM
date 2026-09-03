@@ -19,6 +19,7 @@
     "test:vtime": "tsx --test src/data/training-programs.test.ts",
     "test:vtime-registration": "tsx --test src/lib/validation/vtime-registration.test.ts",
     "test:knowledge": "tsx --test src/data/knowledge.test.ts",
+    "test:news": "tsx --test src/data/news.test.ts",
     "test:loan": "tsx --test src/lib/loan-calculator/*.test.ts",
     "test:security": "tsx --test src/lib/security/*.test.ts",
     "postinstall": "prisma generate"
