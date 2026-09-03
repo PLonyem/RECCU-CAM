@@ -1,6 +1,5 @@
 import {
   BadgeCheck,
-  BookOpenCheck,
   Building2,
   CircleDollarSign,
   ClipboardCheck,
@@ -63,5 +62,4 @@ export const knowledgePreview: HomepageFeature[] = [
   { title: "Circulars", description: "Controlled notices with clear publication status.", icon: FileText, href: "/knowledge?category=reccu-cam-circulars" },
   { title: "Compliance Guidance", description: "Practical resources for responsible operations.", icon: FileCheck2, href: "/knowledge?category=compliance" },
   { title: "Publications", description: "Approved reports, research, and institutional material.", icon: LibraryBig, href: "/knowledge?category=reports-publications" },
-  { title: "Training Resources", description: "Learning material prepared for VTIME participants.", icon: BookOpenCheck, href: "/vtime/resources" },
 ];

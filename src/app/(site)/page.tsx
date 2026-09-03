@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Newspaper } from "lucide-react";
 import { HomeHero } from "@/components/home/HomeHero";
@@ -9,13 +8,12 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { institution } from "@/config/institution";
-import { knowledgePreview, vtimeTopics } from "@/data/homepage";
-import trainingImage from "../../../public/images/home/vtime-training.webp";
+import { knowledgePreview } from "@/data/homepage";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Building Stronger Credit Unions. Building Stronger Communities.",
-  description: "Learn about RECCU-CAM, access professional learning and source-labelled institutional resources, and follow approved public updates.",
+  description: "Learn about RECCU-CAM, access source-labelled institutional resources, and follow approved public updates.",
   path: "/",
 });
 
@@ -29,33 +27,6 @@ export default function HomePage() {
           <VerificationNote>
             <strong>Verified institutional reference:</strong> Cameroon&apos;s Ministry of Finance lists {institution.legalName} in {institution.location.city} under approval order {institution.approval.order}, dated 5 April 2018. No unconfirmed operational totals, financial figures, or leadership claims are presented here.
           </VerificationNote>
-        </Container>
-      </Section>
-
-      <Section tone="muted">
-        <Container className="grid gap-12 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
-          <div className="relative overflow-hidden rounded-panel bg-muted shadow-card">
-            <Image
-              src={trainingImage}
-              alt="Illustrative professional training workshop with Cameroonian cooperative staff"
-              sizes="(max-width: 1024px) 100vw, 44vw"
-              className="h-auto w-full object-cover"
-            />
-          </div>
-          <div>
-            <SectionHeader eyebrow="VTIME" title="Developing the Next Generation of Microfinance Professionals" subtitle="Practical learning pathways connect cooperative principles with the governance, financial, compliance, leadership, and digital capabilities institutions need." />
-            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-              {vtimeTopics.map(([topic, Icon]) => (
-                <div key={topic} className="rounded-control border border-border bg-surface p-4">
-                  <Icon className="h-5 w-5 text-gold-strong" aria-hidden="true" />
-                  <p className="mt-3 text-sm font-semibold text-institutional">{topic}</p>
-                </div>
-              ))}
-            </div>
-            <Link href="/vtime" className={`${buttonVariants({ variant: "default", size: "lg" })} mt-8`}>
-              Explore VTIME <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </div>
         </Container>
       </Section>
 

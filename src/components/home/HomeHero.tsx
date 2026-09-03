@@ -29,7 +29,7 @@ export function HomeHero() {
             Building Stronger Credit Unions. <span className="text-accent-300">Building Stronger Communities.</span>
           </h1>
           <p className="mt-7 max-w-[45rem] text-lead text-primary-50 sm:text-xl sm:leading-9">
-            Discover RECCU-CAM&apos;s verified institutional identity, professional learning platform, source-labelled resources, and approved public updates.
+            Discover RECCU-CAM&apos;s verified institutional identity, source-labelled resources, and approved public updates.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link href="/about" className={buttonVariants({ variant: "accent", size: "lg" })}>
