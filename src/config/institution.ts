@@ -6,7 +6,7 @@ export const institution = {
   shortDescription:
     "A cooperative credit-union network headquartered in Bamenda, Cameroon.",
   platformStatement:
-    "One trusted digital home for institutional information, knowledge, and cooperative connection.",
+    "One trusted digital home for institutional information and cooperative connection.",
   tagline: "Cooperation. Confidence. Shared progress.",
   location: {
     city: "Bamenda",

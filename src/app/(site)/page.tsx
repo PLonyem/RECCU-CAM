@@ -8,12 +8,11 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { institution } from "@/config/institution";
-import { knowledgePreview } from "@/data/homepage";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Building Stronger Credit Unions. Building Stronger Communities.",
-  description: "Learn about RECCU-CAM, access source-labelled institutional resources, and follow approved public updates.",
+  description: "Learn about RECCU-CAM and follow approved public updates from the cooperative financial network.",
   path: "/",
 });
 
@@ -27,29 +26,6 @@ export default function HomePage() {
           <VerificationNote>
             <strong>Verified institutional reference:</strong> Cameroon&apos;s Ministry of Finance lists {institution.legalName} in {institution.location.city} under approval order {institution.approval.order}, dated 5 April 2018. No unconfirmed operational totals, financial figures, or leadership claims are presented here.
           </VerificationNote>
-        </Container>
-      </Section>
-
-      <Section tone="surface">
-        <Container>
-          <div className="grid gap-10 lg:grid-cols-[.72fr_1.28fr] lg:items-start">
-            <div>
-              <SectionHeader eyebrow="Knowledge Centre" title="Trusted resources, clearly controlled." subtitle="Each collection is designed around source ownership, effective dates, versions, and visible publication status." />
-              <Link href="/knowledge" className={`${buttonVariants({ variant: "default", size: "lg" })} mt-8`}>
-                Enter Knowledge Centre <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {knowledgePreview.map((item, index) => (
-                <Link key={item.title} href={item.href ?? "/knowledge"} className={`group rounded-card border border-border bg-surface p-5 shadow-card transition-[border-color,box-shadow,transform] duration-base motion-safe:hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-raised ${index === knowledgePreview.length - 1 ? "sm:col-span-2" : ""}`}>
-                  <div className="flex items-start gap-4">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-primary-50 text-forest" aria-hidden="true"><item.icon className="h-5 w-5" /></span>
-                    <div><h3 className="font-display text-h4 text-institutional">{item.title}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{item.description}</p></div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
         </Container>
       </Section>
 
