@@ -8,6 +8,7 @@ import { ProgramsExplorer } from "@/components/vtime/ProgramsExplorer";
 import { Button, Card, Container, LoadingSkeleton, Section, SectionHeader } from "@/components/ui";
 import { createPageMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
+import { readPublicData } from "@/lib/public-data";
 
 export const metadata: Metadata = createPageMetadata({
   title: "VTIME Programs",
@@ -16,7 +17,15 @@ export const metadata: Metadata = createPageMetadata({
 });
 
 export default async function ProgramsPage() {
-  const publishedPrograms = await prisma.trainingProgram.findMany({ where: { published: true }, orderBy: [{ startDate: "asc" }, { title: "asc" }] });
+  const publishedPrograms = await readPublicData(
+    "published VTIME programs",
+    () =>
+      prisma.trainingProgram.findMany({
+        where: { published: true },
+        orderBy: [{ startDate: "asc" }, { title: "asc" }],
+      }),
+    [],
+  );
   return (
     <>
       <PageIntro

@@ -10,6 +10,7 @@ import { institution } from "@/config/institution";
 import { createPageMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import { parseHomepageSections } from "@/data/homepage-cms";
+import { readPublicData } from "@/lib/public-data";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,41 @@ const purposeThemes = [
 
 export default async function HomePage() {
   const now = new Date();
-  const [homepageContent, sectionsRecord, notice] = await Promise.all([prisma.homepageContent.findUnique({ where: { id: "default" } }), prisma.pageContent.findUnique({ where: { pageKey_locale_status: { pageKey: "homepage-sections", locale: "en", status: "published" } } }), prisma.announcement.findFirst({ where: { isPublished: true, audience: "PUBLIC", OR: [{ startDate: null }, { startDate: { lte: now } }], AND: [{ OR: [{ expiryDate: null }, { expiryDate: { gt: now } }] }] }, orderBy: [{ priority: "desc" }, { publishedAt: "desc" }] })]);
+  const [homepageContent, sectionsRecord, notice] = await Promise.all([
+    readPublicData(
+      "homepage hero",
+      () => prisma.homepageContent.findUnique({ where: { id: "default" } }),
+      null,
+    ),
+    readPublicData(
+      "homepage sections",
+      () =>
+        prisma.pageContent.findUnique({
+          where: {
+            pageKey_locale_status: {
+              pageKey: "homepage-sections",
+              locale: "en",
+              status: "published",
+            },
+          },
+        }),
+      null,
+    ),
+    readPublicData(
+      "public notice",
+      () =>
+        prisma.announcement.findFirst({
+          where: {
+            isPublished: true,
+            audience: "PUBLIC",
+            OR: [{ startDate: null }, { startDate: { lte: now } }],
+            AND: [{ OR: [{ expiryDate: null }, { expiryDate: { gt: now } }] }],
+          },
+          orderBy: [{ priority: "desc" }, { publishedAt: "desc" }],
+        }),
+      null,
+    ),
+  ]);
   const cms = parseHomepageSections(sectionsRecord?.content);
   return (
     <>

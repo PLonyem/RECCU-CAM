@@ -27,6 +27,7 @@ import {
 } from "@/data/knowledge";
 import { createPageMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
+import { readPublicData } from "@/lib/public-data";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Knowledge and Compliance Centre",
@@ -52,7 +53,15 @@ const categoryIcons: Record<KnowledgeCategorySlug, LucideIcon> = {
 };
 
 export default async function KnowledgePage() {
-  const publishedResources = await prisma.resource.findMany({ where: { published: true, isActive: true, accessLevel: "PUBLIC" }, orderBy: [{ publicationDate: "desc" }, { updatedAt: "desc" }] });
+  const publishedResources = await readPublicData(
+    "public knowledge resources",
+    () =>
+      prisma.resource.findMany({
+        where: { published: true, isActive: true, accessLevel: "PUBLIC" },
+        orderBy: [{ publicationDate: "desc" }, { updatedAt: "desc" }],
+      }),
+    [],
+  );
   return (
     <>
       <PageIntro

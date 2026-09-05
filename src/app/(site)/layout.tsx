@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { createSiteStructuredData } from "@/lib/structured-data";
 import { prisma } from "@/lib/prisma";
+import { readPublicData } from "@/lib/public-data";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,11 @@ export default async function SiteLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await prisma.siteSettings.findUnique({ where: { id: "default" } });
+  const settings = await readPublicData(
+    "site settings",
+    () => prisma.siteSettings.findUnique({ where: { id: "default" } }),
+    null,
+  );
   return (
     <div className="min-h-full flex flex-col flex-1">
       <JsonLd data={createSiteStructuredData()} />

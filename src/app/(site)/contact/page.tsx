@@ -17,6 +17,7 @@ import { Section } from "@/components/ui/Section";
 import { institution } from "@/config/institution";
 import { createPageMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
+import { readPublicData } from "@/lib/public-data";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Contact | Get in Touch",
@@ -41,7 +42,11 @@ const contactGuidance = [
 ] as const;
 
 export default async function ContactPage() {
-  const settings = await prisma.siteSettings.findUnique({ where: { id: "default" } });
+  const settings = await readPublicData(
+    "contact settings",
+    () => prisma.siteSettings.findUnique({ where: { id: "default" } }),
+    null,
+  );
   return (
     <>
       <PageIntro
