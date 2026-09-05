@@ -1,30 +1,196 @@
 import type { Metadata } from "next";
+import { ArrowUpRight, Check, Quote } from "lucide-react";
+import Link from "next/link";
 import { HomeHero } from "@/components/home/HomeHero";
-import { VerificationNote } from "@/components/layout/VerificationNote";
+import { buttonVariants } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
+import { CTASection } from "@/components/ui/CTASection";
 import { Section } from "@/components/ui/Section";
 import { institution } from "@/config/institution";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Building Stronger Credit Unions. Building Stronger Communities.",
-  description: "Learn about RECCU-CAM's verified identity and institutional foundation in Cameroon.",
+  description: "Meet RECCU-CAM, an apex cooperative financial network supporting stronger institutions, responsible governance, and sustainable growth in Cameroon.",
   path: "/",
 });
+
+const institutionalValues = [
+  ["Integrity", "Acting with honesty, consistency, and respect for the trust placed in cooperative institutions."],
+  ["Accountability", "Encouraging clear responsibility, sound oversight, and decisions that can stand up to scrutiny."],
+  ["Cooperation", "Advancing shared progress through collective purpose and enduring institutional relationships."],
+  ["Professionalism", "Promoting disciplined practice, capable leadership, and high standards across institutional life."],
+  ["Inclusion", "Keeping people, participation, and wider access to responsible finance at the centre of progress."],
+] as const;
+
+const purposeThemes = [
+  ["Stronger institutions", "Institutional strength creates the foundation for continuity, public confidence, and responsible growth."],
+  ["Responsible governance", "Clear oversight and accountable decision-making protect cooperative purpose over the long term."],
+  ["Sustainable cooperative finance", "Professional practice and resilience help institutions remain useful to members and communities."],
+] as const;
 
 export default function HomePage() {
   return (
     <>
       <HomeHero />
 
-      <Section tone="surface" spacing="compact" className="border-b border-border">
-        <Container>
-          <VerificationNote>
-            <strong>Verified institutional reference:</strong> Cameroon&apos;s Ministry of Finance lists {institution.legalName} in {institution.location.city} under approval order {institution.approval.order}, dated 5 April 2018. No unconfirmed operational totals, financial figures, or leadership claims are presented here.
-          </VerificationNote>
+      <Section tone="surface" className="overflow-hidden">
+        <Container className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
+          <div>
+            <p className="text-meta uppercase text-gold-strong">Who we are</p>
+            <h2 className="mt-4 max-w-md font-display text-h2 text-institutional">
+              An apex institution with a cooperative purpose.
+            </h2>
+          </div>
+          <div className="relative border-l border-primary-200 pl-6 sm:pl-10">
+            <span aria-hidden="true" className="absolute -left-px top-0 h-24 w-px bg-gold" />
+            <p className="font-display text-2xl leading-9 text-institutional sm:text-3xl sm:leading-10">
+              RECCU-CAM is an apex cooperative financial network that supports cooperative financial institutions and the communities they serve.
+            </p>
+            <div className="mt-8 grid gap-5 text-body text-muted-foreground sm:grid-cols-2 sm:gap-8">
+              <p>
+                It promotes institutional strength, responsible practice, and sustainable growth across the cooperative financial sector.
+              </p>
+              <p>
+                Its purpose connects stronger institutions with financial inclusion, cooperative development, and lasting community confidence.
+              </p>
+            </div>
+          </div>
         </Container>
       </Section>
 
+      <Section tone="muted">
+        <Container className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-20">
+          <div className="max-w-2xl">
+            <p className="text-meta uppercase text-gold-strong">Our purpose</p>
+            <h2 className="mt-4 font-display text-h2 text-institutional">
+              Strengthening the conditions for cooperative finance to endure.
+            </h2>
+            <Quote className="mt-8 h-8 w-8 text-gold" aria-hidden="true" />
+            <p className="mt-5 font-display text-2xl leading-9 text-forest sm:text-3xl sm:leading-10">
+              To foster resilient, well-governed, and professional cooperative institutions that can grow responsibly and contribute to financial inclusion.
+            </p>
+          </div>
+          <div className="divide-y divide-border border-y border-border">
+            {purposeThemes.map(([title, description], index) => (
+              <article key={title} className="grid gap-4 py-7 sm:grid-cols-[3rem_1fr]">
+                <span className="font-display text-lg text-gold-strong" aria-hidden="true">0{index + 1}</span>
+                <div>
+                  <h3 className="font-display text-h4 text-institutional">{title}</h3>
+                  <p className="mt-2 text-body text-muted-foreground">{description}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      <Section tone="brand" className="overflow-hidden">
+        <Container className="relative grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:gap-24">
+          <div aria-hidden="true" className="absolute -right-32 -top-40 h-96 w-96 rounded-pill border border-white/10" />
+          <div>
+            <p className="text-meta uppercase text-accent-300">Why RECCU-CAM exists</p>
+            <h2 className="mt-4 max-w-lg font-display text-h2 text-white">
+              Shared strength matters in cooperative finance.
+            </h2>
+          </div>
+          <div className="relative space-y-6 border-l border-white/15 pl-6 text-lg leading-8 text-primary-100 sm:pl-10">
+            <span aria-hidden="true" className="absolute -left-px top-0 h-28 w-px bg-gold" />
+            <p>
+              Cooperative finance begins with local trust. Individual institutions carry that trust every day, while navigating expectations around governance, resilience, professionalism, and responsible growth.
+            </p>
+            <p>
+              An apex organization creates common ground: a place where institutional direction can be reinforced, standards can be elevated, and cooperative purpose can remain central as the financial environment evolves.
+            </p>
+            <p className="font-display text-xl leading-8 text-white">
+              RECCU-CAM exists to help cooperative institutions move forward with greater confidence, shared purpose, and long-term perspective.
+            </p>
+          </div>
+        </Container>
+      </Section>
+
+      <Section tone="surface">
+        <Container>
+          <div className="max-w-2xl">
+            <p className="text-meta uppercase text-gold-strong">Institutional values</p>
+            <h2 className="mt-4 font-display text-h2 text-institutional">
+              Principles that keep cooperation meaningful.
+            </h2>
+            <p className="mt-5 text-body text-muted-foreground">
+              These values express the institutional character required for durable cooperative progress.
+            </p>
+          </div>
+          <div className="mt-12 grid border-y border-border sm:grid-cols-2 lg:grid-cols-5">
+            {institutionalValues.map(([title, description], index) => (
+              <article
+                key={title}
+                className="border-b border-border py-7 last:border-b-0 sm:px-6 sm:[&:nth-child(odd)]:border-r lg:border-b-0 lg:border-r lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0 lg:[&:nth-child(odd)]:border-r"
+              >
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-pill bg-primary-50 text-forest" aria-hidden="true">
+                  <Check className="h-4 w-4" />
+                </span>
+                <p className="mt-5 text-meta text-gold-strong" aria-hidden="true">0{index + 1}</p>
+                <h3 className="mt-2 font-display text-xl text-institutional">{title}</h3>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">{description}</p>
+              </article>
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      <Section tone="muted">
+        <Container className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-20">
+          <div>
+            <p className="text-meta uppercase text-gold-strong">Verified institutional context</p>
+            <h2 className="mt-4 font-display text-h2 text-institutional">
+              An identity grounded in a public record.
+            </h2>
+            <p className="mt-6 max-w-reading text-body text-muted-foreground">
+              The Ministry of Finance public listing records RECCU-CAM&apos;s legal identity, Bamenda location, and approval reference. Information that has not been confirmed is intentionally left unpublished.
+            </p>
+          </div>
+          <div className="rounded-panel border border-primary-100 bg-surface p-6 shadow-card sm:p-8">
+            <dl className="grid gap-6 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <dt className="text-meta uppercase text-muted-foreground">Legal name</dt>
+                <dd className="mt-2 font-display text-xl text-institutional">{institution.legalName}</dd>
+              </div>
+              <div>
+                <dt className="text-meta uppercase text-muted-foreground">Recorded location</dt>
+                <dd className="mt-2 font-semibold text-institutional">{institution.location.city}, {institution.location.country}</dd>
+              </div>
+              <div>
+                <dt className="text-meta uppercase text-muted-foreground">Approval reference</dt>
+                <dd className="mt-2 font-semibold text-institutional">{institution.approval.order}</dd>
+              </div>
+            </dl>
+            <a
+              href={institution.approval.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-8 inline-flex items-center gap-2 rounded-sm text-sm font-semibold text-forest underline decoration-gold underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
+            >
+              View the official MINFI reference <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+          </div>
+        </Container>
+      </Section>
+
+      <CTASection
+        eyebrow="Contact RECCU-CAM"
+        title="Stronger Institutions Start With Stronger Cooperation."
+        description="Connect with RECCU-CAM or continue exploring the institution's identity, purpose, and cooperative foundation."
+        actions={
+          <>
+            <Link href="/contact" className={buttonVariants({ variant: "accent", size: "lg" })}>
+              Contact RECCU-CAM
+            </Link>
+            <Link href="/about" className={buttonVariants({ variant: "secondary", size: "lg", className: "border-white/30 bg-white/10 text-white hover:border-white/60 hover:bg-white/15" })}>
+              Learn More About Us
+            </Link>
+          </>
+        }
+      />
     </>
   );
 }

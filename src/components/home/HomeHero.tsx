@@ -29,11 +29,11 @@ export function HomeHero() {
             Building Stronger Credit Unions. <span className="text-accent-300">Building Stronger Communities.</span>
           </h1>
           <p className="mt-7 max-w-[45rem] text-lead text-primary-50 sm:text-xl sm:leading-9">
-            Discover RECCU-CAM&apos;s verified institutional identity and cooperative purpose in Cameroon.
+            RECCU-CAM strengthens cooperative financial institutions through institutional support, responsible governance, professional development and shared growth.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link href="/about" className={buttonVariants({ variant: "accent", size: "lg" })}>
-              About RECCU-CAM <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              Learn About RECCU-CAM <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
             <Link href="/contact" className={buttonVariants({ variant: "secondary", size: "lg", className: "border-white/40 bg-white/10 text-white hover:border-white/70 hover:bg-white/15" })}>
               Contact RECCU-CAM
