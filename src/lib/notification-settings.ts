@@ -28,9 +28,9 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplates = {
   },
   contactFormMessage: {
     name: "Contact Form Submission",
-    subject: "New website contact message",
-    body: "A new contact form message was submitted by {email}.",
-    variables: ["{email}"],
+    subject: "New {purpose} contact inquiry",
+    body: "A new contact inquiry was submitted by {name}.\n\nContact: {contact}\nPurpose: {purpose}\nRouting: {department}\nSubject: {subject}",
+    variables: ["{name}", "{contact}", "{email}", "{purpose}", "{department}", "{subject}"],
   },
   accountCredentialsEmail: {
     name: "Account Credentials",

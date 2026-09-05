@@ -1,17 +1,22 @@
 "use client";
 
 import { Fragment, useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, Trash2, Phone } from "lucide-react";
+import { Building2, ChevronDown, ChevronUp, Mail, Phone, Trash2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { contactPurposeOptions, type ContactPurpose } from "@/data/contact";
 import { cn } from "@/lib/utils";
 
 interface MessageRow {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   phone: string | null;
+  organization: string | null;
+  role: string | null;
+  purpose: ContactPurpose;
+  department: string;
   subject: string;
   message: string;
   isRead: boolean;
@@ -32,6 +37,10 @@ function formatDate(value: string): string {
     month: "short",
     day: "numeric",
   });
+}
+
+function purposeLabel(value: ContactPurpose) {
+  return contactPurposeOptions.find((option) => option.value === value)?.label ?? value;
 }
 
 export default function AdminMessagesPage() {
@@ -145,10 +154,10 @@ export default function AdminMessagesPage() {
                       Name
                     </th>
                     <th className="text-left font-medium text-gray-500 px-4 py-3">
-                      Email
+                      Organization
                     </th>
                     <th className="text-left font-medium text-gray-500 px-4 py-3">
-                      Subject
+                      Purpose
                     </th>
                     <th className="text-left font-medium text-gray-500 px-4 py-3">
                       Date
@@ -186,9 +195,11 @@ export default function AdminMessagesPage() {
                               {msg.name}
                             </p>
                           </td>
-                          <td className="px-4 py-3 text-gray-600">{msg.email}</td>
                           <td className="px-4 py-3 text-gray-600 max-w-xs truncate">
-                            {msg.subject}
+                            {msg.organization || "—"}
+                          </td>
+                          <td className="px-4 py-3 text-gray-600 max-w-xs truncate">
+                            {purposeLabel(msg.purpose)}
                           </td>
                           <td className="px-4 py-3 text-gray-600">
                             {formatDate(msg.createdAt)}
@@ -211,16 +222,24 @@ export default function AdminMessagesPage() {
                           <tr>
                             <td colSpan={6} className="px-4 pb-4 bg-gray-50">
                               <div className="pl-8">
-                                {msg.phone && (
-                                  <a
-                                    href={`tel:${msg.phone}`}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 mb-2"
-                                  >
-                                    <Phone className="h-3.5 w-3.5" />
-                                    {msg.phone}
-                                  </a>
-                                )}
+                                <div className="mb-4 grid gap-2 text-sm text-gray-600 sm:grid-cols-2">
+                                  {msg.phone && (
+                                    <a href={`tel:${msg.phone}`} onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1.5 font-medium text-primary-600 hover:text-primary-700">
+                                      <Phone className="h-3.5 w-3.5" /> {msg.phone}
+                                    </a>
+                                  )}
+                                  {msg.email && (
+                                    <a href={`mailto:${msg.email}`} onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1.5 font-medium text-primary-600 hover:text-primary-700">
+                                      <Mail className="h-3.5 w-3.5" /> {msg.email}
+                                    </a>
+                                  )}
+                                  {msg.organization && <span className="inline-flex items-center gap-1.5"><Building2 className="h-3.5 w-3.5" /> {msg.organization}</span>}
+                                  {msg.role && <span className="inline-flex items-center gap-1.5"><UserRound className="h-3.5 w-3.5" /> {msg.role}</span>}
+                                </div>
+                                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                  {purposeLabel(msg.purpose)} · {msg.department}
+                                </p>
+                                <p className="mb-2 font-medium text-gray-900">{msg.subject}</p>
                                 <p className="text-sm text-gray-700 whitespace-pre-wrap">
                                   {msg.message}
                                 </p>
@@ -305,17 +324,26 @@ export default function AdminMessagesPage() {
                   {isExpanded && (
                     <div className="px-4 pb-4">
                       <p className="text-xs text-gray-400 mb-2">
-                        {msg.email} · {formatDate(msg.createdAt)}
+                        {msg.email || msg.phone || "No contact channel"} · {formatDate(msg.createdAt)}
                       </p>
-                      {msg.phone && (
-                        <a
-                          href={`tel:${msg.phone}`}
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 mb-2"
-                        >
-                          <Phone className="h-3.5 w-3.5" />
-                          {msg.phone}
-                        </a>
-                      )}
+                      <div className="mb-3 space-y-1.5 text-sm text-gray-600">
+                        {msg.phone && (
+                          <a href={`tel:${msg.phone}`} className="flex items-center gap-1.5 font-medium text-primary-600 hover:text-primary-700">
+                            <Phone className="h-3.5 w-3.5" /> {msg.phone}
+                          </a>
+                        )}
+                        {msg.email && (
+                          <a href={`mailto:${msg.email}`} className="flex items-center gap-1.5 font-medium text-primary-600 hover:text-primary-700">
+                            <Mail className="h-3.5 w-3.5" /> {msg.email}
+                          </a>
+                        )}
+                        {msg.organization && <p className="flex items-center gap-1.5"><Building2 className="h-3.5 w-3.5" /> {msg.organization}</p>}
+                        {msg.role && <p className="flex items-center gap-1.5"><UserRound className="h-3.5 w-3.5" /> {msg.role}</p>}
+                      </div>
+                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                        {purposeLabel(msg.purpose)} · {msg.department}
+                      </p>
+                      <p className="mb-2 text-sm font-medium text-gray-900">{msg.subject}</p>
                       <p className="text-sm text-gray-700 whitespace-pre-wrap">
                         {msg.message}
                       </p>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { contactMessageSchema } from "@/lib/validation/contact";
+import { getContactPurpose } from "@/data/contact";
+import { contactMessageSchema, normalizeContactPhone } from "@/lib/validation/contact";
 import {
   acceptedSubmissionResponse,
   isLikelyAutomatedSubmission,
@@ -10,8 +11,8 @@ import { enforceRateLimit, readBoundedJson } from "@/lib/security/request";
 import { reportServerError } from "@/lib/security/logging";
 
 // Public endpoint — the site's contact form, not an admin route. No auth
-// check by design; mirrors the same min-length rules as the client-side
-// form validation as a defense-in-depth backstop.
+// check by design. The same schema is used by the client for inline feedback
+// and repeated here as the authoritative security boundary.
 export async function POST(request: NextRequest) {
   const limited = enforceRateLimit(request, {
     scope: "contact",
@@ -38,15 +39,23 @@ export async function POST(request: NextRequest) {
   }
 
   const message = parsed.data;
+  const purpose = getContactPurpose(message.purpose);
+  const normalizedPhone = normalizeContactPhone(message.phone);
 
   try {
     await prisma.contactMessage.create({
       data: {
-        name: message.name,
-        email: message.email,
-        phone: message.phone || null,
+        name: message.fullName,
+        phone: normalizedPhone,
+        email: message.email || null,
+        organization: message.organization || null,
+        role: message.role || null,
+        purpose: purpose.value,
+        department: purpose.department,
         subject: message.subject,
         message: message.message,
+        consent: message.consent,
+        status: "new",
       },
     });
   } catch (error) {
@@ -58,7 +67,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await sendContactFormNotification(message.email);
+    await sendContactFormNotification({
+      name: message.fullName,
+      contact: message.email || normalizedPhone,
+      email: message.email || "Not provided",
+      purpose: purpose.label,
+      department: purpose.department,
+      subject: message.subject,
+    });
   } catch (error) {
     reportServerError("contact.notification_failed", error);
   }

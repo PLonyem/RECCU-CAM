@@ -395,15 +395,25 @@ model Announcement {
 }
 
 model ContactMessage {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  phone     String?
-  subject   String
-  message   String   @db.Text
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  name         String
+  phone        String?
+  email        String?
+  organization String?
+  role         String?
+  purpose      String   @default("general-inquiry")
+  department   String   @default("Administration / Front Office")
+  subject      String
+  message      String   @db.Text
+  consent      Boolean  @default(false)
+  status       String   @default("new") // new | in-review | responded | closed
+  isRead       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
+  @@index([purpose])
+  @@index([status])
+  @@index([createdAt])
   @@map("contact_messages")
 }
 

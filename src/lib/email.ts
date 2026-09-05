@@ -261,14 +261,40 @@ export async function sendNewCreditUnionCreatedToReccucam(
   });
 }
 
-export async function sendContactFormNotification(email: string) {
+interface ContactFormNotificationParams {
+  name: string;
+  contact: string;
+  email: string;
+  purpose: string;
+  department: string;
+  subject: string;
+}
+
+export async function sendContactFormNotification(input: ContactFormNotificationParams | string) {
   const preferences = await getNotificationPreferences();
   if (!preferences.contactFormMessage) return;
   if (!resend) {
     reportServerEvent("email.contact_form.skipped_not_configured");
     return;
   }
-  const rendered = renderTemplate(preferences.emailTemplates.contactFormMessage, { email });
+  const params: ContactFormNotificationParams = typeof input === "string"
+    ? {
+        name: "Website visitor",
+        contact: input,
+        email: input,
+        purpose: "Website inquiry",
+        department: "Administration / Front Office",
+        subject: "Submitted through a website form",
+      }
+    : input;
+  const rendered = renderTemplate(preferences.emailTemplates.contactFormMessage, {
+    name: params.name,
+    contact: params.contact,
+    email: params.email,
+    purpose: params.purpose,
+    department: params.department,
+    subject: params.subject,
+  });
   await sendOrThrow({
     from: FROM_NOTIFICATIONS,
     to: preferences.adminNotificationEmail || ADMIN_EMAIL,
