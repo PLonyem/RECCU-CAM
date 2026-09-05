@@ -14,27 +14,28 @@ export function AdminShell({ children }: AdminShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-[#f5f4ef]">
       <AdminSessionTimeout />
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-[1px] lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0 transition-transform duration-200 md:static md:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0 transition-transform duration-200 lg:static lg:translate-x-0",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <Sidebar onNavigate={() => setIsSidebarOpen(false)} />
       </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <AdminNavbar onMenuClick={() => setIsSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50">
+        <main className="flex-1 overflow-y-auto bg-[#f5f4ef] p-4 sm:p-6 xl:p-8">
           {children}
         </main>
       </div>

@@ -45,5 +45,32 @@ export const adminNavGroups: AdminNavGroup[] = [
 export const adminNavItems = adminNavGroups.flatMap((group) => group.items);
 export function isAdminNavItemActive(pathname: string, href: string) { return href === "/admin" ? pathname === href : pathname.startsWith(href); }
 function bestMatchingNavItem(pathname: string) { return adminNavItems.filter((item) => isAdminNavItemActive(pathname, item.href)).sort((a, b) => b.href.length - a.href.length)[0]; }
-export function getAdminPageTitle(pathname: string) { return bestMatchingNavItem(pathname)?.label ?? "Dashboard"; }
+export function getAdminPageTitle(pathname: string) {
+  if (pathname === "/admin") return "RECCU-CAM Administration";
+  return bestMatchingNavItem(pathname)?.label ?? "Dashboard";
+}
 export function getActiveAdminNavHref(pathname: string) { return bestMatchingNavItem(pathname)?.href; }
+
+const PAGE_DESCRIPTIONS: Record<string, string> = {
+  "/admin": "Manage the institution's digital platform and network operations.",
+  "/admin/content": "Publish and maintain verified public website content.",
+  "/admin/messages": "Review and route public institutional inquiries.",
+  "/admin/affiliates": "Maintain the verified affiliate network directory.",
+  "/admin/affiliation-requests": "Review institutions requesting affiliation.",
+  "/admin/news": "Manage institutional news, events, and publications.",
+  "/admin/notices": "Publish official notices to the appropriate audience.",
+  "/admin/vtime": "Manage training programmes and registrations.",
+  "/admin/knowledge": "Maintain controlled knowledge and compliance resources.",
+  "/admin/compliance": "Coordinate published compliance requirements.",
+  "/admin/affiliate-banking": "Review institutional service inquiries without processing transactions.",
+  "/admin/support": "Assign and resolve affiliate support requests.",
+  "/admin/media": "Manage approved media metadata and storage references.",
+  "/admin/users": "Administer trusted staff users and roles.",
+  "/admin/audit-log": "Review recorded administrative actions.",
+  "/admin/settings": "Configure verified organization and platform settings.",
+};
+
+export function getAdminPageDescription(pathname: string) {
+  const href = getActiveAdminNavHref(pathname) ?? "/admin";
+  return PAGE_DESCRIPTIONS[href] ?? PAGE_DESCRIPTIONS["/admin"];
+}
