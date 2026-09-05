@@ -1,121 +1,18 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Newspaper, CheckCircle2, Building2, Mail } from "lucide-react";
+import { Building2, CalendarDays, ClipboardList, FilePenLine, Headphones, Mail } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
-import { buttonVariants } from "@/components/ui/Button";
-import { T } from "@/components/admin/T";
 
-const statCardColors = {
-  blue: "bg-blue-50 text-blue-600",
-  green: "bg-green-50 text-green-600",
-  teal: "bg-teal-50 text-teal-600",
-  amber: "bg-amber-50 text-amber-600",
-} as const;
-
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  color,
-  href,
-}: {
-  label: ReactNode;
-  value: number;
-  icon: LucideIcon;
-  color: keyof typeof statCardColors;
-  href?: string;
-}) {
-  const content = (
-    <Card className="p-5 flex items-center gap-4">
-      <div
-        className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${statCardColors[color]}`}
-      >
-        <Icon className="h-6 w-6" />
-      </div>
-      <div>
-        <p className="text-sm text-gray-500">{label}</p>
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
-      </div>
-    </Card>
-  );
-
-  if (!href) return content;
-
-  return (
-    <Link href={href} className="block hover:opacity-90 transition-opacity">
-      {content}
-    </Link>
-  );
+function StatCard({ label, value, detail, icon: Icon, href }: { label: string; value: number; detail: string; icon: LucideIcon; href: string }) {
+  return <Link href={href}><Card className="h-full p-5 transition hover:border-primary-200 hover:shadow-md"><div className="flex items-start justify-between gap-4"><span className="grid h-11 w-11 place-items-center rounded-xl bg-primary-50 text-forest"><Icon className="h-5 w-5" /></span><span className="font-display text-3xl font-bold text-institutional">{value}</span></div><h2 className="mt-5 font-semibold text-slate-900">{label}</h2><p className="mt-1 text-sm text-slate-500">{detail}</p></Card></Link>;
 }
 
 export default async function AdminDashboardPage() {
-  const [totalArticles, publishedArticles, totalAffiliates, unreadMessages] =
-    await Promise.all([
-      prisma.newsArticle.count(),
-      prisma.newsArticle.count({ where: { published: true } }),
-      prisma.affiliate.count(),
-      prisma.contactMessage.count({ where: { isRead: false } }),
-    ]);
-
-  return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label={<T k="admin.totalArticles" />}
-          value={totalArticles}
-          icon={Newspaper}
-          color="blue"
-          href="/admin/news"
-        />
-        <StatCard
-          label={<T k="admin.published" />}
-          value={publishedArticles}
-          icon={CheckCircle2}
-          color="green"
-        />
-        <StatCard
-          label={<T k="admin.totalAffiliates" />}
-          value={totalAffiliates}
-          icon={Building2}
-          color="teal"
-          href="/admin/affiliates"
-        />
-        <StatCard
-          label={<T k="admin.unreadMessages" />}
-          value={unreadMessages}
-          icon={Mail}
-          color="amber"
-          href="/admin/messages"
-        />
-      </div>
-
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">
-          <T k="admin.quickActions" />
-        </h2>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/admin/news/new"
-            className={buttonVariants({ variant: "default" })}
-          >
-            <T k="admin.newArticle" />
-          </Link>
-          <Link
-            href="/admin/affiliates/new"
-            className={buttonVariants({ variant: "outline" })}
-          >
-            <T k="admin.addAffiliate" />
-          </Link>
-          <Link
-            href="/admin/messages"
-            className={buttonVariants({ variant: "outline" })}
-          >
-            <T k="admin.viewMessages" />
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+  const now = new Date();
+  const [newMessages, activeAffiliates, pendingAffiliations, upcomingTraining, draftNews, draftPages, openSupport] = await Promise.all([
+    prisma.contactMessage.count({ where: { status: "new" } }), prisma.affiliate.count({ where: { isActive: true } }), prisma.affiliationInquiry.count({ where: { status: { in: ["new", "under-review"] } } }), prisma.trainingProgram.count({ where: { published: true, OR: [{ startDate: null }, { startDate: { gte: now } }] } }), prisma.newsArticle.count({ where: { published: false } }), prisma.pageContent.count({ where: { status: "draft" } }), prisma.supportTicket.count({ where: { status: { in: ["open", "in-progress"] } } }),
+  ]);
+  const cards = [["New Contact Messages", newMessages, "Awaiting review", Mail, "/admin/messages"], ["Active Affiliates", activeAffiliates, "Verified operational records", Building2, "/admin/affiliates"], ["Pending Affiliation Requests", pendingAffiliations, "New or under review", ClipboardList, "/admin/affiliation-requests"], ["Upcoming Training", upcomingTraining, "Published VTIME programs", CalendarDays, "/admin/vtime"], ["Draft Publications", draftNews + draftPages, "News and page drafts", FilePenLine, "/admin/content"], ["Open Support Requests", openSupport, "Open or in progress", Headphones, "/admin/support"]] as const;
+  return <div className="space-y-8"><header><p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold-strong">Operations control center</p><h1 className="mt-2 font-display text-3xl font-bold text-institutional">RECCU-CAM Administration</h1><p className="mt-2 text-slate-600">Manage the digital presence, institutional resources, and affiliate network.</p></header><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{cards.map(([label, value, detail, icon, href]) => <StatCard key={label} label={label} value={value} detail={detail} icon={icon} href={href} />)}</div><Card className="border-l-4 border-l-gold p-6"><h2 className="font-semibold text-institutional">Live operational data</h2><p className="mt-2 text-sm leading-6 text-slate-600">All figures above are calculated from stored records. No financial balances, regulatory deadlines, or unverified institutional statistics are fabricated.</p></Card></div>;
 }

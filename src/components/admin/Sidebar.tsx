@@ -9,30 +9,29 @@ import { cn } from "@/lib/utils";
 import { adminNavGroups, getActiveAdminNavHref, type AdminNavItem } from "./nav-items";
 import { useLanguage } from "@/context/LanguageContext";
 import { BrandMark } from "@/components/brand/BrandMark";
+import { hasPermission } from "@/lib/auth/roles";
 
 interface SidebarProps {
   onNavigate?: () => void;
 }
 
-const BADGE_COLOR: Record<NonNullable<AdminNavItem["badge"]>, string> = {
-  affiliateReview: "bg-primary-500",
-};
+const BADGE_COLOR: Record<NonNullable<AdminNavItem["badge"]>, string> = { messages: "bg-primary-500" };
 
 export function Sidebar({ onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const { signOut } = useClerk();
   const { user } = useUser();
   const { t } = useLanguage();
-  const [affiliateReviewCount, setAffiliateReviewCount] = useState<number | null>(null);
+  const [messageCount, setMessageCount] = useState<number | null>(null);
 
   useEffect(() => {
     let ignore = false;
 
     function refetchBadgeCounts() {
-      fetch("/api/admin/affiliates/review/count")
+      fetch("/api/admin/messages?status=unread&limit=1")
         .then((res) => (res.ok ? res.json() : null))
-        .then((data: { pending: number } | null) => {
-          if (!ignore && data) setAffiliateReviewCount(data.pending);
+        .then((data: { unreadCount: number } | null) => {
+          if (!ignore && data) setMessageCount(data.unreadCount);
         })
         .catch(() => {});
 
@@ -53,8 +52,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     // Also re-fetch whenever the admin navigates, as a fallback.
   }, [pathname]);
 
-  const badgeCounts = { affiliateReview: affiliateReviewCount };
+  const badgeCounts = { messages: messageCount };
   const activeHref = getActiveAdminNavHref(pathname);
+  const role = user?.publicMetadata.role;
 
   return (
     <aside className="bg-gray-900 text-white h-full flex flex-col">
@@ -65,13 +65,16 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       </div>
 
       <nav className="mt-2 flex-1 overflow-y-auto px-3 pb-4">
-        {adminNavGroups.map((group, groupIndex) => (
-          <div key={`${group.labelKey}-${groupIndex}`}>
+        {adminNavGroups.map((group, groupIndex) => {
+          const visibleItems = group.items.filter((item) => hasPermission(role, item.permission));
+          if (!visibleItems.length) return null;
+          return (
+          <div key={`${group.label}-${groupIndex}`}>
             <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold px-3 mt-5 mb-2">
-              {t(group.labelKey)}
+              {group.label}
             </p>
             <div className="space-y-1">
-              {group.items.map(({ href, labelKey, icon: Icon, badge }) => {
+              {visibleItems.map(({ href, label, icon: Icon, badge }) => {
                 const isActive = href === activeHref;
                 const count = badge ? badgeCounts[badge] : null;
 
@@ -88,7 +91,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
-                    <span className="flex-1">{t(labelKey)}</span>
+                    <span className="flex-1">{label}</span>
                     {badge && !!count && (
                       <span
                         className={cn(
@@ -104,7 +107,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               })}
             </div>
           </div>
-        ))}
+        )})}
       </nav>
 
       <div className="border-t border-gray-800 px-4 py-4">

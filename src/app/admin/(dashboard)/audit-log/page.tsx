@@ -1,0 +1,7 @@
+import { prisma } from "@/lib/prisma";
+import { Card } from "@/components/ui/Card";
+
+export default async function AuditLogPage() {
+  const logs = await prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 200 });
+  return <div className="space-y-6"><header><p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold-strong">Governance</p><h1 className="mt-2 font-display text-3xl font-bold text-institutional">Audit Log</h1><p className="mt-2 text-slate-600">Security-relevant operational actions. Passwords, tokens, and secrets are never recorded.</p></header><Card className="overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="px-4 py-3">Actor</th><th className="px-4 py-3">Action</th><th className="px-4 py-3">Resource</th><th className="px-4 py-3">Timestamp</th></tr></thead><tbody className="divide-y divide-slate-100">{logs.map((log) => <tr key={log.id}><td className="px-4 py-3"><span className="font-medium text-slate-800">{log.actorId}</span><span className="block text-xs text-slate-400">{log.actorRole}</span></td><td className="px-4 py-3">{log.action}</td><td className="px-4 py-3">{log.resource}{log.resourceId ? ` · ${log.resourceId}` : ""}</td><td className="px-4 py-3 text-slate-500">{log.createdAt.toLocaleString("en-GB")}</td></tr>)}</tbody></table>{!logs.length && <p className="p-8 text-center text-slate-500">No audited actions yet.</p>}</div></Card></div>;
+}
