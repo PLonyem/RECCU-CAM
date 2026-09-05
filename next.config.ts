@@ -43,7 +43,6 @@ const nextConfig: NextConfig = {
       { source: "/resources", destination: "/knowledge", permanent: true },
       { source: "/resources/chapter-profile-template", destination: "/knowledge", permanent: true },
       { source: "/news/:slug", destination: "/news", permanent: true },
-      { source: "/affiliate-portal", destination: "/dashboard", permanent: false },
     ];
   },
   async headers() {
@@ -56,6 +55,8 @@ const nextConfig: NextConfig = {
       { source: "/dashboard/:path*", headers: privateCacheHeaders },
       { source: "/affiliate-portal/:path*", headers: privateCacheHeaders },
       { source: "/api/admin/:path*", headers: privateCacheHeaders },
+      { source: "/api/affiliate-portal/:path*", headers: privateCacheHeaders },
+      { source: "/sign-in/:path*", headers: privateCacheHeaders },
       { source: "/login/:path*", headers: privateCacheHeaders },
     ];
   },

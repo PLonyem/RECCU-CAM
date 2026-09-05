@@ -9,6 +9,7 @@ import { AUTH_PERMISSIONS, APP_ROLES, type AppRole } from "@/lib/auth/roles";
 import { writeAuditLog } from "@/lib/audit";
 import { slugify } from "@/lib/slug";
 import type { Prisma } from "@/generated/prisma/client";
+import { defaultHomepageSections } from "@/data/homepage-cms";
 
 const kinds = ["message", "affiliation", "support", "banking"] as const;
 const updateSchema = z.object({
@@ -72,6 +73,29 @@ export async function createMediaMetadata(formData: FormData) {
   const record = await prisma.mediaAsset.create({ data: { ...data, caption: data.caption || null, uploadedBy: actor.userId, storageState: "metadata-only" } });
   await writeAuditLog({ actorId: actor.userId, actorRole: actor.role, action: "media_metadata_created", resource: "media", resourceId: record.id });
   revalidatePath("/admin/media");
+}
+
+export async function updateOrganizationSettings(formData: FormData) {
+  const actor = await requireStaffPermission(AUTH_PERMISSIONS.manageSettings);
+  const data = z.object({ siteName: z.string().trim().min(2).max(100), fullName: z.string().trim().min(4).max(240), address: z.string().trim().min(2).max(240), addressSecondary: z.string().trim().max(240).optional(), phone: z.string().trim().max(60).optional(), email: z.string().trim().email().optional().or(z.literal("")), officeHours: z.string().trim().max(240).optional(), facebookUrl: z.string().trim().url().optional().or(z.literal("")), linkedinUrl: z.string().trim().url().optional().or(z.literal("")), twitterUrl: z.string().trim().url().optional().or(z.literal("")) }).parse(Object.fromEntries(formData));
+  const settings = await prisma.siteSettings.upsert({ where: { id: "default" }, update: data, create: { id: "default", ...data } });
+  await writeAuditLog({ actorId: actor.userId, actorRole: actor.role, action: "organization_settings_updated", resource: "site_settings", resourceId: settings.id });
+  revalidatePath("/", "layout"); revalidatePath("/contact");
+}
+
+export async function saveHomepageSections(formData: FormData) {
+  const actor = await requireStaffPermission(AUTH_PERMISSIONS.manageContent);
+  const value = z.string().trim().max(2500);
+  const raw = Object.fromEntries(formData);
+  const data = z.object({ mode: z.enum(["draft", "publish"]), whoTitle: value.min(4), whoDescription: value.min(20), missionTitle: value.min(4), missionBody: value.min(20), visionTitle: value.min(4), visionBody: value.min(20), leaderName: value, leaderRole: value, leaderMessage: value, contactTitle: value.min(4), contactDescription: value.min(10), contactButtonText: value.min(2) }).parse(raw);
+  const values = defaultHomepageSections.values.map((fallback, index) => ({ title: String(raw[`value${index + 1}Title`] ?? fallback.title).trim(), description: String(raw[`value${index + 1}Description`] ?? fallback.description).trim() }));
+  const { mode, ...fields } = data;
+  const content = { ...fields, values } as unknown as Prisma.InputJsonValue;
+  const status = mode;
+  const record = await prisma.pageContent.upsert({ where: { pageKey_locale_status: { pageKey: "homepage-sections", locale: "en", status } }, update: { content, publishedAt: mode === "publish" ? new Date() : null, publishedBy: mode === "publish" ? actor.userId : null }, create: { pageKey: "homepage-sections", locale: "en", status, content, publishedAt: mode === "publish" ? new Date() : null, publishedBy: mode === "publish" ? actor.userId : null } });
+  await writeAuditLog({ actorId: actor.userId, actorRole: actor.role, action: mode === "publish" ? "homepage_sections_published" : "homepage_sections_draft_saved", resource: "page_content", resourceId: record.id });
+  if (mode === "publish") revalidatePath("/");
+  revalidatePath("/admin/content/homepage-sections");
 }
 
 export async function updateUserAccess(formData: FormData) {

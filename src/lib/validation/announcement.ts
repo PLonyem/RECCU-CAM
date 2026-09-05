@@ -12,6 +12,9 @@ export const announcementSchema = z.object({
   category: z.string().min(1).default("Circular"),
   priority: z.string().min(1).default("normal"),
   targetChapter: z.string().trim().nullable().optional(),
+  audience: z.enum(["PUBLIC", "ALL_AFFILIATES", "SPECIFIC_AFFILIATE", "STAFF"]).default("PUBLIC"),
+  affiliateId: z.string().trim().nullable().optional(),
+  startDate: z.string().nullable().optional(),
   isPublished: z.boolean().default(false),
   expiryDate: z.string().nullable().optional(),
 });

@@ -26,6 +26,7 @@ import {
   type KnowledgeCategorySlug,
 } from "@/data/knowledge";
 import { createPageMetadata } from "@/lib/seo";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Knowledge and Compliance Centre",
@@ -50,7 +51,8 @@ const categoryIcons: Record<KnowledgeCategorySlug, LucideIcon> = {
   "reports-publications": FileText,
 };
 
-export default function KnowledgePage() {
+export default async function KnowledgePage() {
+  const publishedResources = await prisma.resource.findMany({ where: { published: true, isActive: true, accessLevel: "PUBLIC" }, orderBy: [{ publicationDate: "desc" }, { updatedAt: "desc" }] });
   return (
     <>
       <PageIntro
@@ -107,6 +109,8 @@ export default function KnowledgePage() {
           </div>
         </Container>
       </Section>
+
+      {publishedResources.length > 0 && <Section tone="surface"><Container><SectionHeader eyebrow="RECCU-CAM publications" title="Recently published resources." subtitle="These records are managed by authorized staff and classified for public access." /><div className="mt-8 grid gap-4 md:grid-cols-2">{publishedResources.map((resource) => <Card key={resource.id} padding="default"><span className="rounded-pill bg-primary-50 px-3 py-1 text-xs font-semibold uppercase text-forest">{resource.category}</span><h3 className="mt-4 font-display text-xl font-semibold text-institutional">{resource.title}</h3>{resource.description && <p className="mt-2 text-sm leading-6 text-muted-foreground">{resource.description}</p>}<p className="mt-3 text-xs text-muted-foreground">{resource.issuingAuthority || "RECCU-CAM"}{resource.publicationDate ? ` · ${resource.publicationDate.toLocaleDateString("en-GB")}` : ""}</p>{resource.fileUrl && <a href={resource.fileUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex font-semibold text-forest underline-offset-4 hover:underline">Open resource</a>}</Card>)}</div></Container></Section>}
 
       <Section>
         <Container>

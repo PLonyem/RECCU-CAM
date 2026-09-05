@@ -3,6 +3,7 @@ import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { Container } from "@/components/ui/Container";
 import { institution } from "@/config/institution";
+import type { SiteSettings } from "@/generated/prisma/client";
 
 const footerGroups = [
   {
@@ -34,10 +35,10 @@ const footerGroups = [
   },
 ] as const;
 
-export function Footer() {
-  const address = institution.contact.streetAddress
+export function Footer({ settings }: { settings?: SiteSettings | null }) {
+  const address = settings?.address || (institution.contact.streetAddress
     ? `${institution.contact.streetAddress}, ${institution.location.city}, ${institution.location.country}`
-    : `Address not published - ${institution.location.city}, ${institution.location.country}`;
+    : `Address not published - ${institution.location.city}, ${institution.location.country}`);
 
   return (
     <footer className="bg-institutional text-white print:hidden">
@@ -46,8 +47,8 @@ export function Footer() {
           <div className="flex items-center gap-3">
             <BrandMark className="bg-white text-institutional shadow-none" />
             <div>
-              <h2 id="footer-reccu-cam" className="font-display text-xl font-bold">RECCU-CAM</h2>
-              <p className="mt-1 text-xs text-primary-200">{institution.displayName}</p>
+              <h2 id="footer-reccu-cam" className="font-display text-xl font-bold">{settings?.siteName || "RECCU-CAM"}</h2>
+              <p className="mt-1 text-xs text-primary-200">{settings?.fullName || institution.displayName}</p>
             </div>
           </div>
           <p className="mt-5 max-w-sm text-sm leading-7 text-primary-100">{institution.platformStatement}</p>
@@ -75,8 +76,8 @@ export function Footer() {
           <h2 id="footer-contact" className="text-meta uppercase text-accent-300">Contact</h2>
           <address className="mt-4 space-y-4 not-italic text-sm leading-6 text-primary-100">
             <p className="flex gap-2.5"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" /><span>{address}</span></p>
-            <p className="flex gap-2.5"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" /><span>{institution.contact.email ?? "Email not published"}</span></p>
-            <p className="flex gap-2.5"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" /><span>{institution.contact.phone ?? "Phone not published"}</span></p>
+            <p className="flex gap-2.5"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" /><span>{settings?.email || institution.contact.email || "Email not published"}</span></p>
+            <p className="flex gap-2.5"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" /><span>{settings?.phone || institution.contact.phone || "Phone not published"}</span></p>
           </address>
           <Link href="/contact" className="mt-5 inline-flex rounded-sm text-sm font-semibold text-white underline decoration-accent-300 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold">
             Contact RECCU-CAM

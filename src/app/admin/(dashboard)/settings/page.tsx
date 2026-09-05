@@ -136,8 +136,8 @@ export default function AdminSettingsPage() {
 
               <Card className="p-6">
                 <div className="flex items-center gap-3"><History className="h-5 w-5 text-primary-600" /><h3 className="font-semibold text-gray-900">Audit Log Summary</h3></div>
-                <div className="mt-4 divide-y divide-gray-100 rounded-lg border border-gray-200">{["Admin logged in — Aug 28, 2026", "Settings changed — Aug 27, 2026", "New credit union created — Aug 26, 2026"].map((event) => <p key={event} className="px-4 py-3 text-sm text-gray-600">{event}</p>)}</div>
-                <Link href="/admin/settings#audit-log" className="mt-4 inline-flex text-sm font-medium text-primary-600 hover:text-primary-700">View Full Audit Log →</Link>
+                <p className="mt-4 rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-600">Recorded operational changes are available in the protected audit log. No prototype activity is fabricated here.</p>
+                <Link href="/admin/audit-log" className="mt-4 inline-flex text-sm font-medium text-primary-600 hover:text-primary-700">View Full Audit Log →</Link>
               </Card>
             </>
           )}

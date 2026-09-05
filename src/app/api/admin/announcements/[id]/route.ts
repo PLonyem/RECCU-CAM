@@ -53,6 +53,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             ? new Date(data.expiryDate)
             : null
           : undefined,
+      startDate:
+        data.startDate !== undefined
+          ? data.startDate
+            ? new Date(data.startDate)
+            : null
+          : undefined,
       ...(publishedAt !== undefined ? { publishedAt } : {}),
     },
   });

@@ -1,0 +1,9 @@
+import { prisma } from "@/lib/prisma";
+import { Card } from "@/components/ui/Card";
+import { updateOrganizationSettings } from "@/app/admin/(dashboard)/operations/actions";
+
+export default async function OrganizationSettingsPage() {
+  const settings = await prisma.siteSettings.upsert({ where: { id: "default" }, update: {}, create: { id: "default" } });
+  const fields = [["siteName","Organization name",settings.siteName],["fullName","Legal / full name",settings.fullName],["address","Head office",settings.address],["addressSecondary","Additional address",settings.addressSecondary],["phone","Public phone",settings.phone],["email","Public email",settings.email],["officeHours","Office hours",settings.officeHours],["facebookUrl","Facebook URL",settings.facebookUrl],["linkedinUrl","LinkedIn URL",settings.linkedinUrl],["twitterUrl","X / Twitter URL",settings.twitterUrl]] as const;
+  return <div className="space-y-7"><header><p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold-strong">Public identity</p><h1 className="mt-2 font-display text-3xl font-bold text-institutional">Organization Settings</h1><p className="mt-2 text-slate-600">Verified contact details saved here are reflected in the public footer and contact page.</p></header><Card className="p-6"><form action={updateOrganizationSettings} className="grid gap-5 sm:grid-cols-2">{fields.map(([name,label,value]) => <label key={name} className={`text-sm font-semibold text-slate-700 ${name === "fullName" || name === "address" ? "sm:col-span-2" : ""}`}>{label}<input name={name} defaultValue={value} required={["siteName","fullName","address"].includes(name)} type={name === "email" ? "email" : name.endsWith("Url") ? "url" : "text"} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm" /></label>)}<button className="rounded-lg bg-institutional px-4 py-2.5 font-semibold text-white sm:col-span-2">Save verified settings</button></form></Card></div>;
+}

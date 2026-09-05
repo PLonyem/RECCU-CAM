@@ -16,6 +16,7 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { institution } from "@/config/institution";
 import { createPageMetadata } from "@/lib/seo";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Contact | Get in Touch",
@@ -39,7 +40,8 @@ const contactGuidance = [
   ],
 ] as const;
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const settings = await prisma.siteSettings.findUnique({ where: { id: "default" } });
   return (
     <>
       <PageIntro
@@ -87,10 +89,10 @@ export default function ContactPage() {
                     <MapPin className="h-4 w-4 text-gold-strong" aria-hidden="true" /> Head Office
                   </dt>
                   <dd className="mt-2 text-sm leading-6 text-muted-foreground">
-                    {institution.location.city}, {institution.location.region}, {institution.location.country}
+                    {settings?.address || `${institution.location.city}, ${institution.location.region}, ${institution.location.country}`}
                   </dd>
                   <dd className="mt-1 text-xs leading-5 text-muted-foreground">
-                    A precise visiting address is withheld until verified for public use.
+                    {settings?.addressSecondary || "Additional visiting details are published only after institutional verification."}
                   </dd>
                 </div>
                 <div className="py-5">
@@ -98,7 +100,7 @@ export default function ContactPage() {
                     <MailQuestion className="h-4 w-4 text-gold-strong" aria-hidden="true" /> Phone and Email
                   </dt>
                   <dd className="mt-2 text-sm leading-6 text-muted-foreground">
-                    Official public phone and email details are pending confirmation. Use this form for current inquiries.
+                    {settings?.phone || settings?.email ? [settings.phone, settings.email].filter(Boolean).join(" · ") : "Official public phone and email details are pending confirmation. Use this form for current inquiries."}
                   </dd>
                 </div>
                 <div className="py-5">
@@ -106,7 +108,7 @@ export default function ContactPage() {
                     <Clock3 className="h-4 w-4 text-gold-strong" aria-hidden="true" /> Availability
                   </dt>
                   <dd className="mt-2 text-sm leading-6 text-muted-foreground">
-                    The form accepts inquiries at any time. Confirmed office hours and visiting arrangements are not yet published.
+                    {settings?.officeHours || "The form accepts inquiries at any time. Confirmed office hours and visiting arrangements are not yet published."}
                   </dd>
                 </div>
               </dl>

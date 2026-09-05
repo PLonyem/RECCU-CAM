@@ -17,6 +17,10 @@ export const resourceFormSchema = z.object({
   category: z.string().min(1, "Category is required"),
   fileType: z.string(),
   fileUrl: z.string(),
+  issuingAuthority: z.string(),
+  publicationDate: z.string(),
+  accessLevel: z.enum(["PUBLIC", "AFFILIATE_ONLY", "STAFF_ONLY"]),
+  published: z.boolean(),
   isActive: z.boolean(),
 });
 
@@ -28,6 +32,10 @@ const emptyDefaults: ResourceFormValues = {
   category: "",
   fileType: "",
   fileUrl: "",
+  issuingAuthority: "",
+  publicationDate: "",
+  accessLevel: "PUBLIC",
+  published: false,
   isActive: true,
 };
 
@@ -38,6 +46,10 @@ export function buildResourcePayload(values: ResourceFormValues) {
     category: values.category,
     fileType: values.fileType || null,
     fileUrl: values.fileUrl || null,
+    issuingAuthority: values.issuingAuthority || null,
+    publicationDate: values.publicationDate || null,
+    accessLevel: values.accessLevel,
+    published: values.published,
     isActive: values.isActive,
   };
 }
@@ -93,6 +105,12 @@ export function ResourceForm({ defaultValues, onSubmit }: ResourceFormProps) {
             <p className="text-xs text-red-500 min-h-[16px]">
               {errors.title?.message}
             </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="space-y-1"><label htmlFor="issuingAuthority" className="text-sm font-medium text-gray-700">Issuing Authority</label><input id="issuingAuthority" type="text" disabled={isSubmitting} className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500" {...register("issuingAuthority")} /></div>
+            <div className="space-y-1"><label htmlFor="publicationDate" className="text-sm font-medium text-gray-700">Publication Date</label><input id="publicationDate" type="date" disabled={isSubmitting} className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500" {...register("publicationDate")} /></div>
+            <div className="space-y-1"><label htmlFor="accessLevel" className="text-sm font-medium text-gray-700">Access Level</label><select id="accessLevel" disabled={isSubmitting} className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500" {...register("accessLevel")}><option value="PUBLIC">Public</option><option value="AFFILIATE_ONLY">Affiliate Only</option><option value="STAFF_ONLY">Staff Only</option></select></div>
           </div>
 
           <div className="space-y-1">
@@ -180,6 +198,7 @@ export function ResourceForm({ defaultValues, onSubmit }: ResourceFormProps) {
             />
             Active
           </label>
+          <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" disabled={isSubmitting} className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500" {...register("published")} />Published</label>
 
           <div className="flex flex-wrap gap-3 pt-2">
             <Button type="submit" disabled={isSubmitting}>

@@ -24,6 +24,7 @@ export async function GET() {
   const rows = await prisma.announcement.findMany({
     where: {
       isPublished: true,
+      audience: "PUBLIC",
       OR: [{ expiryDate: null }, { expiryDate: { gt: now } }],
     },
     orderBy: { publishedAt: "desc" },

@@ -15,6 +15,10 @@ interface FetchedResource {
   category: string;
   fileType: string | null;
   fileUrl: string | null;
+  issuingAuthority: string | null;
+  publicationDate: string | null;
+  accessLevel: "PUBLIC" | "AFFILIATE_ONLY" | "STAFF_ONLY";
+  published: boolean;
   isActive: boolean;
 }
 
@@ -25,6 +29,10 @@ function toFormValues(resource: FetchedResource): Partial<ResourceFormValues> {
     category: resource.category,
     fileType: resource.fileType ?? "",
     fileUrl: resource.fileUrl ?? "",
+    issuingAuthority: resource.issuingAuthority ?? "",
+    publicationDate: resource.publicationDate?.slice(0, 10) ?? "",
+    accessLevel: resource.accessLevel,
+    published: resource.published,
     isActive: resource.isActive,
   };
 }

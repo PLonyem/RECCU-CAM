@@ -668,6 +668,11 @@ model HomepageContent {
   showReach    Boolean @default(true)
   showNews     Boolean @default(true)
 
+  draftContent      Json?
+  publicationStatus String    @default("published") // draft | published
+  publishedAt       DateTime?
+  publishedBy       String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

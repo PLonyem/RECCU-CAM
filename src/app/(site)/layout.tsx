@@ -2,12 +2,16 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { createSiteStructuredData } from "@/lib/structured-data";
+import { prisma } from "@/lib/prisma";
 
-export default function SiteLayout({
+export const dynamic = "force-dynamic";
+
+export default async function SiteLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await prisma.siteSettings.findUnique({ where: { id: "default" } });
   return (
     <div className="min-h-full flex flex-col flex-1">
       <JsonLd data={createSiteStructuredData()} />
@@ -19,7 +23,7 @@ export default function SiteLayout({
       </a>
       <Navbar />
       <main id="main-content" tabIndex={-1} className="flex-1 outline-none">{children}</main>
-      <Footer />
+      <Footer settings={settings} />
     </div>
   );
 }

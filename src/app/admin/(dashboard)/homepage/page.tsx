@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Upload,
   X,
@@ -305,6 +306,7 @@ export default function AdminHomepageEditorPage() {
   const [data, setData] = useState<HomepageContentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveMode, setSaveMode] = useState<"draft" | "publish" | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -312,7 +314,7 @@ export default function AdminHomepageEditorPage() {
 
   useEffect(() => {
     let ignore = false;
-    fetch("/api/homepage")
+    fetch("/api/admin/homepage")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load");
         return res.json();
@@ -387,19 +389,21 @@ export default function AdminHomepageEditorPage() {
     updateField("heroImages", next);
   }
 
-  async function handleSave() {
+  async function handleSave(mode: "draft" | "publish") {
     if (!data) return;
     setIsSaving(true);
+    setSaveMode(mode);
     setFieldErrors({});
     setToast(null);
 
-    const res = await fetch("/api/admin/homepage", {
+    const res = await fetch(`/api/admin/homepage?mode=${mode}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
     const body = await res.json().catch(() => null);
     setIsSaving(false);
+    setSaveMode(null);
 
     if (!res.ok) {
       const details = body?.details?.fieldErrors as Record<string, string[] | undefined> | undefined;
@@ -415,7 +419,7 @@ export default function AdminHomepageEditorPage() {
     }
 
     setData(body);
-    setToast({ type: "success", message: "Homepage content saved" });
+    setToast({ type: "success", message: mode === "draft" ? "Homepage draft saved" : "Homepage published" });
   }
 
   return (
@@ -919,21 +923,15 @@ export default function AdminHomepageEditorPage() {
               </p>
             )}
           </div>
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="px-6 py-2.5"
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {t("admin.saving")}
-              </>
-            ) : (
-              t("admin.save")
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link href="/" target="_blank" className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50">Preview published</Link>
+            <Button type="button" variant="outline" onClick={() => handleSave("draft")} disabled={isSaving} className="px-4 py-2.5">
+              {isSaving && saveMode === "draft" ? <><Loader2 className="h-4 w-4 animate-spin" />Saving...</> : "Save Draft"}
+            </Button>
+            <Button type="button" onClick={() => handleSave("publish")} disabled={isSaving} className="px-5 py-2.5">
+              {isSaving && saveMode === "publish" ? <><Loader2 className="h-4 w-4 animate-spin" />Publishing...</> : "Publish"}
+            </Button>
+          </div>
         </div>
       )}
     </div>

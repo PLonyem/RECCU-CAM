@@ -35,38 +35,41 @@ export async function POST(request: Request) {
   }
 
   const registration = parsed.data;
-  const program = getTrainingProgramBySlug(registration.program);
-  if (!program) {
+  const curriculumProgram = getTrainingProgramBySlug(registration.program);
+  const publishedProgram = await prisma.trainingProgram.findFirst({ where: { slug: registration.program, published: true } });
+  if (!curriculumProgram && !publishedProgram) {
     return NextResponse.json({ error: "Select a valid VTIME program." }, { status: 400 });
   }
+  const programTitle = publishedProgram?.title ?? curriculumProgram!.title;
+  const programSlug = publishedProgram?.slug ?? curriculumProgram!.slug;
 
   const message = [
     `Participant: ${registration.participantName}`,
     `Institution: ${registration.institution}`,
     `Role: ${registration.role}`,
-    `Program: ${program.title}`,
-    `Program slug: ${program.slug}`,
+    `Program: ${programTitle}`,
+    `Program slug: ${programSlug}`,
     "",
     registration.notes || "No additional notes provided.",
   ].join("\n");
 
   try {
-    const storedProgram = await prisma.trainingProgram.upsert({
-      where: { slug: program.slug },
+    const storedProgram = publishedProgram ?? await prisma.trainingProgram.upsert({
+      where: { slug: curriculumProgram!.slug },
       update: {},
       create: {
-        slug: program.slug,
-        title: program.title,
-        summary: program.summary,
-        category: program.category,
-        audience: [...program.audience],
-        level: program.level,
-        format: program.format,
-        venue: program.location,
-        startDate: program.startDate ? new Date(`${program.startDate}T00:00:00Z`) : null,
-        endDate: program.endDate ? new Date(`${program.endDate}T00:00:00Z`) : null,
-        capacity: program.capacity,
-        registrationStatus: program.registrationStatus,
+        slug: curriculumProgram!.slug,
+        title: curriculumProgram!.title,
+        summary: curriculumProgram!.summary,
+        category: curriculumProgram!.category,
+        audience: [...curriculumProgram!.audience],
+        level: curriculumProgram!.level,
+        format: curriculumProgram!.format,
+        venue: curriculumProgram!.location,
+        startDate: curriculumProgram!.startDate ? new Date(`${curriculumProgram!.startDate}T00:00:00Z`) : null,
+        endDate: curriculumProgram!.endDate ? new Date(`${curriculumProgram!.endDate}T00:00:00Z`) : null,
+        capacity: curriculumProgram!.capacity,
+        registrationStatus: curriculumProgram!.registrationStatus,
       },
     });
     await prisma.trainingRegistration.create({
@@ -89,7 +92,7 @@ export async function POST(request: Request) {
         role: registration.role,
         purpose: "training",
         department: "VTIME Training",
-        subject: `VTIME registration — ${program.title}`,
+        subject: `VTIME registration — ${programTitle}`,
         message,
       },
     });

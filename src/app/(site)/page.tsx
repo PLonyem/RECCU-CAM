@@ -8,6 +8,10 @@ import { CTASection } from "@/components/ui/CTASection";
 import { Section } from "@/components/ui/Section";
 import { institution } from "@/config/institution";
 import { createPageMetadata } from "@/lib/seo";
+import { prisma } from "@/lib/prisma";
+import { parseHomepageSections } from "@/data/homepage-cms";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Building Stronger Credit Unions. Building Stronger Communities.",
@@ -15,37 +19,34 @@ export const metadata: Metadata = createPageMetadata({
   path: "/",
 });
 
-const institutionalValues = [
-  ["Integrity", "Acting with honesty, consistency, and respect for the trust placed in cooperative institutions."],
-  ["Accountability", "Encouraging clear responsibility, sound oversight, and decisions that can stand up to scrutiny."],
-  ["Cooperation", "Advancing shared progress through collective purpose and enduring institutional relationships."],
-  ["Professionalism", "Promoting disciplined practice, capable leadership, and high standards across institutional life."],
-  ["Inclusion", "Keeping people, participation, and wider access to responsible finance at the centre of progress."],
-] as const;
-
 const purposeThemes = [
   ["Stronger institutions", "Institutional strength creates the foundation for continuity, public confidence, and responsible growth."],
   ["Responsible governance", "Clear oversight and accountable decision-making protect cooperative purpose over the long term."],
   ["Sustainable cooperative finance", "Professional practice and resilience help institutions remain useful to members and communities."],
 ] as const;
 
-export default function HomePage() {
+export default async function HomePage() {
+  const now = new Date();
+  const [homepageContent, sectionsRecord, notice] = await Promise.all([prisma.homepageContent.findUnique({ where: { id: "default" } }), prisma.pageContent.findUnique({ where: { pageKey_locale_status: { pageKey: "homepage-sections", locale: "en", status: "published" } } }), prisma.announcement.findFirst({ where: { isPublished: true, audience: "PUBLIC", OR: [{ startDate: null }, { startDate: { lte: now } }], AND: [{ OR: [{ expiryDate: null }, { expiryDate: { gt: now } }] }] }, orderBy: [{ priority: "desc" }, { publishedAt: "desc" }] })]);
+  const cms = parseHomepageSections(sectionsRecord?.content);
   return (
     <>
-      <HomeHero />
+      {homepageContent?.showHero !== false && <HomeHero content={homepageContent} />}
+
+      {notice && <section className="border-b border-amber-200 bg-amber-50 py-4"><Container className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-800">Official notice · {notice.priority}</p><p className="mt-1 font-semibold text-institutional">{notice.title}</p></div><p className="max-w-2xl text-sm text-slate-700">{notice.opening}</p></Container></section>}
 
       <Section tone="surface" className="overflow-hidden">
         <Container className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
           <div>
             <p className="text-meta uppercase text-gold-strong">Who we are</p>
             <h2 className="mt-4 max-w-md font-display text-h2 text-institutional">
-              An apex institution with a cooperative purpose.
+              {cms.whoTitle}
             </h2>
           </div>
           <div className="relative border-l border-primary-200 pl-6 sm:pl-10">
             <span aria-hidden="true" className="absolute -left-px top-0 h-24 w-px bg-gold" />
             <p className="font-display text-2xl leading-9 text-institutional sm:text-3xl sm:leading-10">
-              RECCU-CAM is an apex cooperative financial network that supports cooperative financial institutions and the communities they serve.
+              {cms.whoDescription}
             </p>
             <div className="mt-8 grid gap-5 text-body text-muted-foreground sm:grid-cols-2 sm:gap-8">
               <p>
@@ -64,11 +65,11 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <p className="text-meta uppercase text-gold-strong">Our purpose</p>
             <h2 className="mt-4 font-display text-h2 text-institutional">
-              Strengthening the conditions for cooperative finance to endure.
+              {cms.missionTitle}
             </h2>
             <Quote className="mt-8 h-8 w-8 text-gold" aria-hidden="true" />
             <p className="mt-5 font-display text-2xl leading-9 text-forest sm:text-3xl sm:leading-10">
-              To foster resilient, well-governed, and professional cooperative institutions that can grow responsibly and contribute to financial inclusion.
+              {cms.missionBody}
             </p>
           </div>
           <div className="divide-y divide-border border-y border-border">
@@ -91,7 +92,7 @@ export default function HomePage() {
           <div>
             <p className="text-meta uppercase text-accent-300">Why RECCU-CAM exists</p>
             <h2 className="mt-4 max-w-lg font-display text-h2 text-white">
-              Shared strength matters in cooperative finance.
+              {cms.visionTitle}
             </h2>
           </div>
           <div className="relative space-y-6 border-l border-white/15 pl-6 text-lg leading-8 text-primary-100 sm:pl-10">
@@ -103,7 +104,7 @@ export default function HomePage() {
               An apex organization creates common ground: a place where institutional direction can be reinforced, standards can be elevated, and cooperative purpose can remain central as the financial environment evolves.
             </p>
             <p className="font-display text-xl leading-8 text-white">
-              RECCU-CAM exists to help cooperative institutions move forward with greater confidence, shared purpose, and long-term perspective.
+              {cms.visionBody}
             </p>
           </div>
         </Container>
@@ -121,7 +122,7 @@ export default function HomePage() {
             </p>
           </div>
           <div className="mt-12 grid border-y border-border sm:grid-cols-2 lg:grid-cols-5">
-            {institutionalValues.map(([title, description], index) => (
+            {cms.values.map(({ title, description }, index) => (
               <article
                 key={title}
                 className="border-b border-border py-7 last:border-b-0 sm:px-6 sm:[&:nth-child(odd)]:border-r lg:border-b-0 lg:border-r lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0 lg:[&:nth-child(odd)]:border-r"
@@ -137,6 +138,13 @@ export default function HomePage() {
           </div>
         </Container>
       </Section>
+
+      {cms.leaderName && cms.leaderMessage && <Section tone="surface">
+        <Container className="grid gap-8 lg:grid-cols-[0.65fr_1.35fr] lg:gap-20">
+          <div><p className="text-meta uppercase text-gold-strong">Leadership message</p><h2 className="mt-4 font-display text-h2 text-institutional">A word from our leadership.</h2></div>
+          <blockquote className="border-l border-gold pl-6 sm:pl-10"><Quote className="h-8 w-8 text-gold" /><p className="mt-5 font-display text-2xl leading-9 text-institutional">{cms.leaderMessage}</p><footer className="mt-6 text-sm"><strong className="block text-institutional">{cms.leaderName}</strong><span className="text-muted-foreground">{cms.leaderRole}</span></footer></blockquote>
+        </Container>
+      </Section>}
 
       <Section tone="muted">
         <Container className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-20">
@@ -176,21 +184,21 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <CTASection
+      {homepageContent?.showServices !== false && <CTASection
         eyebrow="Contact RECCU-CAM"
-        title="Stronger Institutions Start With Stronger Cooperation."
-        description="Connect with RECCU-CAM or continue exploring the institution's identity, purpose, and cooperative foundation."
+        title={cms.contactTitle}
+        description={cms.contactDescription}
         actions={
           <>
             <Link href="/contact" className={buttonVariants({ variant: "accent", size: "lg" })}>
-              Contact RECCU-CAM
+              {cms.contactButtonText}
             </Link>
             <Link href="/about" className={buttonVariants({ variant: "secondary", size: "lg", className: "border-white/30 bg-white/10 text-white hover:border-white/60 hover:bg-white/15" })}>
               Learn More About Us
             </Link>
           </>
         }
-      />
+      />}
     </>
   );
 }

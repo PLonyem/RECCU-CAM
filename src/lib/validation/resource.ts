@@ -8,6 +8,10 @@ export const resourceSchema = z.object({
   fileType: z.string().trim().max(100).nullable().optional(),
   fileSize: z.number().int().nonnegative().nullable().optional(),
   fileUrl: safePublicUrlSchema.nullable().optional(),
+  issuingAuthority: z.string().trim().max(200).nullable().optional(),
+  publicationDate: z.coerce.date().nullable().optional(),
+  accessLevel: z.enum(["PUBLIC", "AFFILIATE_ONLY", "STAFF_ONLY"]).default("PUBLIC"),
+  published: z.boolean().default(false),
   downloadCount: z.number().int().nonnegative().default(0),
   isActive: z.boolean().default(true),
 });
