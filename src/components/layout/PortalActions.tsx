@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, LogIn, LogOut } from "lucide-react";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { LayoutDashboard, LogIn, UserPlus } from "lucide-react";
+import { Show, SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import { isStaffRole, privateHomeForRole } from "@/lib/auth/roles";
 
 interface PortalActionsProps {
@@ -12,40 +12,63 @@ interface PortalActionsProps {
 }
 
 function ConfiguredPortalActions({ mobile, signInLabel, onNavigate }: PortalActionsProps) {
-  const { isLoaded, isSignedIn, user } = useUser();
-  const { signOut } = useClerk();
+  const { user } = useUser();
   const role = user?.publicMetadata.role;
   const portalHref = privateHomeForRole(role);
   const hasPortal = isStaffRole(role) || portalHref === "/affiliate-portal";
 
-  if (!isLoaded) return null;
-
   if (mobile) {
     return (
-      <Link
-        href={isSignedIn && hasPortal ? portalHref : "/sign-in"}
-        onClick={onNavigate}
-        className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary-800 px-4 text-sm font-semibold text-white"
-      >
-        {isSignedIn ? <LayoutDashboard className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
-        {isSignedIn ? "Open portal" : signInLabel}
-      </Link>
+      <div className="grid w-full gap-3">
+        <Show when="signed-out">
+          <SignInButton mode="redirect">
+            <button type="button" onClick={onNavigate} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-semibold text-institutional">
+              <LogIn className="h-4 w-4" /> {signInLabel}
+            </button>
+          </SignInButton>
+          <SignUpButton mode="modal">
+            <button type="button" onClick={onNavigate} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-800 px-4 text-sm font-semibold text-white">
+              <UserPlus className="h-4 w-4" /> Create account
+            </button>
+          </SignUpButton>
+        </Show>
+        <Show when="signed-in">
+          <div className="flex items-center gap-3">
+            <Link
+              href={hasPortal ? portalHref : "/"}
+              onClick={onNavigate}
+              className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary-800 px-4 text-sm font-semibold text-white"
+            >
+              <LayoutDashboard className="h-4 w-4" /> {hasPortal ? "Open portal" : "Home"}
+            </Link>
+            <UserButton />
+          </div>
+        </Show>
+      </div>
     );
   }
 
-  return isSignedIn ? (
+  return (
     <>
-      <Link href={portalHref} className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary-800 px-4 text-sm font-semibold text-white hover:bg-primary-700">
-        <LayoutDashboard className="h-4 w-4" /> Portal
-      </Link>
-      <button type="button" onClick={() => signOut({ redirectUrl: "/" })} aria-label="Sign out" className="grid h-10 w-10 place-items-center rounded-lg text-gray-500 hover:bg-gray-100">
-        <LogOut className="h-4 w-4" />
-      </button>
+      <Show when="signed-out">
+        <SignInButton mode="redirect">
+          <button type="button" className="inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-white px-4 text-sm font-semibold text-institutional hover:bg-muted">
+            <LogIn className="h-4 w-4" /> {signInLabel}
+          </button>
+        </SignInButton>
+        <SignUpButton mode="modal">
+          <button type="button" className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary-800 px-4 text-sm font-semibold text-white hover:bg-primary-700">
+            <UserPlus className="h-4 w-4" /> Create account
+          </button>
+        </SignUpButton>
+      </Show>
+      <Show when="signed-in">
+        <Link href={hasPortal ? portalHref : "/"} className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary-800 px-4 text-sm font-semibold text-white hover:bg-primary-700">
+          <LayoutDashboard className="h-4 w-4" /> {hasPortal ? "Portal" : "Home"}
+        </Link>
+        <UserButton />
+      </Show>
     </>
-  ) : (
-    <Link href="/sign-in" className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary-800 px-4 text-sm font-semibold text-white hover:bg-primary-700">
-      <LogIn className="h-4 w-4" /> {signInLabel}
-    </Link>
   );
 }
 

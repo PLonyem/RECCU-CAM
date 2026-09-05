@@ -109,5 +109,10 @@ function unconfiguredProxy(req: NextRequest) {
 export default isClerkConfigured() ? configuredProxy : unconfiguredProxy;
 
 export const config = {
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [
+    "/((?!.*\\..*|_next).*)",
+    "/",
+    "/(api|trpc)(.*)",
+    "/__clerk/:path*",
+  ],
 };

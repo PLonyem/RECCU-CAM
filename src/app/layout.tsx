@@ -51,17 +51,23 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const document = (
+  const content = (
+    <LanguageProvider>{children}</LanguageProvider>
+  );
+
+  return (
     <html lang="en" className={`${inter.variable} ${lexend.variable} h-full antialiased`}>
       <body className={`${inter.className} min-h-full bg-background text-foreground`}>
-        <LanguageProvider>{children}</LanguageProvider>
+        {isClerkConfigured() ? (
+          <ClerkProvider
+            signInUrl="/sign-in"
+            signInFallbackRedirectUrl="/auth/complete"
+            signUpFallbackRedirectUrl="/auth/complete"
+          >
+            {content}
+          </ClerkProvider>
+        ) : content}
       </body>
     </html>
   );
-
-  return isClerkConfigured() ? (
-    <ClerkProvider signInUrl="/sign-in" signInFallbackRedirectUrl="/auth/complete">
-      {document}
-    </ClerkProvider>
-  ) : document;
 }

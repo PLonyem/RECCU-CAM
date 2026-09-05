@@ -13,9 +13,9 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { Container } from "@/components/ui/Container";
-import { buttonVariants } from "@/components/ui/Button";
 import { siteNavigation, type NavigationLink } from "@/data/site-navigation";
 import { cn } from "@/lib/utils";
+import { PortalActions } from "@/components/layout/PortalActions";
 
 const DESKTOP_HOVER_QUERY = "(any-hover: hover) and (any-pointer: fine)";
 
@@ -276,9 +276,7 @@ export function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-2 xl:flex">
-          <Link href="/affiliate-portal" prefetch={false} onClick={() => setOpenMenu(null)} className={buttonVariants({ variant: "secondary", size: "sm" })}>
-            Affiliate Portal
-          </Link>
+          <PortalActions signInLabel="Sign in" onNavigate={() => setOpenMenu(null)} />
         </div>
 
         <button
@@ -382,9 +380,7 @@ export function Navbar() {
               </ul>
             </nav>
             <div className="mt-6 border-t border-border pt-5">
-              <Link href="/affiliate-portal" prefetch={false} onClick={() => setMobileOpen(false)} className={buttonVariants({ variant: "secondary" })}>
-                Affiliate Portal
-              </Link>
+              <PortalActions mobile signInLabel="Sign in" onNavigate={() => setMobileOpen(false)} />
             </div>
           </Container>
         </div>
