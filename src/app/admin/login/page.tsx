@@ -5,5 +5,5 @@ import { redirect } from "next/navigation";
 // /dashboard accordingly) — this route is kept only so old bookmarks/links
 // to /admin/login still land somewhere useful.
 export default function AdminLoginPage() {
-  redirect("/login");
+  redirect("/sign-in");
 }

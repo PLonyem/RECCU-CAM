@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
+import { isAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 import { generateClerkPassword } from "@/lib/clerk-admin-utils";
 import { sendCreditUnionCredentials } from "@/lib/email";
@@ -9,7 +10,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || sessionClaims?.metadata?.role !== "admin") {
+  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { LayoutDashboard, LogIn, LogOut } from "lucide-react";
 import { useClerk, useUser } from "@clerk/nextjs";
+import { isStaffRole, privateHomeForRole } from "@/lib/auth/roles";
 
 interface PortalActionsProps {
   mobile?: boolean;
@@ -13,14 +14,16 @@ interface PortalActionsProps {
 function ConfiguredPortalActions({ mobile, signInLabel, onNavigate }: PortalActionsProps) {
   const { isLoaded, isSignedIn, user } = useUser();
   const { signOut } = useClerk();
-  const portalHref = user?.publicMetadata.role === "admin" ? "/admin" : "/dashboard";
+  const role = user?.publicMetadata.role;
+  const portalHref = privateHomeForRole(role);
+  const hasPortal = isStaffRole(role) || portalHref === "/affiliate-portal";
 
   if (!isLoaded) return null;
 
   if (mobile) {
     return (
       <Link
-        href={isSignedIn ? portalHref : "/login"}
+        href={isSignedIn && hasPortal ? portalHref : "/sign-in"}
         onClick={onNavigate}
         className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary-800 px-4 text-sm font-semibold text-white"
       >
@@ -40,7 +43,7 @@ function ConfiguredPortalActions({ mobile, signInLabel, onNavigate }: PortalActi
       </button>
     </>
   ) : (
-    <Link href="/login" className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary-800 px-4 text-sm font-semibold text-white hover:bg-primary-700">
+    <Link href="/sign-in" className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary-800 px-4 text-sm font-semibold text-white hover:bg-primary-700">
       <LogIn className="h-4 w-4" /> {signInLabel}
     </Link>
   );

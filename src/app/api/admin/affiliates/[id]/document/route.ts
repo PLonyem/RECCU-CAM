@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { isAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 import { getSignedSupabaseUrl, isSupabaseStorageConfigured } from "@/lib/supabase-storage";
 
@@ -12,7 +13,7 @@ interface RouteParams {
 // storagePath alone isn't viewable.
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || sessionClaims?.metadata?.role !== "admin") {
+  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

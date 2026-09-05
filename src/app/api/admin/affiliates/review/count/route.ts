@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { isAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 
 // Cheap endpoint for the admin sidebar badge — just the pending-review
 // count, not the full chapter list.
 export async function GET() {
   const { userId, sessionClaims } = await auth();
-  if (!userId || sessionClaims?.metadata?.role !== "admin") {
+  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

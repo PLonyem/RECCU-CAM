@@ -120,7 +120,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           {t("admin.backToWebsite")}
         </Link>
         <button
-          onClick={() => signOut({ redirectUrl: "/login" })}
+          onClick={() => signOut({ redirectUrl: "/sign-in" })}
           className="mt-3 flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
         >
           <LogOut className="h-4 w-4" />

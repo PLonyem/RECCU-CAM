@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { isAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 import { affiliateSchema } from "@/lib/validation/affiliate";
 import type { Prisma } from "@/generated/prisma/client";
 
 export async function GET(request: NextRequest) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || sessionClaims?.metadata?.role !== "admin") {
+  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || sessionClaims?.metadata?.role !== "admin") {
+  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

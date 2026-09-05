@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { isAdminRole } from "@/lib/auth/roles";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
@@ -29,7 +30,7 @@ const notificationSettingsSchema = z.object({
 
 async function isAdmin() {
   const { userId, sessionClaims } = await auth();
-  return Boolean(userId && sessionClaims?.metadata?.role === "admin");
+  return Boolean(userId && isAdminRole(sessionClaims?.metadata?.role));
 }
 
 function getSettings() {

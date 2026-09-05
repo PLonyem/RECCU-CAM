@@ -59,7 +59,7 @@ function AdminSessionTimeout() {
         resetTimer = () => {
           if (timer) window.clearTimeout(timer);
           timer = window.setTimeout(() => {
-            void signOut({ redirectUrl: "/login" });
+            void signOut({ redirectUrl: "/sign-in" });
           }, timeoutMs);
         };
         for (const event of events) window.addEventListener(event, resetTimer, { passive: true });

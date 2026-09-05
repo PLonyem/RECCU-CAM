@@ -16,7 +16,7 @@ export default async function AdminLayout({
   // Any authenticated Clerk user could be a credit_union account — a
   // chapter session must never reach the admin shell.
   if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   // Deliberately NOT calling currentUser() here — unlike auth(), which

@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
+import { isAdminRole } from "@/lib/auth/roles";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { loanProductAdminSchema } from "@/lib/loan-calculator/validation";
@@ -6,7 +7,7 @@ import type { Prisma } from "@/generated/prisma/client";
 
 async function adminIdentity() {
   const { userId, sessionClaims } = await auth();
-  return userId && sessionClaims?.metadata?.role === "admin" ? userId : null;
+  return userId && isAdminRole(sessionClaims?.metadata?.role) ? userId : null;
 }
 
 export async function GET() {

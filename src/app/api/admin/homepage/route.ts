@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { isAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 import { homepageContentSchema } from "@/lib/validation/homepage-content";
 
@@ -8,7 +9,7 @@ import { homepageContentSchema } from "@/lib/validation/homepage-content";
 // with this one rather than replacing it outright.
 export async function PUT(request: NextRequest) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || sessionClaims?.metadata?.role !== "admin") {
+  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

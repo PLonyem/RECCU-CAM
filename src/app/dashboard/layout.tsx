@@ -19,12 +19,12 @@ export default async function DashboardLayout({
   const { userId, sessionClaims } = await auth();
 
   if (!userId) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   const role = sessionClaims?.metadata?.role;
   if (isAdminRole(role)) redirect("/admin");
-  if (!isAffiliateRole(role)) redirect("/login");
+  if (!isAffiliateRole(role)) redirect("/sign-in");
 
   return (
     <div className="min-h-screen bg-gray-50">

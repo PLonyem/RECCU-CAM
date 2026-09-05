@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { isAdminRole } from "@/lib/auth/roles";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
@@ -15,7 +16,7 @@ const securitySettingsSchema = z.object({
 
 async function isAdmin() {
   const { userId, sessionClaims } = await auth();
-  return Boolean(userId && sessionClaims?.metadata?.role === "admin");
+  return Boolean(userId && isAdminRole(sessionClaims?.metadata?.role));
 }
 
 export async function GET() {

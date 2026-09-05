@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
+import { isAdminRole } from "@/lib/auth/roles";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { RECCUCAM_REGION_STRUCTURE, regionNameToCode } from "@/lib/chapters";
@@ -20,7 +21,7 @@ const createCreditUnionSchema = z.object({
 
 async function requireAdmin() {
   const { userId, sessionClaims } = await auth();
-  return Boolean(userId && sessionClaims?.metadata?.role === "admin");
+  return Boolean(userId && isAdminRole(sessionClaims?.metadata?.role));
 }
 
 export async function GET() {

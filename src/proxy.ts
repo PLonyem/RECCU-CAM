@@ -2,12 +2,13 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { isClerkConfigured } from "@/lib/auth/config";
 import {
-  isAdminRole,
+  hasPermission,
   isAffiliateRole,
+  permissionForAdminPath,
   privateHomeForRole,
 } from "@/lib/auth/roles";
 
-const isAuthPage = createRouteMatcher(["/login(.*)", "/signup(.*)"]);
+const isAuthPage = createRouteMatcher(["/sign-in(.*)", "/login(.*)", "/signup(.*)"]);
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 const isAdminApiRoute = createRouteMatcher(["/api/admin(.*)"]);
 const isDashboardRoute = createRouteMatcher(["/dashboard(.*)"]);
@@ -42,7 +43,7 @@ const configuredProxy = clerkMiddleware(async (auth, req) => {
     if (!userId) {
       return NextResponse.json({ error: "Authentication required." }, { status: 401 });
     }
-    if (!isAdminRole(sessionClaims?.metadata?.role)) {
+    if (!hasPermission(sessionClaims?.metadata?.role, permissionForAdminPath(req.nextUrl.pathname))) {
       return NextResponse.json({ error: "Insufficient permissions." }, { status: 403 });
     }
     return NextResponse.next();
@@ -53,8 +54,8 @@ const configuredProxy = clerkMiddleware(async (auth, req) => {
     if (!authObject.userId) {
       return authObject.redirectToSignIn({ returnBackUrl: req.url });
     }
-    if (!isAdminRole(authObject.sessionClaims?.metadata?.role)) {
-      return NextResponse.redirect(new URL("/", req.url));
+    if (!hasPermission(authObject.sessionClaims?.metadata?.role, permissionForAdminPath(req.nextUrl.pathname))) {
+      return NextResponse.redirect(new URL(privateHomeForRole(authObject.sessionClaims?.metadata?.role), req.url));
     }
     return NextResponse.next();
   }
@@ -86,7 +87,7 @@ function unconfiguredProxy(req: NextRequest) {
   }
 
   if (isAdminRoute(req) || isDashboardRoute(req) || isAffiliatePortalRoute(req)) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 
   return NextResponse.next();
