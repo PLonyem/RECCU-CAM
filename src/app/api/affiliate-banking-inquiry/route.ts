@@ -51,11 +51,33 @@ export async function POST(request: Request) {
   ].join("\n");
 
   try {
+    const affiliate = await prisma.affiliate.findFirst({
+      where: { name: { equals: inquiry.institution, mode: "insensitive" } },
+      select: { id: true },
+    });
+    await prisma.affiliateBankingInquiry.create({
+      data: {
+        reference: `AB-${new Date().getUTCFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+        affiliateId: affiliate?.id,
+        institution: inquiry.institution,
+        contactPerson: inquiry.contactPerson,
+        email: inquiry.email,
+        phone: inquiry.phone,
+        role: inquiry.role,
+        city: inquiry.city,
+        supportCategory: inquiry.supportCategory,
+        message: inquiry.message,
+      },
+    });
     await prisma.contactMessage.create({
       data: {
         name: inquiry.contactPerson,
         email: inquiry.email,
         phone: inquiry.phone,
+        organization: inquiry.institution,
+        role: inquiry.role,
+        purpose: "affiliate-banking",
+        department: "Affiliate Banking",
         subject: `Affiliate Banking inquiry — ${category}`,
         message,
       },

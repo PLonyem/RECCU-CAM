@@ -44,11 +44,26 @@ export async function POST(request: Request) {
   ].join("\n");
 
   try {
+    await prisma.affiliationInquiry.create({
+      data: {
+        institution: inquiry.institution,
+        contactPerson: inquiry.contactPerson,
+        email: inquiry.email,
+        phone: inquiry.phone,
+        role: inquiry.role,
+        city: inquiry.city,
+        message: inquiry.message,
+      },
+    });
     await prisma.contactMessage.create({
       data: {
         name: inquiry.contactPerson,
         email: inquiry.email,
         phone: inquiry.phone,
+        organization: inquiry.institution,
+        role: inquiry.role,
+        purpose: "affiliation",
+        department: "Network Administration",
         subject: `Affiliation inquiry — ${inquiry.institution}`,
         message,
       },

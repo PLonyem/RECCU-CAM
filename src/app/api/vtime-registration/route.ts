@@ -51,11 +51,44 @@ export async function POST(request: Request) {
   ].join("\n");
 
   try {
+    const storedProgram = await prisma.trainingProgram.upsert({
+      where: { slug: program.slug },
+      update: {},
+      create: {
+        slug: program.slug,
+        title: program.title,
+        summary: program.summary,
+        category: program.category,
+        audience: [...program.audience],
+        level: program.level,
+        format: program.format,
+        venue: program.location,
+        startDate: program.startDate ? new Date(`${program.startDate}T00:00:00Z`) : null,
+        endDate: program.endDate ? new Date(`${program.endDate}T00:00:00Z`) : null,
+        capacity: program.capacity,
+        registrationStatus: program.registrationStatus,
+      },
+    });
+    await prisma.trainingRegistration.create({
+      data: {
+        programId: storedProgram.id,
+        participantName: registration.participantName,
+        institution: registration.institution,
+        role: registration.role,
+        email: registration.email,
+        phone: registration.phone,
+        notes: registration.notes,
+      },
+    });
     await prisma.contactMessage.create({
       data: {
         name: registration.participantName,
         email: registration.email,
         phone: registration.phone,
+        organization: registration.institution,
+        role: registration.role,
+        purpose: "training",
+        department: "VTIME Training",
         subject: `VTIME registration — ${program.title}`,
         message,
       },

@@ -13,6 +13,7 @@ const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 const isAdminApiRoute = createRouteMatcher(["/api/admin(.*)"]);
 const isDashboardRoute = createRouteMatcher(["/dashboard(.*)"]);
 const isAffiliatePortalRoute = createRouteMatcher(["/affiliate-portal(.*)"]);
+const isAffiliatePortalApiRoute = createRouteMatcher(["/api/affiliate-portal(.*)"]);
 
 function isCrossOriginMutation(request: NextRequest) {
   if (["GET", "HEAD", "OPTIONS"].includes(request.method)) return false;
@@ -60,6 +61,18 @@ const configuredProxy = clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
+  if (isAffiliatePortalApiRoute(req)) {
+    if (isCrossOriginMutation(req)) {
+      return NextResponse.json({ error: "Cross-origin request rejected." }, { status: 403 });
+    }
+    const { userId, sessionClaims } = await auth();
+    if (!userId) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+    if (!isAffiliateRole(sessionClaims?.metadata?.role)) {
+      return NextResponse.json({ error: "Insufficient permissions." }, { status: 403 });
+    }
+    return NextResponse.next();
+  }
+
   if (isDashboardRoute(req) || isAffiliatePortalRoute(req)) {
     const authObject = await auth();
     if (!authObject.userId) {
@@ -79,7 +92,7 @@ const configuredProxy = clerkMiddleware(async (auth, req) => {
 });
 
 function unconfiguredProxy(req: NextRequest) {
-  if (isAdminApiRoute(req)) {
+  if (isAdminApiRoute(req) || isAffiliatePortalApiRoute(req)) {
     return NextResponse.json(
       { error: "Authentication is not configured." },
       { status: 503 },

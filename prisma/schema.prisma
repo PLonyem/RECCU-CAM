@@ -90,6 +90,8 @@ model Affiliate {
   phone       String?
   email       String?
   website     String?
+  logoUrl     String?
+  description String?  @db.Text
   isActive    Boolean  @default(true)
 
   // Chapter Profile Form fields — populated via the admin "Upload Chapter
@@ -120,11 +122,15 @@ model Affiliate {
   // own submission — only by the admin review action.
   profileReviewNote      String?   @db.Text
 
-  documents            AffiliateDocument[]
-  signupRequests       CreditUnionSignupRequest[]
-  submissions          AffiliateSubmission[]
-  loanProductOverrides LoanProductAffiliate[]
-  loanSimulations      LoanSimulation[]
+  documents             AffiliateDocument[]
+  signupRequests        CreditUnionSignupRequest[]
+  submissions           AffiliateSubmission[]
+  loanProductOverrides  LoanProductAffiliate[]
+  loanSimulations       LoanSimulation[]
+  updateRequests        AffiliateUpdateRequest[]
+  supportTickets        SupportTicket[]
+  bankingInquiries      AffiliateBankingInquiry[]
+  trainingRegistrations TrainingRegistration[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -358,19 +364,25 @@ model AffiliateDocument {
 }
 
 model Resource {
-  id            String   @id @default(cuid())
-  title         String
-  description   String?  @db.Text
-  category      String
-  fileType      String?
-  fileSize      Int?
-  fileUrl       String?
-  downloadCount Int      @default(0)
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id               String    @id @default(cuid())
+  title            String
+  description      String?   @db.Text
+  category         String
+  fileType         String?
+  fileSize         Int?
+  fileUrl          String?
+  issuingAuthority String?
+  publicationDate  DateTime?
+  accessLevel      String    @default("PUBLIC") // PUBLIC | AFFILIATE_ONLY | STAFF_ONLY
+  published        Boolean   @default(false)
+  archivedAt       DateTime?
+  downloadCount    Int       @default(0)
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([category])
+  @@index([accessLevel, published])
   @@map("resources")
 }
 
@@ -382,6 +394,9 @@ model Announcement {
   category      String    @default("Circular") // Circular, Training, COBAC, Announcement, Event
   priority      String    @default("normal") // low, normal, high, urgent
   targetChapter String? // null = all chapters, or specific chapter
+  audience      String    @default("PUBLIC") // PUBLIC | ALL_AFFILIATES | SPECIFIC_AFFILIATE | STAFF
+  affiliateId   String?
+  startDate     DateTime?
   isPublished   Boolean   @default(false)
   publishedAt   DateTime?
   expiryDate    DateTime?
@@ -395,26 +410,218 @@ model Announcement {
 }
 
 model ContactMessage {
-  id           String   @id @default(cuid())
-  name         String
-  phone        String?
-  email        String?
-  organization String?
-  role         String?
-  purpose      String   @default("general-inquiry")
-  department   String   @default("Administration / Front Office")
-  subject      String
-  message      String   @db.Text
-  consent      Boolean  @default(false)
-  status       String   @default("new") // new | in-review | responded | closed
-  isRead       Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  phone         String?
+  email         String?
+  organization  String?
+  role          String?
+  purpose       String   @default("general-inquiry")
+  department    String   @default("Administration / Front Office")
+  subject       String
+  message       String   @db.Text
+  consent       Boolean  @default(false)
+  status        String   @default("new") // new | in-review | responded | closed
+  isRead        Boolean  @default(false)
+  assignedTo    String?
+  internalNotes Json     @default("[]")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@index([purpose])
   @@index([status])
   @@index([createdAt])
   @@map("contact_messages")
+}
+
+model AffiliateUpdateRequest {
+  id            String    @id @default(cuid())
+  affiliateId   String
+  affiliate     Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  submittedBy   String
+  requestedData Json
+  status        String    @default("pending") // pending | approved | declined
+  reviewNote    String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([affiliateId, status])
+  @@map("affiliate_update_requests")
+}
+
+model SupportTicket {
+  id            String    @id @default(cuid())
+  reference     String    @unique
+  affiliateId   String
+  affiliate     Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  submittedBy   String
+  subject       String
+  category      String
+  message       String    @db.Text
+  priority      String    @default("normal") // low | normal | high | urgent
+  status        String    @default("open") // open | in-progress | resolved | closed
+  assignedTo    String?
+  response      String?   @db.Text
+  internalNotes Json      @default("[]")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([affiliateId, status])
+  @@index([status, createdAt])
+  @@map("support_tickets")
+}
+
+model AffiliateBankingInquiry {
+  id              String     @id @default(cuid())
+  reference       String     @unique
+  affiliateId     String?
+  affiliate       Affiliate? @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
+  institution     String
+  contactPerson   String
+  email           String
+  phone           String
+  role            String
+  city            String
+  supportCategory String
+  message         String     @db.Text
+  status          String     @default("submitted")
+  assignedTo      String?
+  internalNotes   Json       @default("[]")
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@index([affiliateId, status])
+  @@index([status, createdAt])
+  @@map("affiliate_banking_inquiries")
+}
+
+model AffiliationInquiry {
+  id            String   @id @default(cuid())
+  institution   String
+  contactPerson String
+  email         String
+  phone         String
+  role          String
+  city          String
+  message       String   @db.Text
+  status        String   @default("new")
+  assignedTo    String?
+  internalNotes Json     @default("[]")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@map("affiliation_inquiries")
+}
+
+model TrainingProgram {
+  id                 String                 @id @default(cuid())
+  slug               String                 @unique
+  title              String
+  summary            String                 @db.Text
+  category           String
+  audience           String[]
+  level              String
+  format             String?
+  venue              String?
+  startDate          DateTime?
+  endDate            DateTime?
+  capacity           Int?
+  registrationStatus String                 @default("schedule-pending")
+  published          Boolean                @default(false)
+  registrations      TrainingRegistration[]
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  @@index([published, startDate])
+  @@map("training_programs")
+}
+
+model TrainingRegistration {
+  id              String          @id @default(cuid())
+  programId       String
+  program         TrainingProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  affiliateId     String?
+  affiliate       Affiliate?      @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
+  participantName String
+  institution     String
+  role            String
+  email           String
+  phone           String
+  notes           String?         @db.Text
+  status          String          @default("submitted")
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([programId, status])
+  @@index([affiliateId, createdAt])
+  @@map("training_registrations")
+}
+
+model ComplianceRecord {
+  id          String    @id @default(cuid())
+  title       String
+  description String    @db.Text
+  category    String
+  dueDate     DateTime?
+  status      String    @default("pending")
+  audience    String    @default("all-affiliates")
+  affiliateId String?
+  published   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([published, dueDate])
+  @@index([affiliateId, status])
+  @@map("compliance_records")
+}
+
+model PageContent {
+  id          String    @id @default(cuid())
+  pageKey     String
+  locale      String    @default("en")
+  status      String    @default("draft") // draft | published
+  content     Json
+  publishedAt DateTime?
+  publishedBy String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([pageKey, locale, status])
+  @@index([status, updatedAt])
+  @@map("page_content")
+}
+
+model MediaAsset {
+  id           String   @id @default(cuid())
+  fileName     String
+  fileUrl      String?
+  fileType     String
+  fileSize     Int?
+  title        String
+  altText      String
+  caption      String?
+  uploadedBy   String
+  storageState String   @default("metadata-only")
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("media_assets")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actorRole  String
+  action     String
+  resource   String
+  resourceId String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([resource, resourceId])
+  @@map("audit_logs")
 }
 
 // Editable homepage content for a future admin CMS UI (not wired to the
