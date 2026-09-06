@@ -2,10 +2,10 @@ import type { AuthRole } from "@/lib/auth/roles";
 
 export {};
 
-// role is "admin" or "credit_union"; the affiliate* fields are only ever
-// set for "credit_union" accounts — a chapter's own affiliate, assigned by
-// an admin via the Clerk Dashboard's publicMetadata editor, never chosen by
-// the user themselves. Both interfaces describe the same shape because
+// role is one of the server-recognized AppRole values; the affiliate* fields
+// are only set for "affiliate_user" accounts — a chapter's own affiliate,
+// assigned by an authorized admin and never chosen by the user. Both
+// interfaces describe the same shape because
 // Clerk types the JWT session claims and the User resource separately:
 // CustomJwtSessionClaims is what `auth()` (proxy/server/API routes) reads
 // from the signed session token — requires the Dashboard's session token

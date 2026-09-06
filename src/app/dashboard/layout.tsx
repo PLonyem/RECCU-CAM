@@ -24,7 +24,7 @@ export default async function DashboardLayout({
 
   const role = sessionClaims?.metadata?.role;
   if (isAdminRole(role)) redirect("/admin");
-  if (!isAffiliateRole(role)) redirect("/sign-in");
+  if (!isAffiliateRole(role)) redirect("/access-denied");
 
   return (
     <div className="min-h-screen bg-gray-50">

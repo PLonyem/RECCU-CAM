@@ -29,7 +29,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   const { userId, sessionClaims } = await auth();
   // role check (not just "is there a session") matters here specifically:
   // this route accepts a raw profileStatus field, so without it a
-  // credit_union session could call it directly and self-approve its own
+  // affiliate_user session could call it directly and self-approve its own
   // profile, bypassing the admin review workflow entirely.
   if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

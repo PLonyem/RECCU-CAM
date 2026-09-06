@@ -69,7 +69,6 @@ export const ROLE_LABELS: Readonly<Record<AppRole, string>> = {
 };
 
 export function normalizeAuthRole(role: unknown): AppRole | null {
-  if (role === LEGACY_AUTH_ROLES.creditUnion) return APP_ROLES.affiliateUser;
   return Object.values(APP_ROLES).includes(role as AppRole) ? (role as AppRole) : null;
 }
 
@@ -93,7 +92,7 @@ export function isAffiliateRole(role: unknown) {
 export function privateHomeForRole(role: unknown) {
   if (isStaffRole(role)) return "/admin";
   if (isAffiliateRole(role)) return "/affiliate-portal";
-  return "/";
+  return "/access-denied";
 }
 
 const ADMIN_PATH_PERMISSIONS: readonly [string, AuthPermission][] = [

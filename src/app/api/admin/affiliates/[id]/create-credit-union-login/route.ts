@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { isAdminRole } from "@/lib/auth/roles";
+import { APP_ROLES, isAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 import { extractClerkErrorMessage, generateClerkPassword } from "@/lib/clerk-admin-utils";
 
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       emailAddress: [parsed.data.email],
       password,
       publicMetadata: {
-        role: "credit_union",
+        role: APP_ROLES.affiliateUser,
         affiliateId: affiliate.id,
         affiliateName: affiliate.name,
         affiliateCode: affiliate.code,

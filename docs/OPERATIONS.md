@@ -10,7 +10,8 @@
 { "metadata": "{{user.public_metadata}}" }
 ```
 
-4. Build with `pnpm build` and deploy. The application contains no authentication bypass or hard-coded password.
+4. Disable public sign-ups in the Clerk Dashboard so accounts can be created or invited only by authorized administrators.
+5. Build with `pnpm build` and deploy. Production builds cannot activate the local demo bypass and contain no hard-coded password.
 
 ## Demo users
 
@@ -33,7 +34,21 @@ Affiliate demo metadata (use a real `Affiliate.id`, name, and code from the data
 }
 ```
 
-Supported staff roles are `super_admin`, `admin`, `communications`, `network_manager`, `compliance_officer`, `training_manager`, and `editor`. The legacy values `admin` and `credit_union` remain compatible; new affiliate accounts should use `affiliate_user`.
+Supported staff roles are `super_admin`, `admin`, `communications`, `network_manager`, `compliance_officer`, `training_manager`, and `editor`. Affiliate accounts must use `affiliate_user`; the legacy `credit_union` value no longer grants protected access.
+
+## Controlled account lifecycle
+
+The public website provides sign-in only and does not expose self-registration.
+An authorized administrator creates or invites the user through Clerk, assigns
+the trusted `publicMetadata.role` (plus a verified `affiliateId` for an
+affiliate), and sends the invitation or credentials through an approved
+channel. The user then signs in at `/sign-in` and is routed server-side to the
+appropriate workspace. Accounts without a recognized role are sent to the
+no-index `/access-denied` page and never receive dashboard access.
+
+Application-level redirects block `/sign-up` and `/signup`. Clerk's instance
+setting must also keep public sign-ups disabled; route hiding alone is not a
+substitute for that service-side control.
 
 ## Security boundaries
 
@@ -45,17 +60,15 @@ Supported staff roles are `super_admin`, `admin`, `communications`, `network_man
 
 ## Executive proposal mode
 
-Set `NEXT_PUBLIC_DEMO_MODE=true` at build time to make read-only `/admin` page
-requests available without Clerk during an executive proposal. The interface
-uses a simulated `RECCU-CAM Demo Administrator` with the `super_admin` view and
-clearly labels the workspace as a proposal preview. API routes, Server Actions,
-and other mutation paths remain authenticated and permission checked.
+For local development only, `NEXT_PUBLIC_DEMO_MODE=true` makes read-only
+`/admin` page requests available without Clerk. The interface uses a simulated
+`RECCU-CAM Demo Administrator`, while API routes and Server Actions retain
+their normal authentication and permission checks.
 
-Proposal mode is fail-closed: when the variable is absent or has any value
-other than the exact lowercase string `true`, normal Clerk authentication and
-staff authorization apply. Set it back to `false` and rebuild the deployment
-immediately after the proposal. Affiliate Portal access remains protected and
-requires a real affiliate identity.
+Proposal mode is fail-closed and requires both the exact lowercase value
+`true` and `NODE_ENV=development`. Production and test builds ignore the flag,
+even if it is accidentally configured. Affiliate Portal access always requires
+a real affiliate identity.
 - There is no core-banking connection, transaction processing, or financial credential storage.
 - Public forms are validated and locally rate limited. Production should add a shared edge/WAF limiter and bot protection.
 - Restricted documents require private storage and short-lived authorized downloads before production use.

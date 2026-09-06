@@ -67,7 +67,7 @@ export default function SignInPage() {
                   headerTitle: "font-display text-institutional",
                   headerSubtitle: "text-slate-500",
                   formButtonPrimary: "bg-forest hover:bg-institutional",
-                  footerActionLink: "text-forest hover:text-institutional",
+                  footerAction: "hidden",
                 },
               }}
             />
@@ -79,7 +79,7 @@ export default function SignInPage() {
               <Link className="mt-5 inline-flex font-semibold text-forest underline-offset-4 hover:underline" href="/">Return to the public website</Link>
             </div>
           )}
-          <p className="mt-6 text-center text-xs leading-5 text-slate-500">Access is restricted to authorized RECCU-CAM staff and affiliated institutions. Authentication is managed securely by Clerk.</p>
+          <p className="mt-6 text-center text-xs leading-5 text-slate-500">Secure access for authorized RECCU-CAM staff and affiliate institutions. Authentication is managed securely by Clerk.</p>
         </div>
       </section>
     </main>

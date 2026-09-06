@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { isAdminRole } from "@/lib/auth/roles";
+import { APP_ROLES, isAdminRole } from "@/lib/auth/roles";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { RECCUCAM_REGION_STRUCTURE, regionNameToCode } from "@/lib/chapters";
@@ -35,7 +35,7 @@ export async function GET() {
   const userByAffiliate = new Map<string, (typeof users)[number]>();
   for (const user of users) {
     const metadata = user.publicMetadata as { role?: string; affiliateId?: string };
-    if (metadata.role === "credit_union" && metadata.affiliateId) userByAffiliate.set(metadata.affiliateId, user);
+    if (metadata.role === APP_ROLES.affiliateUser && metadata.affiliateId) userByAffiliate.set(metadata.affiliateId, user);
   }
 
   const regionOrder = new Map<string, number>(RECCUCAM_REGION_STRUCTURE.map((region, index) => [region.name, index]));
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       emailAddress: [data.email],
       password: data.password,
       publicMetadata: {
-        role: "credit_union",
+        role: APP_ROLES.affiliateUser,
         affiliateId: affiliate.id,
         affiliateName: affiliate.name,
         affiliateCode: affiliate.code,

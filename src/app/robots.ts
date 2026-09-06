@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
           "/api",
           "/affiliate-portal",
           "/login",
+          "/sign-up",
           "/signup",
         ],
       },

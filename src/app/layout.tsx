@@ -61,6 +61,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {isClerkConfigured() ? (
           <ClerkProvider
             signInUrl="/sign-in"
+            signUpUrl="/sign-in"
             signInFallbackRedirectUrl="/auth/complete"
             signUpFallbackRedirectUrl="/auth/complete"
           >

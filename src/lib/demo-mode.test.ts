@@ -3,11 +3,16 @@ import test from "node:test";
 import { isDemoAdminPageRequest, isDemoMode } from "./demo-mode";
 
 test("demo mode is fail-closed unless explicitly set to true", () => {
-  assert.equal(isDemoMode("true"), true);
-  assert.equal(isDemoMode("false"), false);
-  assert.equal(isDemoMode("TRUE"), false);
-  assert.equal(isDemoMode("1"), false);
-  assert.equal(isDemoMode(undefined), false);
+  assert.equal(isDemoMode("true", "development"), true);
+  assert.equal(isDemoMode("false", "development"), false);
+  assert.equal(isDemoMode("TRUE", "development"), false);
+  assert.equal(isDemoMode("1", "development"), false);
+  assert.equal(isDemoMode(undefined, "development"), false);
+});
+
+test("demo mode cannot be enabled in a production build", () => {
+  assert.equal(isDemoMode("true", "production"), false);
+  assert.equal(isDemoMode("true", "test"), false);
 });
 
 test("demo access applies only to read-only admin page requests", () => {

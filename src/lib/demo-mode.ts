@@ -12,8 +12,11 @@ export const DEMO_ADMIN_IDENTITY = {
  * Removing the variable, misspelling it, or setting any other value restores
  * the normal Clerk authentication and authorization flow.
  */
-export function isDemoMode(value = process.env.NEXT_PUBLIC_DEMO_MODE) {
-  return value === "true";
+export function isDemoMode(
+  value = process.env.NEXT_PUBLIC_DEMO_MODE,
+  environment = process.env.NODE_ENV,
+) {
+  return environment === "development" && value === "true";
 }
 
 /**
