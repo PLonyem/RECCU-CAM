@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, LogIn, UserPlus } from "lucide-react";
+import { LayoutDashboard, LogIn, ShieldCheck, UserPlus } from "lucide-react";
 import { Show, SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import { isStaffRole, privateHomeForRole } from "@/lib/auth/roles";
+import { isDemoMode } from "@/lib/demo-mode";
 
 interface PortalActionsProps {
   mobile?: boolean;
@@ -73,6 +74,21 @@ function ConfiguredPortalActions({ mobile, signInLabel, onNavigate }: PortalActi
 }
 
 export function PortalActions(props: PortalActionsProps) {
+  if (isDemoMode()) {
+    return (
+      <Link
+        href="/admin"
+        onClick={props.onNavigate}
+        className={props.mobile
+          ? "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-primary-700 bg-primary-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
+          : "inline-flex h-10 items-center gap-2 rounded-lg border border-primary-700 bg-primary-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"}
+        aria-label="Open the RECCU-CAM Admin Dashboard proposal preview"
+      >
+        <ShieldCheck className="h-4 w-4" aria-hidden="true" /> Admin Dashboard
+      </Link>
+    );
+  }
+
   if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
     return (
       <span className={props.mobile ? "flex flex-1 items-center justify-center rounded-xl bg-gray-100 px-4 text-xs font-semibold text-gray-500" : "rounded-lg bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-500"}>

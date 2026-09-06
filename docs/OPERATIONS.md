@@ -42,6 +42,20 @@ Supported staff roles are `super_admin`, `admin`, `communications`, `network_man
 - `/admin/*` and `/api/admin/*` require a staff role plus the module permission in `src/proxy.ts`.
 - Server Actions repeat permission checks before every write.
 - Clerk owns credentials; administrators cannot read passwords.
+
+## Executive proposal mode
+
+Set `NEXT_PUBLIC_DEMO_MODE=true` at build time to make read-only `/admin` page
+requests available without Clerk during an executive proposal. The interface
+uses a simulated `RECCU-CAM Demo Administrator` with the `super_admin` view and
+clearly labels the workspace as a proposal preview. API routes, Server Actions,
+and other mutation paths remain authenticated and permission checked.
+
+Proposal mode is fail-closed: when the variable is absent or has any value
+other than the exact lowercase string `true`, normal Clerk authentication and
+staff authorization apply. Set it back to `false` and rebuild the deployment
+immediately after the proposal. Affiliate Portal access remains protected and
+requires a real affiliate identity.
 - There is no core-banking connection, transaction processing, or financial credential storage.
 - Public forms are validated and locally rate limited. Production should add a shared edge/WAF limiter and bot protection.
 - Restricted documents require private storage and short-lived authorized downloads before production use.

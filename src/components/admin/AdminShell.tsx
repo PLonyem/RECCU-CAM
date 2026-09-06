@@ -5,6 +5,7 @@ import { useClerk } from "@clerk/nextjs";
 import { Sidebar } from "./Sidebar";
 import { AdminNavbar } from "./AdminNavbar";
 import { cn } from "@/lib/utils";
+import { isDemoMode } from "@/lib/demo-mode";
 
 interface AdminShellProps {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ export function AdminShell({ children }: AdminShellProps) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f5f4ef]">
-      <AdminSessionTimeout />
+      {!isDemoMode() && <AdminSessionTimeout />}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-[1px] lg:hidden"

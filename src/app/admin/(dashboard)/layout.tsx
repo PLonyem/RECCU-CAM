@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { AdminNavGuard } from "@/components/admin/AdminNavGuard";
 import { isAdminRole } from "@/lib/auth/roles";
+import { isDemoMode } from "@/lib/demo-mode";
 
 export const dynamic = "force-dynamic";
 
@@ -11,11 +12,14 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { userId, sessionClaims } = await auth();
+  const authentication = isDemoMode() ? null : await auth();
 
   // Any authenticated Clerk user could be a credit_union account — a
   // chapter session must never reach the admin shell.
-  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
+  if (
+    authentication &&
+    (!authentication.userId || !isAdminRole(authentication.sessionClaims?.metadata?.role))
+  ) {
     redirect("/sign-in");
   }
 

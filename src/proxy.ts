@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { isClerkConfigured } from "@/lib/auth/config";
+import { isDemoAdminPageRequest, isDemoMode } from "@/lib/demo-mode";
 import {
   hasPermission,
   isAffiliateRole,
@@ -24,6 +25,14 @@ function isCrossOriginMutation(request: NextRequest) {
 }
 
 const configuredProxy = clerkMiddleware(async (auth, req) => {
+  if (isDemoMode() && isAuthPage(req)) {
+    return NextResponse.redirect(new URL("/admin", req.url));
+  }
+
+  if (isDemoAdminPageRequest(req.nextUrl.pathname, req.method)) {
+    return NextResponse.next();
+  }
+
   // Logged-in users visiting an auth page go to their assigned dashboard.
   // instead of seeing the form again.
   if (isAuthPage(req)) {
@@ -92,6 +101,14 @@ const configuredProxy = clerkMiddleware(async (auth, req) => {
 });
 
 function unconfiguredProxy(req: NextRequest) {
+  if (isDemoMode() && isAuthPage(req)) {
+    return NextResponse.redirect(new URL("/admin", req.url));
+  }
+
+  if (isDemoAdminPageRequest(req.nextUrl.pathname, req.method)) {
+    return NextResponse.next();
+  }
+
   if (isAdminApiRoute(req) || isAffiliatePortalApiRoute(req)) {
     return NextResponse.json(
       { error: "Authentication is not configured." },

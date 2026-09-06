@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
+import { DEMO_ADMIN_IDENTITY, isDemoMode } from "@/lib/demo-mode";
 
 interface SecuritySettings {
   minimumPasswordLength: 8 | 10 | 12 | 14;
@@ -40,14 +41,19 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () =
 }
 
 export default function AdminSettingsPage() {
+  const demo = isDemoMode();
   const [activeTab, setActiveTab] = useState<"account" | "security">("account");
   const [security, setSecurity] = useState<SecuritySettings>(DEFAULT_SECURITY);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!demo);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState(false);
 
   useEffect(() => {
+    if (demo) {
+      return;
+    }
+
     let ignore = false;
     fetch("/api/admin/settings/security", { cache: "no-store" })
       .then(async (response) => {
@@ -58,7 +64,7 @@ export default function AdminSettingsPage() {
       .catch((caught) => { if (!ignore) setError(caught instanceof Error ? caught.message : "Could not load security settings."); })
       .finally(() => { if (!ignore) setIsLoading(false); });
     return () => { ignore = true; };
-  }, []);
+  }, [demo]);
 
   function updateNumber(key: keyof SecuritySettings, value: string) {
     setSecurity((current) => ({ ...current, [key]: Number(value) }));
@@ -66,6 +72,7 @@ export default function AdminSettingsPage() {
 
   async function saveSecurity(event: FormEvent) {
     event.preventDefault();
+    if (demo) return;
     setIsSaving(true);
     setError(null);
     try {
@@ -97,7 +104,16 @@ export default function AdminSettingsPage() {
       </div>
 
       {activeTab === "account" ? (
-        <div className="mt-6 max-w-2xl"><UserProfile routing="hash" appearance={{ elements: { rootBox: "w-full", card: "shadow-none border border-gray-200 rounded-xl" } }} /></div>
+        demo ? (
+          <Card className="mt-6 max-w-2xl p-6">
+            <Badge variant="warning">Proposal Preview</Badge>
+            <h2 className="mt-4 font-display text-xl font-bold text-institutional">{DEMO_ADMIN_IDENTITY.name}</h2>
+            <p className="mt-2 text-sm text-slate-600">{DEMO_ADMIN_IDENTITY.roleLabel}</p>
+            <p className="mt-4 rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-600">This is a simulated identity. Account management is available only after normal Clerk authentication is restored.</p>
+          </Card>
+        ) : (
+          <div className="mt-6 max-w-2xl"><UserProfile routing="hash" appearance={{ elements: { rootBox: "w-full", card: "shadow-none border border-gray-200 rounded-xl" } }} /></div>
+        )
       ) : (
         <form onSubmit={saveSecurity} className="mt-6 space-y-6">
           <div className="flex items-start gap-3"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-50 text-primary-600"><ShieldCheck className="h-6 w-6" /></span><div><h2 className="font-display text-xl font-bold text-primary-900">Security Settings</h2><p className="mt-1 text-sm text-gray-500">Manage access and security preferences for the admin dashboard.</p></div></div>
@@ -143,7 +159,7 @@ export default function AdminSettingsPage() {
           )}
 
           {error && <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
-          <div className="sticky bottom-0 z-20 -mx-4 flex justify-end border-t border-gray-200 bg-white/95 px-4 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur"><Button type="submit" disabled={isSaving || isLoading}>{isSaving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</> : "Save Settings"}</Button></div>
+          <div className="sticky bottom-0 z-20 -mx-4 flex items-center justify-end gap-3 border-t border-gray-200 bg-white/95 px-4 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur">{demo && <span className="text-xs font-medium text-amber-700">Changes are disabled in proposal mode.</span>}<Button type="submit" disabled={demo || isSaving || isLoading}>{isSaving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</> : "Save Settings"}</Button></div>
         </form>
       )}
     </div>

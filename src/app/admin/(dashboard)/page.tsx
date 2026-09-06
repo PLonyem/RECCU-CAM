@@ -27,6 +27,7 @@ import { Card } from "@/components/ui/Card";
 import { buttonVariants } from "@/components/ui/Button";
 import { prisma } from "@/lib/prisma";
 import { requireStaffPermission } from "@/lib/auth/staff-context";
+import { DEMO_ADMIN_IDENTITY, isDemoMode } from "@/lib/demo-mode";
 import {
   AUTH_PERMISSIONS,
   hasPermission,
@@ -159,7 +160,9 @@ function StatCard({ label, value, detail, icon: Icon, href }: {
 }
 
 export default async function AdminDashboardPage() {
-  const { role } = await requireStaffPermission(AUTH_PERMISSIONS.accessAdmin);
+  const role = isDemoMode()
+    ? DEMO_ADMIN_IDENTITY.role
+    : (await requireStaffPermission(AUTH_PERMISSIONS.accessAdmin)).role;
   const can = (permission: AuthPermission) => hasPermission(role, permission);
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
