@@ -221,7 +221,7 @@ export default function AdminNewsPage() {
         </div>
       ) : articles.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
-          No articles found
+          No news articles yet.
         </div>
       ) : (
         <>

@@ -12,6 +12,10 @@ export default defineConfig({
   datasource: {
     // CLI/migrations bypass the pooler and connect directly — Supabase's
     // transaction-mode pooler doesn't support the advisory locks migrate needs.
-    url: process.env["DIRECT_URL"],
+    url:
+      process.env["DIRECT_URL"] ??
+      process.env["POSTGRES_URL_NON_POOLING"] ??
+      process.env["DATABASE_URL"] ??
+      process.env["POSTGRES_URL"],
   },
 });

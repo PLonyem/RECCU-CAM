@@ -85,7 +85,7 @@ export default function AdminResourcesPage() {
         </div>
       ) : resources.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
-          No resources found
+          No resources found.
         </div>
       ) : (
         <>

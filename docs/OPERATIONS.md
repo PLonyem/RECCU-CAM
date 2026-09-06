@@ -13,6 +13,20 @@
 4. Keep Clerk sign-ups enabled when public account creation is required. Registration never assigns an application role automatically.
 5. Build with `pnpm build` and deploy. Production builds cannot activate the local demo bypass and contain no hard-coded password.
 
+### Production database
+
+Admin modules require a network-accessible PostgreSQL connection. In Vercel,
+set `DATABASE_URL` to the pooled runtime connection and `DIRECT_URL` to the
+direct migration connection for each deployed environment. Loopback hosts such
+as `localhost` and `127.0.0.1` are local-machine addresses and cannot reach a
+database from a Vercel function. Standard Vercel Postgres variables
+`POSTGRES_PRISMA_URL`, `POSTGRES_URL`, and `POSTGRES_URL_NON_POOLING` are also
+recognized when supplied by an integration.
+
+After configuring the direct production connection, apply only committed
+migrations with `pnpm exec prisma migrate deploy`, then redeploy the app. Never
+commit either connection string.
+
 ## Demo users
 
 Create test users in the Clerk development instance. Assign roles in trusted `publicMetadata`; never let the browser choose a role.
