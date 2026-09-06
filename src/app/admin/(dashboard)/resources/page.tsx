@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { AdminDataFailure } from "@/components/admin/AdminDataFailure";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { requestAdminData } from "@/lib/admin-data-client";
 import { formatCategory } from "@/lib/utils";
 
 interface ResourceRow {
@@ -25,6 +27,7 @@ interface ListResponse {
 export default function AdminResourcesPage() {
   const [resources, setResources] = useState<ResourceRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
 
   const [deleteTarget, setDeleteTarget] = useState<ResourceRow | null>(null);
@@ -42,28 +45,51 @@ export default function AdminResourcesPage() {
   useEffect(() => {
     let ignore = false;
 
-    fetch("/api/admin/resources?limit=100")
-      .then((res) => res.json())
-      .then((data: ListResponse) => {
+    async function loadResources() {
+      try {
+        const result = await requestAdminData<ListResponse>("/api/admin/resources?limit=100");
         if (ignore) return;
-        setResources(data.resources);
-        setIsLoading(false);
-      });
+        if (result.ok) {
+          setResources(result.data.resources);
+          setLoadError(null);
+        } else {
+          setLoadError(result.message);
+        }
+      } finally {
+        if (!ignore) setIsLoading(false);
+      }
+    }
+
+    void loadResources();
 
     return () => {
       ignore = true;
     };
   }, [refreshToken]);
 
+  function retryLoad() {
+    setLoadError(null);
+    setIsLoading(true);
+    setRefreshToken((token) => token + 1);
+  }
+
   async function handleDelete() {
     if (!deleteTarget) return;
     setIsDeleting(true);
-    await fetch(`/api/admin/resources/${deleteTarget.id}`, {
-      method: "DELETE",
-    });
-    setIsDeleting(false);
-    setDeleteTarget(null);
-    setRefreshToken((t) => t + 1);
+    try {
+      const result = await requestAdminData<{ success: true }>(
+        `/api/admin/resources/${deleteTarget.id}`,
+        { method: "DELETE" },
+      );
+      if (!result.ok) {
+        setLoadError(result.message);
+        return;
+      }
+      setDeleteTarget(null);
+      setRefreshToken((token) => token + 1);
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   return (
@@ -83,6 +109,8 @@ export default function AdminResourcesPage() {
         <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
           Loading...
         </div>
+      ) : loadError ? (
+        <AdminDataFailure message={loadError} onRetry={retryLoad} />
       ) : resources.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
           No resources found.

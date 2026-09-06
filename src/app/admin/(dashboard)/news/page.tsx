@@ -6,9 +6,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Pencil, Trash2, Search, CheckCircle2 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/Button";
 import { Badge, type BadgeProps } from "@/components/ui/Badge";
+import { AdminDataFailure } from "@/components/admin/AdminDataFailure";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { CATEGORIES } from "@/data/admin-options";
 import { useLanguage } from "@/context/LanguageContext";
+import { requestAdminData } from "@/lib/admin-data-client";
 
 interface NewsArticleRow {
   id: string;
@@ -78,6 +80,7 @@ export default function AdminNewsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -125,28 +128,53 @@ export default function AdminNewsPage() {
     if (status) params.set("status", status);
     if (language) params.set("language", language);
 
-    fetch(`/api/admin/news?${params.toString()}`)
-      .then((res) => res.json())
-      .then((data: ListResponse) => {
+    async function loadArticles() {
+      try {
+        const result = await requestAdminData<ListResponse>(`/api/admin/news?${params.toString()}`);
         if (ignore) return;
-        setArticles(data.articles);
-        setTotal(data.total);
-        setTotalPages(data.totalPages);
-        setIsLoading(false);
-      });
+        if (result.ok) {
+          setArticles(result.data.articles);
+          setTotal(result.data.total);
+          setTotalPages(result.data.totalPages);
+          setLoadError(null);
+        } else {
+          setLoadError(result.message);
+        }
+      } finally {
+        if (!ignore) setIsLoading(false);
+      }
+    }
+
+    void loadArticles();
 
     return () => {
       ignore = true;
     };
   }, [page, debouncedSearch, category, status, language, refreshToken]);
 
+  function retryLoad() {
+    setLoadError(null);
+    setIsLoading(true);
+    setRefreshToken((token) => token + 1);
+  }
+
   async function handleDelete() {
     if (!deleteTarget) return;
     setIsDeleting(true);
-    await fetch(`/api/admin/news/${deleteTarget.id}`, { method: "DELETE" });
-    setIsDeleting(false);
-    setDeleteTarget(null);
-    setRefreshToken((t) => t + 1);
+    try {
+      const result = await requestAdminData<{ success: true }>(
+        `/api/admin/news/${deleteTarget.id}`,
+        { method: "DELETE" },
+      );
+      if (!result.ok) {
+        setLoadError(result.message);
+        return;
+      }
+      setDeleteTarget(null);
+      setRefreshToken((token) => token + 1);
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   return (
@@ -219,6 +247,8 @@ export default function AdminNewsPage() {
         <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
           {t("loading_text")}
         </div>
+      ) : loadError ? (
+        <AdminDataFailure message={loadError} onRetry={retryLoad} />
       ) : articles.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
           No news articles yet.

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { isAdminRole } from "@/lib/auth/roles";
+import { adminDataResponse } from "@/lib/admin-data-server";
 import { prisma } from "@/lib/prisma";
 import { affiliateSchema } from "@/lib/validation/affiliate";
 import type { Prisma } from "@/generated/prisma/client";
@@ -29,22 +30,24 @@ export async function GET(request: NextRequest) {
     where.region = region;
   }
 
-  const [affiliates, total] = await Promise.all([
-    prisma.affiliate.findMany({
-      where,
-      orderBy: { name: "asc" },
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.affiliate.count({ where }),
-  ]);
+  return adminDataResponse("affiliates", "list", async () => {
+    const [affiliates, total] = await Promise.all([
+      prisma.affiliate.findMany({
+        where,
+        orderBy: { name: "asc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.affiliate.count({ where }),
+    ]);
 
-  return NextResponse.json({
-    affiliates,
-    total,
-    page,
-    limit,
-    totalPages: Math.max(1, Math.ceil(total / limit)),
+    return {
+      affiliates,
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    };
   });
 }
 

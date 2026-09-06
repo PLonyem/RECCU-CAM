@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { AdminDataFailure } from "@/components/admin/AdminDataFailure";
+import { requestAdminData } from "@/lib/admin-data-client";
 import { cn } from "@/lib/utils";
 import { regions, regionLabels } from "@/data/admin-options";
 import { RejectDialog } from "./RejectDialog";
@@ -116,6 +118,7 @@ export default function ChapterReviewPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [regionFilter, setRegionFilter] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [actioningId, setActioningId] = useState<string | null>(null);
   const [rejectTarget, setRejectTarget] = useState<ReviewChapter | null>(null);
@@ -139,19 +142,36 @@ export default function ChapterReviewPage() {
     if (statusFilter) params.set("status", statusFilter);
     if (regionFilter) params.set("region", regionFilter);
 
-    fetch(`/api/admin/affiliates/review?${params.toString()}`)
-      .then((res) => res.json())
-      .then((data: { chapters: ReviewChapter[]; counts: Counts }) => {
+    async function loadChapters() {
+      try {
+        const result = await requestAdminData<{ chapters: ReviewChapter[]; counts: Counts }>(
+          `/api/admin/affiliates/review?${params.toString()}`,
+        );
         if (ignore) return;
-        setChapters(data.chapters);
-        setCounts(data.counts);
-        setIsLoading(false);
-      });
+        if (result.ok) {
+          setChapters(result.data.chapters);
+          setCounts(result.data.counts);
+          setLoadError(null);
+        } else {
+          setLoadError(result.message);
+        }
+      } finally {
+        if (!ignore) setIsLoading(false);
+      }
+    }
+
+    void loadChapters();
 
     return () => {
       ignore = true;
     };
   }, [statusFilter, regionFilter, refreshToken]);
+
+  function retryLoad() {
+    setLoadError(null);
+    setIsLoading(true);
+    setRefreshToken((token) => token + 1);
+  }
 
   // Auto-dismiss the toast a few seconds after it appears.
   useEffect(() => {
@@ -166,25 +186,31 @@ export default function ChapterReviewPage() {
     reason?: string | null
   ) {
     setActioningId(chapter.id);
-    const res = await fetch(`/api/admin/affiliates/review/${chapter.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, reason: reason ?? null }),
-    });
-    setActioningId(null);
+    try {
+      const result = await requestAdminData<ReviewChapter>(
+        `/api/admin/affiliates/review/${chapter.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action, reason: reason ?? null }),
+        },
+      );
 
-    if (!res.ok) {
-      setToast("Something went wrong. Please try again.");
-      return;
+      if (!result.ok) {
+        setToast(result.message);
+        return;
+      }
+
+      setToast(
+        action === "approve"
+          ? "Profile approved. It is now live on the website."
+          : "Profile rejected.",
+      );
+      setRefreshToken((token) => token + 1);
+      window.dispatchEvent(new Event("admin-badge-refresh"));
+    } finally {
+      setActioningId(null);
     }
-
-    setToast(
-      action === "approve"
-        ? "Profile approved. It is now live on the website."
-        : "Profile rejected."
-    );
-    setRefreshToken((t) => t + 1);
-    window.dispatchEvent(new Event("admin-badge-refresh"));
   }
 
   return (
@@ -239,6 +265,8 @@ export default function ChapterReviewPage() {
         <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
           Loading...
         </div>
+      ) : loadError ? (
+        <AdminDataFailure message={loadError} onRetry={retryLoad} />
       ) : chapters.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
           No credit union profiles found for this filter.

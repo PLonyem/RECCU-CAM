@@ -6,8 +6,10 @@ import { Plus, CheckCircle2, AlertCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge, type BadgeProps } from "@/components/ui/Badge";
+import { AdminDataFailure } from "@/components/admin/AdminDataFailure";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { regions, regionLabels } from "@/data/admin-options";
+import { requestAdminData } from "@/lib/admin-data-client";
 import { cn } from "@/lib/utils";
 import type { AnnouncementDetail } from "@/lib/validation/announcement";
 
@@ -105,6 +107,7 @@ const EMPTY_FORM: FormState = {
 export default function AdminAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<AnnouncementRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -120,21 +123,33 @@ export default function AdminAnnouncementsPage() {
 
   useEffect(() => {
     let ignore = false;
-    // isLoading starts true (see useState above) for the very first fetch;
-    // later refetches triggered by refreshToken update the list in place
-    // without blanking the page again — the toast already covers feedback
-    // for those.
-    fetch("/api/admin/announcements")
-      .then((res) => res.json())
-      .then((data: AnnouncementRow[]) => {
+
+    async function loadAnnouncements() {
+      try {
+        const result = await requestAdminData<AnnouncementRow[]>("/api/admin/announcements");
         if (ignore) return;
-        setAnnouncements(data);
-        setIsLoading(false);
-      });
+        if (result.ok) {
+          setAnnouncements(result.data);
+          setLoadError(null);
+        } else {
+          setLoadError(result.message);
+        }
+      } finally {
+        if (!ignore) setIsLoading(false);
+      }
+    }
+
+    void loadAnnouncements();
     return () => {
       ignore = true;
     };
   }, [refreshToken]);
+
+  function retryLoad() {
+    setLoadError(null);
+    setIsLoading(true);
+    setRefreshToken((token) => token + 1);
+  }
 
   useEffect(() => {
     if (!toast) return;
@@ -203,38 +218,42 @@ export default function AdminAnnouncementsPage() {
     const url = editingId ? `/api/admin/announcements/${editingId}` : "/api/admin/announcements";
     const method = editingId ? "PUT" : "POST";
 
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const body = await res.json().catch(() => null);
-    setIsSaving(false);
+    try {
+      const result = await requestAdminData<AnnouncementRow>(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (!res.ok) {
-      const details = body?.details?.fieldErrors as Record<string, string[] | undefined> | undefined;
-      const nextErrors: Record<string, string> = {};
-      if (details) {
-        for (const [field, messages] of Object.entries(details)) {
-          if (messages?.[0]) nextErrors[field] = messages[0];
-        }
+      if (!result.ok) {
+        setToast({ type: "error", message: result.message });
+        return;
       }
-      setFieldErrors(nextErrors);
-      setToast({ type: "error", message: body?.error ?? "Could not save announcement." });
-      return;
-    }
 
-    setIsModalOpen(false);
-    setToast({ type: "success", message: isPublished ? "Announcement published." : "Saved as draft." });
-    setRefreshToken((t) => t + 1);
+      setIsModalOpen(false);
+      setToast({
+        type: "success",
+        message: isPublished ? "Announcement published." : "Saved as draft.",
+      });
+      setRefreshToken((token) => token + 1);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   async function togglePublish(announcement: AnnouncementRow, isPublished: boolean) {
-    await fetch(`/api/admin/announcements/${announcement.id}`, {
+    const result = await requestAdminData<AnnouncementRow>(
+      `/api/admin/announcements/${announcement.id}`,
+      {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isPublished }),
-    });
+      },
+    );
+    if (!result.ok) {
+      setToast({ type: "error", message: result.message });
+      return;
+    }
     setToast({
       type: "success",
       message: isPublished ? "Announcement published." : "Announcement unpublished.",
@@ -245,11 +264,21 @@ export default function AdminAnnouncementsPage() {
   async function handleDelete() {
     if (!deleteTarget) return;
     setIsDeleting(true);
-    await fetch(`/api/admin/announcements/${deleteTarget.id}`, { method: "DELETE" });
-    setIsDeleting(false);
-    setDeleteTarget(null);
-    setToast({ type: "success", message: "Announcement deleted." });
-    setRefreshToken((t) => t + 1);
+    try {
+      const result = await requestAdminData<{ success: true }>(
+        `/api/admin/announcements/${deleteTarget.id}`,
+        { method: "DELETE" },
+      );
+      if (!result.ok) {
+        setToast({ type: "error", message: result.message });
+        return;
+      }
+      setDeleteTarget(null);
+      setToast({ type: "success", message: "Announcement deleted." });
+      setRefreshToken((token) => token + 1);
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   return (
@@ -288,6 +317,12 @@ export default function AdminAnnouncementsPage() {
       {isLoading ? (
         <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
           Loading…
+        </div>
+      ) : loadError ? (
+        <AdminDataFailure message={loadError} onRetry={retryLoad} />
+      ) : announcements.length === 0 ? (
+        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-500 text-sm">
+          No announcements yet.
         </div>
       ) : (
         <>

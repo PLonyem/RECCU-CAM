@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { isAdminRole } from "@/lib/auth/roles";
+import { adminDataResponse } from "@/lib/admin-data-server";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 
@@ -22,23 +23,25 @@ export async function GET(request: NextRequest) {
     where.isRead = true;
   }
 
-  const [messages, total, unreadCount] = await Promise.all([
-    prisma.contactMessage.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.contactMessage.count({ where }),
-    prisma.contactMessage.count({ where: { isRead: false } }),
-  ]);
+  return adminDataResponse("messages", "list", async () => {
+    const [messages, total, unreadCount] = await Promise.all([
+      prisma.contactMessage.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.contactMessage.count({ where }),
+      prisma.contactMessage.count({ where: { isRead: false } }),
+    ]);
 
-  return NextResponse.json({
-    messages,
-    total,
-    page,
-    limit,
-    totalPages: Math.max(1, Math.ceil(total / limit)),
-    unreadCount,
+    return {
+      messages,
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+      unreadCount,
+    };
   });
 }

@@ -5,9 +5,11 @@ import Link from "next/link";
 import { Plus, Pencil, Trash2, Search, Upload, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { AdminDataFailure } from "@/components/admin/AdminDataFailure";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { regions, regionLabels } from "@/data/admin-options";
 import { useLanguage } from "@/context/LanguageContext";
+import { requestAdminData } from "@/lib/admin-data-client";
 
 interface AffiliateRow {
   id: string;
@@ -46,6 +48,7 @@ export default function AdminAffiliatesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -91,30 +94,53 @@ export default function AdminAffiliatesPage() {
     if (debouncedSearch) params.set("search", debouncedSearch);
     if (region) params.set("region", region);
 
-    fetch(`/api/admin/affiliates?${params.toString()}`)
-      .then((res) => res.json())
-      .then((data: ListResponse) => {
+    async function loadAffiliates() {
+      try {
+        const result = await requestAdminData<ListResponse>(`/api/admin/affiliates?${params.toString()}`);
         if (ignore) return;
-        setAffiliates(data.affiliates);
-        setTotal(data.total);
-        setTotalPages(data.totalPages);
-        setIsLoading(false);
-      });
+        if (result.ok) {
+          setAffiliates(result.data.affiliates);
+          setTotal(result.data.total);
+          setTotalPages(result.data.totalPages);
+          setLoadError(null);
+        } else {
+          setLoadError(result.message);
+        }
+      } finally {
+        if (!ignore) setIsLoading(false);
+      }
+    }
+
+    void loadAffiliates();
 
     return () => {
       ignore = true;
     };
   }, [page, debouncedSearch, region, refreshToken]);
 
+  function retryLoad() {
+    setLoadError(null);
+    setIsLoading(true);
+    setRefreshToken((token) => token + 1);
+  }
+
   async function handleDelete() {
     if (!deleteTarget) return;
     setIsDeleting(true);
-    await fetch(`/api/admin/affiliates/${deleteTarget.id}`, {
-      method: "DELETE",
-    });
-    setIsDeleting(false);
-    setDeleteTarget(null);
-    setRefreshToken((t) => t + 1);
+    try {
+      const result = await requestAdminData<{ success: true }>(
+        `/api/admin/affiliates/${deleteTarget.id}`,
+        { method: "DELETE" },
+      );
+      if (!result.ok) {
+        setLoadError(result.message);
+        return;
+      }
+      setDeleteTarget(null);
+      setRefreshToken((token) => token + 1);
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   async function handleImportFile(file: File) {
@@ -124,19 +150,25 @@ export default function AdminAffiliatesPage() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("/api/admin/affiliates/import", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const result = await requestAdminData<ImportResult>("/api/admin/affiliates/import", {
+        method: "POST",
+        body: formData,
+      });
 
-    if (res.ok) {
-      const result: ImportResult = await res.json();
-      setImportResult(result);
-      setRefreshToken((t) => t + 1);
-    } else {
-      setImportResult({ created: 0, updated: 0, errors: [{ row: 0, message: "Import failed." }] });
+      if (result.ok) {
+        setImportResult(result.data);
+        setRefreshToken((token) => token + 1);
+      } else {
+        setImportResult({
+          created: 0,
+          updated: 0,
+          errors: [{ row: 0, message: result.message }],
+        });
+      }
+    } finally {
+      setIsImporting(false);
     }
-    setIsImporting(false);
   }
 
   return (
@@ -238,6 +270,8 @@ export default function AdminAffiliatesPage() {
         <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
           {t("loading_text")}
         </div>
+      ) : loadError ? (
+        <AdminDataFailure message={loadError} onRetry={retryLoad} />
       ) : affiliates.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
           No affiliates found.

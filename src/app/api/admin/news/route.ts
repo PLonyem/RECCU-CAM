@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { isAdminRole } from "@/lib/auth/roles";
+import { adminDataResponse } from "@/lib/admin-data-server";
 import { prisma } from "@/lib/prisma";
 import { uniqueNewsSlug } from "@/lib/news-articles";
 import { newsArticleSchema } from "@/lib/validation/news-article";
@@ -37,22 +38,24 @@ export async function GET(request: NextRequest) {
     where.language = language;
   }
 
-  const [articles, total] = await Promise.all([
-    prisma.newsArticle.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.newsArticle.count({ where }),
-  ]);
+  return adminDataResponse("news", "list", async () => {
+    const [articles, total] = await Promise.all([
+      prisma.newsArticle.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.newsArticle.count({ where }),
+    ]);
 
-  return NextResponse.json({
-    articles,
-    total,
-    page,
-    limit,
-    totalPages: Math.max(1, Math.ceil(total / limit)),
+    return {
+      articles,
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    };
   });
 }
 

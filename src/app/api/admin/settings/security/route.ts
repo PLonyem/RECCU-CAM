@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { isAdminRole } from "@/lib/auth/roles";
+import { adminDataResponse } from "@/lib/admin-data-server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
@@ -21,12 +22,13 @@ async function isAdmin() {
 
 export async function GET() {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const settings = await prisma.adminSecuritySettings.upsert({
-    where: { id: "default" },
-    update: {},
-    create: { id: "default" },
-  });
-  return NextResponse.json(settings);
+  return adminDataResponse("security-settings", "load", () =>
+    prisma.adminSecuritySettings.upsert({
+      where: { id: "default" },
+      update: {},
+      create: { id: "default" },
+    }),
+  );
 }
 
 export async function PUT(request: NextRequest) {

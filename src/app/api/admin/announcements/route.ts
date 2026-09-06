@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { isAdminRole } from "@/lib/auth/roles";
+import { adminDataResponse } from "@/lib/admin-data-server";
 import { prisma } from "@/lib/prisma";
 import { announcementSchema } from "@/lib/validation/announcement";
 import type { Prisma } from "@/generated/prisma/client";
@@ -27,12 +28,12 @@ export async function GET(request: NextRequest) {
 
   // nulls: "last" keeps drafts (no publishedAt yet) at the bottom instead
   // of Postgres's default of sorting them to the top on a desc order.
-  const announcements = await prisma.announcement.findMany({
-    where,
-    orderBy: { publishedAt: { sort: "desc", nulls: "last" } },
-  });
-
-  return NextResponse.json(announcements);
+  return adminDataResponse("announcements", "list", () =>
+    prisma.announcement.findMany({
+      where,
+      orderBy: { publishedAt: { sort: "desc", nulls: "last" } },
+    }),
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -51,22 +52,26 @@ export async function POST(request: NextRequest) {
   }
 
   const data = parsed.data;
-  const announcement = await prisma.announcement.create({
-    data: {
-      title: data.title,
-      opening: data.opening,
-      details: data.details,
-      category: data.category,
-      priority: data.priority,
-      targetChapter: data.targetChapter?.trim() || null,
-      audience: data.audience,
-      affiliateId: data.affiliateId?.trim() || null,
-      startDate: data.startDate ? new Date(data.startDate) : null,
-      isPublished: data.isPublished,
-      publishedAt: data.isPublished ? new Date() : null,
-      expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
-    },
-  });
-
-  return NextResponse.json(announcement, { status: 201 });
+  return adminDataResponse(
+    "announcements",
+    "create",
+    () =>
+      prisma.announcement.create({
+        data: {
+          title: data.title,
+          opening: data.opening,
+          details: data.details,
+          category: data.category,
+          priority: data.priority,
+          targetChapter: data.targetChapter?.trim() || null,
+          audience: data.audience,
+          affiliateId: data.affiliateId?.trim() || null,
+          startDate: data.startDate ? new Date(data.startDate) : null,
+          isPublished: data.isPublished,
+          publishedAt: data.isPublished ? new Date() : null,
+          expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
+        },
+      }),
+    201,
+  );
 }
