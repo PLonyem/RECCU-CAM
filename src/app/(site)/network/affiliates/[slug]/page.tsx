@@ -32,9 +32,8 @@ import { Section } from "@/components/ui/Section";
 import { Heading, Text } from "@/components/ui/Typography";
 import {
   affiliateServiceCategories,
-  affiliates,
-  getAffiliateBySlug,
 } from "@/data/affiliates";
+import { getPublicAffiliateBySlug } from "@/lib/data/public-affiliates";
 import { createPageMetadata } from "@/lib/seo";
 
 interface Props {
@@ -45,13 +44,11 @@ const serviceLabels = new Map(
   affiliateServiceCategories.map((service) => [service.slug, service.name]),
 );
 
-export function generateStaticParams() {
-  return affiliates.map((affiliate) => ({ slug: affiliate.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const affiliate = getAffiliateBySlug(affiliates, slug);
+  const affiliate = await getPublicAffiliateBySlug(slug);
 
   if (!affiliate) return { title: "Affiliate not found", robots: { index: false, follow: false } };
 
@@ -65,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function AffiliateProfilePage({ params }: Props) {
   const { slug } = await params;
-  const affiliate = getAffiliateBySlug(affiliates, slug);
+  const affiliate = await getPublicAffiliateBySlug(slug);
   if (!affiliate) notFound();
 
   const location = getAffiliateLocation(affiliate);

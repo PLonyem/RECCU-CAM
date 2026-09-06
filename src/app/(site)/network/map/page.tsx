@@ -4,7 +4,8 @@ import { PageIntro } from "@/components/layout/PageIntro";
 import { VerificationNote } from "@/components/layout/VerificationNote";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
-import { affiliates, getMappableAffiliates } from "@/data/affiliates";
+import { getMappableAffiliates } from "@/data/affiliates";
+import { getPublicAffiliates } from "@/lib/data/public-affiliates";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
@@ -13,7 +14,10 @@ export const metadata: Metadata = createPageMetadata({
   path: "/network/map",
 });
 
-export default function NetworkMapPage() {
+export const dynamic = "force-dynamic";
+
+export default async function NetworkMapPage() {
+  const affiliates = await getPublicAffiliates();
   const mappedCount = getMappableAffiliates(affiliates).length;
 
   return (

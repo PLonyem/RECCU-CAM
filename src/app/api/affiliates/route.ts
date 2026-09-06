@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { networkAffiliates } from "@/data/affiliates";
+import { getPublicAffiliates } from "@/lib/data/public-affiliates";
 
 export async function GET() {
+  const affiliates = await getPublicAffiliates();
   return NextResponse.json({
-    affiliates: networkAffiliates,
-    source: "MINFI list as at 31 December 2021",
-    completeCurrentDirectory: false,
+    affiliates,
+    source: "RECCU-CAM managed affiliate directory",
+    completeCurrentDirectory: true,
   });
 }

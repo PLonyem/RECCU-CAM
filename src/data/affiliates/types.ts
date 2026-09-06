@@ -39,7 +39,8 @@ export interface AffiliateSource {
 
 export type AffiliateDataClassification =
   | "demo-safe-source-reference"
-  | "demo-fixture";
+  | "demo-fixture"
+  | "database-managed";
 
 /**
  * Database-neutral public affiliate record.

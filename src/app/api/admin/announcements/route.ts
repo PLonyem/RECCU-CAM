@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
-import { isAdminRole } from "@/lib/auth/roles";
+import { isAdminRole, normalizeAuthRole } from "@/lib/auth/roles";
 import { adminDataResponse } from "@/lib/admin-data-server";
 import { prisma } from "@/lib/prisma";
 import { announcementSchema } from "@/lib/validation/announcement";
 import type { Prisma } from "@/generated/prisma/client";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(request: NextRequest) {
   const { userId, sessionClaims } = await auth();
@@ -38,7 +40,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
+  const role = normalizeAuthRole(sessionClaims?.metadata?.role);
+  if (!userId || !role || !isAdminRole(role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -55,8 +58,8 @@ export async function POST(request: NextRequest) {
   return adminDataResponse(
     "announcements",
     "create",
-    () =>
-      prisma.announcement.create({
+    async () => {
+      const announcement = await prisma.announcement.create({
         data: {
           title: data.title,
           opening: data.opening,
@@ -71,7 +74,12 @@ export async function POST(request: NextRequest) {
           publishedAt: data.isPublished ? new Date() : null,
           expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
         },
-      }),
+      });
+      await writeAuditLog({ actorId: userId, actorRole: role, action: announcement.isPublished ? "announcement_published" : "announcement_draft_created", resource: "announcement", resourceId: announcement.id, metadata: { audience: announcement.audience } });
+      revalidatePath("/");
+      revalidatePath("/affiliate-portal");
+      return announcement;
+    },
     201,
   );
 }

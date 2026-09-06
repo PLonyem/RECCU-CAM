@@ -208,7 +208,9 @@ function EventList({ events, monthLabel }: { events: readonly TrainingProgram[];
             <div>
               <div className="flex flex-wrap gap-2">
                 {category && <Badge variant="primary">{category.title}</Badge>}
-                <Badge variant="success">{registrationStatusLabels[event.registrationStatus]}</Badge>
+                <Badge variant="success">
+                  {registrationStatusLabels[event.registrationStatus as keyof typeof registrationStatusLabels] ?? event.registrationStatus.replaceAll("-", " ")}
+                </Badge>
               </div>
               <h3 className="mt-4 font-display text-h4 text-institutional">{event.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">

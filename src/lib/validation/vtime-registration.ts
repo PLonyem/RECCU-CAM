@@ -1,10 +1,7 @@
 import { z } from "zod";
-import { trainingPrograms } from "@/data/training-programs";
 import { honeypotField } from "@/lib/validation/form-security";
 
 const sensitiveDataPattern = /\b(password|passcode|pin|one[- ]?time password|otp|banking credential|login credential)\b/i;
-const programSlugs = new Set(trainingPrograms.map((program) => program.slug));
-
 export const vtimeRegistrationSchema = z.object({
   companyWebsite: honeypotField,
   participantName: z.string().trim().min(2, "Enter the participant's name.").max(120),
@@ -14,7 +11,7 @@ export const vtimeRegistrationSchema = z.object({
     .string()
     .trim()
     .min(1, "Select a program.")
-    .refine((value) => programSlugs.has(value), "Select a valid VTIME program."),
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Select a valid VTIME program."),
   phone: z.string().trim().min(6, "Enter a valid phone number.").max(30),
   email: z.string().trim().email("Enter a valid email address.").max(254),
   notes: z

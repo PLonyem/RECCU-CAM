@@ -46,15 +46,15 @@ test("data-backed sidebar modules define a zero-record state", () => {
   const expectations = [
     ["messages/page.tsx", "No messages yet."],
     ["affiliates/page.tsx", "No affiliates found."],
-    ["affiliation-requests/page.tsx", "No affiliation requests have been received."],
-    ["affiliate-banking/page.tsx", "No affiliate banking inquiries have been submitted."],
+    ["affiliation-requests/page.tsx", "No affiliation requests yet."],
+    ["affiliate-banking/page.tsx", "No Affiliate Banking inquiries yet."],
     ["support/page.tsx", "No support requests yet."],
     ["news/page.tsx", "No news articles yet."],
     ["announcements/page.tsx", "No announcements yet."],
     ["vtime/page.tsx", "No VTIME programmes yet."],
-    ["resources/page.tsx", "No resources found."],
-    ["compliance/page.tsx", "No compliance records yet."],
-    ["media/page.tsx", "No media assets yet."],
+    ["resources/page.tsx", "No Knowledge Centre resources yet."],
+    ["compliance/page.tsx", "No compliance resources yet."],
+    ["../../../components/admin/MediaLibraryClient.tsx", "No media assets yet."],
     ["users/page.tsx", "No users found."],
     ["audit-log/page.tsx", "No audited actions yet."],
   ] as const;
@@ -70,5 +70,12 @@ test("the nested admin error boundary keeps recovery actions available", () => {
   assert.match(source, /Unable to load this section\./);
   assert.match(source, /> Retry/);
   assert.match(source, /Back to Admin Dashboard/);
+  assert.match(source, /href="\/admin"/);
+});
+
+test("the global admin error boundary offers a real retry and dashboard escape", () => {
+  const source = readFileSync(path.join(process.cwd(), "src", "app", "admin", "error.tsx"), "utf8");
+  assert.match(source, /Unable to load this section\./);
+  assert.match(source, /unstable_retry\(\)/);
   assert.match(source, /href="\/admin"/);
 });

@@ -36,11 +36,10 @@ import {
   SectionHeader,
 } from "@/components/ui";
 import {
-  featuredTrainingPrograms,
-  publishedTrainingEvents,
   trainingCategories,
   type TrainingCategorySlug,
 } from "@/data/training-programs";
+import { getPublicTrainingPrograms } from "@/lib/data/public-training";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
@@ -109,7 +108,14 @@ const learningApproach = [
   },
 ];
 
-export default function VtimePage() {
+export const dynamic = "force-dynamic";
+
+export default async function VtimePage() {
+  const publishedPrograms = await getPublicTrainingPrograms();
+  const featuredTrainingPrograms = publishedPrograms.slice(0, 3);
+  const publishedTrainingEvents = publishedPrograms.filter(
+    (program) => program.startDate && program.registrationStatus !== "schedule-pending",
+  );
   return (
     <>
       <PageIntro
@@ -204,11 +210,20 @@ export default function VtimePage() {
               </Link>
             </Button>
           </div>
-          <div className="mt-10 grid gap-5 lg:grid-cols-3">
-            {featuredTrainingPrograms.map((program) => (
-              <TrainingProgramCard key={program.id} program={program} />
-            ))}
-          </div>
+          {featuredTrainingPrograms.length > 0 ? (
+            <div className="mt-10 grid gap-5 lg:grid-cols-3">
+              {featuredTrainingPrograms.map((program) => (
+                <TrainingProgramCard key={program.id} program={program} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              className="mt-10"
+              icon={GraduationCap}
+              title="No VTIME programmes yet."
+              description="Published programmes will appear here after authorized staff approve them."
+            />
+          )}
         </Container>
       </Section>
 
@@ -274,7 +289,13 @@ export default function VtimePage() {
                   </Button>
                 }
               />
-            ) : null}
+            ) : (
+              <div className="grid gap-5 lg:grid-cols-2">
+                {publishedTrainingEvents.map((program) => (
+                  <TrainingProgramCard key={program.id} program={program} detailed />
+                ))}
+              </div>
+            )}
           </div>
         </Container>
       </Section>

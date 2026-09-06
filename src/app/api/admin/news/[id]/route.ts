@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
-import { isAdminRole } from "@/lib/auth/roles";
+import { isAdminRole, normalizeAuthRole } from "@/lib/auth/roles";
+import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { uniqueNewsSlug } from "@/lib/news-articles";
 import { updateNewsArticleSchema } from "@/lib/validation/news-article";
@@ -27,7 +29,8 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
+  const role = normalizeAuthRole(sessionClaims?.metadata?.role);
+  if (!userId || !role || !isAdminRole(role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -74,12 +77,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     },
   });
 
+  await writeAuditLog({ actorId: userId, actorRole: role, action: article.published ? "news_published_or_updated" : "news_draft_updated", resource: "news_article", resourceId: article.id, metadata: { published: article.published } });
+  revalidatePath("/news");
+  revalidatePath(`/news/${existing.slug}`);
+  revalidatePath(`/news/${article.slug}`);
+
   return NextResponse.json(article);
 }
 
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
+  const role = normalizeAuthRole(sessionClaims?.metadata?.role);
+  if (!userId || !role || !isAdminRole(role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -91,6 +100,10 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   }
 
   await prisma.newsArticle.delete({ where: { id } });
+
+  await writeAuditLog({ actorId: userId, actorRole: role, action: "news_deleted", resource: "news_article", resourceId: id });
+  revalidatePath("/news");
+  revalidatePath(`/news/${existing.slug}`);
 
   return NextResponse.json({ success: true });
 }

@@ -13,7 +13,7 @@ import {
   RequiredMark,
 } from "@/components/forms/FormControls";
 import { Button } from "@/components/ui";
-import { registrationStatusLabels, trainingPrograms } from "@/data/training-programs";
+import { registrationStatusLabels, type TrainingProgram } from "@/data/training-programs";
 import {
   type VtimeRegistration,
   vtimeRegistrationSchema,
@@ -26,10 +26,10 @@ function errorId(name: keyof VtimeRegistration) {
   return `vtime-registration-${name}-error`;
 }
 
-export function TrainingRegistrationForm() {
+export function TrainingRegistrationForm({ programs }: { programs: readonly TrainingProgram[] }) {
   const searchParams = useSearchParams();
   const requestedProgram = searchParams.get("program") ?? "";
-  const validRequestedProgram = trainingPrograms.some((program) => program.slug === requestedProgram)
+  const validRequestedProgram = programs.some((program) => program.slug === requestedProgram)
     ? requestedProgram
     : "";
   const [submissionError, setSubmissionError] = useState<string | null>(null);
@@ -162,9 +162,9 @@ export function TrainingRegistrationForm() {
             aria-describedby={errors.program ? errorId("program") : undefined}
           >
             <option value="">Select a program</option>
-            {trainingPrograms.map((program) => (
+            {programs.map((program) => (
               <option key={program.id} value={program.slug}>
-                {program.title} — {registrationStatusLabels[program.registrationStatus]}
+                {program.title} — {registrationStatusLabels[program.registrationStatus as keyof typeof registrationStatusLabels] ?? program.registrationStatus.replaceAll("-", " ")}
               </option>
             ))}
           </select>

@@ -42,7 +42,6 @@ const nextConfig: NextConfig = {
       { source: "/loan-calculator", destination: "/services/affiliate-banking", permanent: true },
       { source: "/resources", destination: "/knowledge", permanent: true },
       { source: "/resources/chapter-profile-template", destination: "/knowledge", permanent: true },
-      { source: "/news/:slug", destination: "/news", permanent: true },
     ];
   },
   async headers() {

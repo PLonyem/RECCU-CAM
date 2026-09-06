@@ -1,11 +1,15 @@
 import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { createTrainingProgram } from "@/app/admin/(dashboard)/operations/actions";
+import { createTrainingProgram, updateTrainingProgram } from "@/app/admin/(dashboard)/operations/actions";
 
 export default async function VtimeAdminPage() {
   const programs = await prisma.trainingProgram.findMany({
-    include: { _count: { select: { registrations: true } } },
+    include: {
+      _count: { select: { registrations: true } },
+      registrations: { orderBy: { createdAt: "desc" }, take: 100 },
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -31,6 +35,10 @@ export default async function VtimeAdminPage() {
           </select>
           <input name="venue" placeholder="Venue" className="rounded-lg border border-slate-300 px-3 py-2" />
           <input name="capacity" type="number" min="1" placeholder="Capacity" className="rounded-lg border border-slate-300 px-3 py-2" />
+          <select name="publicationStatus" defaultValue="draft" aria-label="Publication status" className="rounded-lg border border-slate-300 px-3 py-2">
+            <option value="draft">Save as draft</option>
+            <option value="published">Publish now</option>
+          </select>
           <label className="text-xs font-semibold text-slate-600">
             Start date
             <input name="startDate" type="date" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" />
@@ -39,7 +47,7 @@ export default async function VtimeAdminPage() {
             End date
             <input name="endDate" type="date" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" />
           </label>
-          <button className="rounded-lg bg-institutional px-4 py-2 font-semibold text-white sm:col-span-2">Publish programme</button>
+          <button className="rounded-lg bg-institutional px-4 py-2 font-semibold text-white sm:col-span-2">Save programme</button>
         </form>
       </Card>
       <section>
@@ -54,6 +62,40 @@ export default async function VtimeAdminPage() {
                 </div>
                 <p className="mt-2 text-sm text-slate-600">{program.summary}</p>
                 <p className="mt-4 text-xs text-slate-500">{program._count.registrations} registrations · {program.registrationStatus}</p>
+                <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+                  {program.published && <Link href={`/vtime/programs/${program.slug}`} className="text-forest hover:underline">Public preview</Link>}
+                </div>
+                <details className="mt-5 border-t border-slate-100 pt-4">
+                  <summary className="cursor-pointer text-sm font-semibold text-institutional">Edit publication and schedule</summary>
+                  <form action={updateTrainingProgram} className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <input type="hidden" name="id" value={program.id} />
+                    <input required name="title" defaultValue={program.title} aria-label="Programme title" className="rounded-lg border border-slate-300 px-3 py-2" />
+                    <input required name="category" defaultValue={program.category} aria-label="Category" className="rounded-lg border border-slate-300 px-3 py-2" />
+                    <textarea required name="summary" defaultValue={program.summary} aria-label="Programme summary" className="rounded-lg border border-slate-300 px-3 py-2 sm:col-span-2" />
+                    <input required name="level" defaultValue={program.level} aria-label="Level" className="rounded-lg border border-slate-300 px-3 py-2" />
+                    <select name="format" defaultValue={program.format ?? ""} aria-label="Format" className="rounded-lg border border-slate-300 px-3 py-2"><option value="">Format pending</option><option value="in-person">In person</option><option value="online">Online</option><option value="hybrid">Hybrid</option></select>
+                    <input name="venue" defaultValue={program.venue ?? ""} aria-label="Venue" placeholder="Venue" className="rounded-lg border border-slate-300 px-3 py-2" />
+                    <input name="capacity" defaultValue={program.capacity ?? ""} type="number" min="1" aria-label="Capacity" placeholder="Capacity" className="rounded-lg border border-slate-300 px-3 py-2" />
+                    <label className="text-xs font-semibold text-slate-600">Start date<input name="startDate" defaultValue={program.startDate?.toISOString().slice(0, 10) ?? ""} type="date" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+                    <label className="text-xs font-semibold text-slate-600">End date<input name="endDate" defaultValue={program.endDate?.toISOString().slice(0, 10) ?? ""} type="date" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+                    <select name="publicationStatus" defaultValue={!program.published && program.registrationStatus === "archived" ? "archived" : !program.published ? "draft" : program.registrationStatus === "registration-closed" ? "closed" : "published"} aria-label="Publication status" className="rounded-lg border border-slate-300 px-3 py-2 sm:col-span-2"><option value="draft">Draft / unpublished</option><option value="published">Published / registration open</option><option value="closed">Published / registration closed</option><option value="archived">Archived</option></select>
+                    <button className="rounded-lg bg-institutional px-4 py-2 font-semibold text-white sm:col-span-2">Update programme</button>
+                  </form>
+                </details>
+                <details className="mt-4 border-t border-slate-100 pt-4">
+                  <summary className="cursor-pointer text-sm font-semibold text-institutional">Registrations ({program._count.registrations})</summary>
+                  {program.registrations.length > 0 ? (
+                    <div className="mt-3 space-y-3">
+                      {program.registrations.map((registration) => (
+                        <div key={registration.id} className="rounded-lg bg-slate-50 p-3 text-sm">
+                          <p className="font-semibold text-slate-900">{registration.participantName} · {registration.institution}</p>
+                          <p className="mt-1 text-slate-600">{registration.role} · {registration.email} · {registration.phone}</p>
+                          <p className="mt-1 text-xs text-slate-500">{registration.status} · {registration.createdAt.toLocaleString("en-GB")}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : <p className="mt-3 text-sm text-slate-500">No registrations yet.</p>}
+                </details>
               </Card>
             ))}
           </div>

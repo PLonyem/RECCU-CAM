@@ -25,7 +25,10 @@ export async function GET() {
     where: {
       isPublished: true,
       audience: "PUBLIC",
-      OR: [{ expiryDate: null }, { expiryDate: { gt: now } }],
+      AND: [
+        { OR: [{ startDate: null }, { startDate: { lte: now } }] },
+        { OR: [{ expiryDate: null }, { expiryDate: { gt: now } }] },
+      ],
     },
     orderBy: { publishedAt: "desc" },
   });

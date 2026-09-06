@@ -8,9 +8,9 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import {
   AFFILIATE_DATA_NOTICE,
-  affiliates,
   deriveAffiliateFilterOptions,
 } from "@/data/affiliates";
+import { getPublicAffiliates } from "@/lib/data/public-affiliates";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
@@ -19,9 +19,11 @@ export const metadata: Metadata = createPageMetadata({
   path: "/network/affiliates",
 });
 
-const filterOptions = deriveAffiliateFilterOptions(affiliates);
+export const dynamic = "force-dynamic";
 
-export default function AffiliatesPage() {
+export default async function AffiliatesPage() {
+  const affiliates = await getPublicAffiliates();
+  const filterOptions = deriveAffiliateFilterOptions(affiliates);
   return (
     <>
       <PageIntro
@@ -31,7 +33,11 @@ export default function AffiliatesPage() {
       />
       <Section>
         <Container>
-          <VerificationNote>{AFFILIATE_DATA_NOTICE}</VerificationNote>
+          <VerificationNote>
+            {affiliates.length > 0
+              ? "This directory shows active affiliate profiles approved by authorized RECCU-CAM staff."
+              : AFFILIATE_DATA_NOTICE}
+          </VerificationNote>
           <div className="mt-8">
             <Suspense fallback={<AffiliateDirectorySkeleton />}>
               <AffiliateDirectory affiliates={affiliates} filterOptions={filterOptions} />

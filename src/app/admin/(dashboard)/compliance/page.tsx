@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { createComplianceRecord } from "@/app/admin/(dashboard)/operations/actions";
+import { createComplianceRecord, updateComplianceRecord } from "@/app/admin/(dashboard)/operations/actions";
 
 export default async function CompliancePage() {
   const [records, affiliates] = await Promise.all([
@@ -21,7 +21,7 @@ export default async function CompliancePage() {
         <p className="mt-2 text-slate-600">Publish editable, verified notices and required submissions. No regulatory deadlines are pre-invented.</p>
       </header>
       <Card className="p-6">
-        <h2 className="font-semibold text-institutional">Publish compliance item</h2>
+        <h2 className="font-semibold text-institutional">Create compliance item</h2>
         <form action={createComplianceRecord} className="mt-5 grid gap-4 sm:grid-cols-2">
           <input required name="title" placeholder="Title" className="rounded-lg border border-slate-300 px-3 py-2" />
           <input required name="category" placeholder="Category" className="rounded-lg border border-slate-300 px-3 py-2" />
@@ -29,7 +29,8 @@ export default async function CompliancePage() {
           <label className="text-xs font-semibold text-slate-600">Due date (optional)<input name="dueDate" type="date" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
           <select name="audience" className="rounded-lg border border-slate-300 px-3 py-2"><option value="all-affiliates">All affiliates</option><option value="specific-affiliate">Specific affiliate</option></select>
           <select name="affiliateId" className="rounded-lg border border-slate-300 px-3 py-2 sm:col-span-2"><option value="">All affiliates</option>{affiliates.map((affiliate) => <option key={affiliate.id} value={affiliate.id}>{affiliate.name}</option>)}</select>
-          <button className="rounded-lg bg-institutional px-4 py-2 font-semibold text-white sm:col-span-2">Publish item</button>
+          <select name="publication" defaultValue="draft" aria-label="Publication status" className="rounded-lg border border-slate-300 px-3 py-2 sm:col-span-2"><option value="draft">Save as draft</option><option value="published">Publish now</option></select>
+          <button className="rounded-lg bg-institutional px-4 py-2 font-semibold text-white sm:col-span-2">Save item</button>
         </form>
       </Card>
       {records.length ? (
@@ -41,11 +42,26 @@ export default async function CompliancePage() {
                 <Badge>{record.status}</Badge>
               </div>
               <p className="mt-3 text-sm text-slate-600">{record.description}</p>
+              <details className="mt-4 border-t border-slate-100 pt-4">
+              <summary className="cursor-pointer text-sm font-semibold text-institutional">Edit content and workflow</summary>
+              <form action={updateComplianceRecord} className="mt-4 grid gap-3 sm:grid-cols-2">
+                <input type="hidden" name="id" value={record.id} />
+                <input required name="title" defaultValue={record.title} aria-label="Title" className="rounded-lg border border-slate-300 px-3 py-2" />
+                <input required name="category" defaultValue={record.category} aria-label="Category" className="rounded-lg border border-slate-300 px-3 py-2" />
+                <textarea required name="description" defaultValue={record.description} aria-label="Description" className="rounded-lg border border-slate-300 px-3 py-2 sm:col-span-2" />
+                <label className="text-xs font-semibold text-slate-600">Due date<input name="dueDate" type="date" defaultValue={record.dueDate?.toISOString().slice(0, 10) ?? ""} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+                <label className="text-xs font-semibold text-slate-600">Audience<select name="audience" defaultValue={record.audience} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="all-affiliates">All affiliates</option><option value="specific-affiliate">Specific affiliate</option></select></label>
+                <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Affiliate<select name="affiliateId" defaultValue={record.affiliateId ?? ""} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="">All affiliates</option>{affiliates.map((affiliate) => <option key={affiliate.id} value={affiliate.id}>{affiliate.name}</option>)}</select></label>
+                <label className="text-xs font-semibold text-slate-600">Workflow status<select name="status" defaultValue={record.status} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="pending">Pending</option><option value="in-review">In review</option><option value="completed">Completed</option><option value="archived">Archived</option></select></label>
+                <label className="text-xs font-semibold text-slate-600">Publication<select name="publication" defaultValue={record.published ? "published" : "draft"} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="draft">Draft</option><option value="published">Published</option></select></label>
+                <button className="rounded-lg bg-institutional px-4 py-2 text-sm font-semibold text-white sm:col-span-2">Update item</button>
+              </form>
+              </details>
             </Card>
           ))}
         </div>
       ) : (
-        <Card className="p-8 text-center text-sm text-slate-500">No compliance records yet.</Card>
+        <Card className="p-8 text-center text-sm text-slate-500">No compliance resources yet.</Card>
       )}
     </div>
   );

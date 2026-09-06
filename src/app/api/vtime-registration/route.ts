@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getTrainingProgramBySlug } from "@/data/training-programs";
 import { sendContactFormNotification } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import {
@@ -35,67 +34,50 @@ export async function POST(request: Request) {
   }
 
   const registration = parsed.data;
-  const curriculumProgram = getTrainingProgramBySlug(registration.program);
-  const publishedProgram = await prisma.trainingProgram.findFirst({ where: { slug: registration.program, published: true } });
-  if (!curriculumProgram && !publishedProgram) {
-    return NextResponse.json({ error: "Select a valid VTIME program." }, { status: 400 });
-  }
-  const programTitle = publishedProgram?.title ?? curriculumProgram!.title;
-  const programSlug = publishedProgram?.slug ?? curriculumProgram!.slug;
-
-  const message = [
-    `Participant: ${registration.participantName}`,
-    `Institution: ${registration.institution}`,
-    `Role: ${registration.role}`,
-    `Program: ${programTitle}`,
-    `Program slug: ${programSlug}`,
-    "",
-    registration.notes || "No additional notes provided.",
-  ].join("\n");
-
   try {
-    const storedProgram = publishedProgram ?? await prisma.trainingProgram.upsert({
-      where: { slug: curriculumProgram!.slug },
-      update: {},
-      create: {
-        slug: curriculumProgram!.slug,
-        title: curriculumProgram!.title,
-        summary: curriculumProgram!.summary,
-        category: curriculumProgram!.category,
-        audience: [...curriculumProgram!.audience],
-        level: curriculumProgram!.level,
-        format: curriculumProgram!.format,
-        venue: curriculumProgram!.location,
-        startDate: curriculumProgram!.startDate ? new Date(`${curriculumProgram!.startDate}T00:00:00Z`) : null,
-        endDate: curriculumProgram!.endDate ? new Date(`${curriculumProgram!.endDate}T00:00:00Z`) : null,
-        capacity: curriculumProgram!.capacity,
-        registrationStatus: curriculumProgram!.registrationStatus,
-      },
+    const publishedProgram = await prisma.trainingProgram.findFirst({
+      where: { slug: registration.program, published: true },
     });
-    await prisma.trainingRegistration.create({
-      data: {
-        programId: storedProgram.id,
-        participantName: registration.participantName,
-        institution: registration.institution,
-        role: registration.role,
-        email: registration.email,
-        phone: registration.phone,
-        notes: registration.notes,
-      },
-    });
-    await prisma.contactMessage.create({
-      data: {
-        name: registration.participantName,
-        email: registration.email,
-        phone: registration.phone,
-        organization: registration.institution,
-        role: registration.role,
-        purpose: "training",
-        department: "VTIME Training",
-        subject: `VTIME registration — ${programTitle}`,
-        message,
-      },
-    });
+    if (!publishedProgram) {
+      return NextResponse.json({ error: "Select a valid published VTIME program." }, { status: 400 });
+    }
+
+    const message = [
+      `Participant: ${registration.participantName}`,
+      `Institution: ${registration.institution}`,
+      `Role: ${registration.role}`,
+      `Program: ${publishedProgram.title}`,
+      `Program slug: ${publishedProgram.slug}`,
+      "",
+      registration.notes || "No additional notes provided.",
+    ].join("\n");
+
+    await prisma.$transaction([
+      prisma.trainingRegistration.create({
+        data: {
+          programId: publishedProgram.id,
+          participantName: registration.participantName,
+          institution: registration.institution,
+          role: registration.role,
+          email: registration.email,
+          phone: registration.phone,
+          notes: registration.notes,
+        },
+      }),
+      prisma.contactMessage.create({
+        data: {
+          name: registration.participantName,
+          email: registration.email,
+          phone: registration.phone,
+          organization: registration.institution,
+          role: registration.role,
+          purpose: "training",
+          department: "VTIME Training",
+          subject: `VTIME registration — ${publishedProgram.title}`,
+          message,
+        },
+      }),
+    ]);
   } catch (error) {
     reportServerError("vtime-registration.store_failed", error);
     return NextResponse.json(

@@ -33,10 +33,10 @@ export interface TrainingProgram {
   slug: string;
   title: string;
   summary: string;
-  category: TrainingCategorySlug;
+  category: string;
   audience: readonly string[];
-  level: TrainingLevel;
-  format: TrainingFormat | null;
+  level: string;
+  format: string | null;
   location: string | null;
   startDate: string | null;
   endDate: string | null;
@@ -46,7 +46,7 @@ export interface TrainingProgram {
   modules: readonly string[];
   requirements: readonly string[];
   capacity: number | null;
-  registrationStatus: RegistrationStatus;
+  registrationStatus: string;
 }
 
 export interface TrainingProgramFilters {
@@ -233,7 +233,7 @@ export const publishedTrainingEvents = trainingPrograms.filter(
     program.startDate !== null && program.registrationStatus !== "schedule-pending",
 );
 
-export function getTrainingCategory(slug: TrainingCategorySlug) {
+export function getTrainingCategory(slug: string) {
   return trainingCategories.find((category) => category.slug === slug);
 }
 

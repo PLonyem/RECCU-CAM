@@ -22,7 +22,7 @@ export interface PublishedNewsArticle {
   title: string;
   summary: string;
   body: readonly string[];
-  category: NewsCategorySlug;
+  category: string;
   publishedAt: string;
   updatedAt: string | null;
   authorName: string | null;
@@ -67,7 +67,7 @@ export const upcomingEvents = [...publishedNewsEvents].sort((a, b) =>
   a.startDate.localeCompare(b.startDate),
 );
 
-export function getNewsCategory(slug: NewsCategorySlug) {
+export function getNewsCategory(slug: string) {
   return newsCategories.find((category) => category.slug === slug);
 }
 

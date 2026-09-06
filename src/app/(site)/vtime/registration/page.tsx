@@ -5,6 +5,7 @@ import { PageIntro } from "@/components/layout/PageIntro";
 import { TrainingRegistrationForm } from "@/components/vtime/TrainingRegistrationForm";
 import { Card, Container, LoadingSkeleton, Section } from "@/components/ui";
 import { createPageMetadata } from "@/lib/seo";
+import { getPublicTrainingPrograms } from "@/lib/data/public-training";
 
 export const metadata: Metadata = createPageMetadata({
   title: "VTIME Training Registration",
@@ -12,7 +13,10 @@ export const metadata: Metadata = createPageMetadata({
   path: "/vtime/registration",
 });
 
-export default function TrainingRegistrationPage() {
+export const dynamic = "force-dynamic";
+
+export default async function TrainingRegistrationPage() {
+  const programs = await getPublicTrainingPrograms();
   return (
     <>
       <PageIntro
@@ -50,7 +54,7 @@ export default function TrainingRegistrationPage() {
             </aside>
             <Card padding="spacious" className="shadow-raised">
               <Suspense fallback={<LoadingSkeleton lines={7} />}>
-                <TrainingRegistrationForm />
+                <TrainingRegistrationForm programs={programs} />
               </Suspense>
             </Card>
           </div>

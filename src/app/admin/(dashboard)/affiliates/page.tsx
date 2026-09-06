@@ -2,14 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Search, Upload, CheckCircle2, AlertCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Upload, CheckCircle2, AlertCircle, Eye, Power } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { AdminDataFailure } from "@/components/admin/AdminDataFailure";
+import { AdminLoadingState } from "@/components/admin/AdminLoadingState";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { regions, regionLabels } from "@/data/admin-options";
 import { useLanguage } from "@/context/LanguageContext";
 import { requestAdminData } from "@/lib/admin-data-client";
+import { slugify } from "@/lib/slug";
 
 interface AffiliateRow {
   id: string;
@@ -19,6 +21,7 @@ interface AffiliateRow {
   city: string | null;
   phone: string | null;
   isActive: boolean;
+  profileStatus: string;
 }
 
 interface ListResponse {
@@ -53,6 +56,8 @@ export default function AdminAffiliatesPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [region, setRegion] = useState("");
+  const [status, setStatus] = useState("");
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<AffiliateRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -71,7 +76,7 @@ export default function AdminAffiliatesPage() {
   // the effective request (page + filters + manual refresh) changes.
   // Adjusted during render (React's documented pattern for this) rather
   // than in an effect, so it doesn't trigger a second, cascading render.
-  const filterKey = `${debouncedSearch}|${region}`;
+  const filterKey = `${debouncedSearch}|${region}|${status}`;
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
   if (filterKey !== prevFilterKey) {
     setPrevFilterKey(filterKey);
@@ -93,6 +98,7 @@ export default function AdminAffiliatesPage() {
     });
     if (debouncedSearch) params.set("search", debouncedSearch);
     if (region) params.set("region", region);
+    if (status) params.set("status", status);
 
     async function loadAffiliates() {
       try {
@@ -116,7 +122,7 @@ export default function AdminAffiliatesPage() {
     return () => {
       ignore = true;
     };
-  }, [page, debouncedSearch, region, refreshToken]);
+  }, [page, debouncedSearch, region, status, refreshToken]);
 
   function retryLoad() {
     setLoadError(null);
@@ -168,6 +174,24 @@ export default function AdminAffiliatesPage() {
       }
     } finally {
       setIsImporting(false);
+    }
+  }
+
+  async function toggleActive(affiliate: AffiliateRow) {
+    setUpdatingId(affiliate.id);
+    try {
+      const result = await requestAdminData<AffiliateRow>(`/api/admin/affiliates/${affiliate.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !affiliate.isActive }),
+      });
+      if (!result.ok) {
+        setLoadError(result.message);
+        return;
+      }
+      setRefreshToken((token) => token + 1);
+    } finally {
+      setUpdatingId(null);
     }
   }
 
@@ -264,12 +288,23 @@ export default function AdminAffiliatesPage() {
             </option>
           ))}
         </select>
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          aria-label="Filter affiliates by status"
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition"
+        >
+          <option value="">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="approved">Public profile approved</option>
+          <option value="pending">Profile pending review</option>
+          <option value="rejected">Profile rejected</option>
+        </select>
       </div>
 
       {isLoading ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
-          {t("loading_text")}
-        </div>
+        <AdminLoadingState label="Loading affiliates" />
       ) : loadError ? (
         <AdminDataFailure message={loadError} onRetry={retryLoad} />
       ) : affiliates.length === 0 ? (
@@ -329,9 +364,26 @@ export default function AdminAffiliatesPage() {
                         <Badge variant={affiliate.isActive ? "success" : "default"}>
                           {affiliate.isActive ? t("admin.active") : t("admin.inactive")}
                         </Badge>
+                        <span className="mt-1 block text-xs capitalize text-gray-500">Profile: {affiliate.profileStatus}</span>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/network/affiliates/${slugify(affiliate.code)}`}
+                            className="text-gray-400 hover:text-primary-600 transition-colors"
+                            aria-label={`View ${affiliate.name} public profile`}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                          <button
+                            type="button"
+                            disabled={updatingId === affiliate.id}
+                            onClick={() => void toggleActive(affiliate)}
+                            className="text-gray-400 hover:text-primary-600 transition-colors disabled:opacity-40"
+                            aria-label={`${affiliate.isActive ? "Deactivate" : "Activate"} ${affiliate.name}`}
+                          >
+                            <Power className="h-4 w-4" />
+                          </button>
                           <Link
                             href={`/admin/affiliates/${affiliate.id}/edit`}
                             className="text-gray-400 hover:text-primary-600 transition-colors"
@@ -372,6 +424,22 @@ export default function AdminAffiliatesPage() {
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     <Link
+                      href={`/network/affiliates/${slugify(affiliate.code)}`}
+                      className="text-gray-400 hover:text-primary-600 transition-colors"
+                      aria-label={`View ${affiliate.name} public profile`}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Link>
+                    <button
+                      type="button"
+                      disabled={updatingId === affiliate.id}
+                      onClick={() => void toggleActive(affiliate)}
+                      className="text-gray-400 hover:text-primary-600 transition-colors disabled:opacity-40"
+                      aria-label={`${affiliate.isActive ? "Deactivate" : "Activate"} ${affiliate.name}`}
+                    >
+                      <Power className="h-4 w-4" />
+                    </button>
+                    <Link
                       href={`/admin/affiliates/${affiliate.id}/edit`}
                       className="text-gray-400 hover:text-primary-600 transition-colors"
                       aria-label={t("admin.edit")}
@@ -392,6 +460,9 @@ export default function AdminAffiliatesPage() {
                   <Badge variant="primary">{regionLabel(affiliate.region)}</Badge>
                   <Badge variant={affiliate.isActive ? "success" : "default"}>
                     {affiliate.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                  <Badge variant={affiliate.profileStatus === "approved" ? "success" : "default"}>
+                    Profile {affiliate.profileStatus}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-500">

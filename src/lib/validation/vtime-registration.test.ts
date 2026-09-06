@@ -16,11 +16,11 @@ test("accepts a complete VTIME registration", () => {
   assert.equal(vtimeRegistrationSchema.safeParse(validRegistration).success, true);
 });
 
-test("rejects an unknown program and incomplete participant details", () => {
+test("rejects a malformed program slug and incomplete participant details", () => {
   const result = vtimeRegistrationSchema.safeParse({
     ...validRegistration,
     participantName: "",
-    program: "invented-program",
+    program: "Invented Program!",
   });
   assert.equal(result.success, false);
 });

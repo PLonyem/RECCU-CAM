@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge, type BadgeProps } from "@/components/ui/Badge";
 import { AdminDataFailure } from "@/components/admin/AdminDataFailure";
+import { AdminLoadingState } from "@/components/admin/AdminLoadingState";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { regions, regionLabels } from "@/data/admin-options";
 import { requestAdminData } from "@/lib/admin-data-client";
@@ -21,6 +22,8 @@ interface AnnouncementRow {
   category: string;
   priority: string;
   targetChapter: string | null;
+  audience: "PUBLIC" | "ALL_AFFILIATES" | "SPECIFIC_AFFILIATE" | "STAFF";
+  startDate: string | null;
   isPublished: boolean;
   publishedAt: string | null;
   expiryDate: string | null;
@@ -91,6 +94,8 @@ interface FormState {
   category: string;
   priority: string;
   targetChapter: string; // "" = All Chapters
+  audience: "PUBLIC" | "ALL_AFFILIATES" | "STAFF";
+  startDate: string;
   expiryDate: string; // yyyy-mm-dd, "" = none
 }
 
@@ -101,6 +106,8 @@ const EMPTY_FORM: FormState = {
   category: CATEGORIES[0],
   priority: "normal",
   targetChapter: "",
+  audience: "PUBLIC",
+  startDate: "",
   expiryDate: "",
 };
 
@@ -176,6 +183,8 @@ export default function AdminAnnouncementsPage() {
       category: announcement.category,
       priority: announcement.priority,
       targetChapter: announcement.targetChapter ?? "",
+      audience: announcement.audience === "SPECIFIC_AFFILIATE" ? "ALL_AFFILIATES" : announcement.audience,
+      startDate: announcement.startDate ? announcement.startDate.slice(0, 10) : "",
       expiryDate: announcement.expiryDate ? announcement.expiryDate.slice(0, 10) : "",
     });
     setFieldErrors({});
@@ -211,6 +220,8 @@ export default function AdminAnnouncementsPage() {
       category: form.category,
       priority: form.priority,
       targetChapter: form.targetChapter || null,
+      audience: form.audience,
+      startDate: form.startDate || null,
       expiryDate: form.expiryDate || null,
       isPublished,
     };
@@ -315,9 +326,7 @@ export default function AdminAnnouncementsPage() {
       )}
 
       {isLoading ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
-          Loading…
-        </div>
+        <AdminLoadingState label="Loading announcements" />
       ) : loadError ? (
         <AdminDataFailure message={loadError} onRetry={retryLoad} />
       ) : announcements.length === 0 ? (
@@ -357,6 +366,7 @@ export default function AdminAnnouncementsPage() {
                           </span>
                         </div>
                         <p className="text-sm text-gray-600 mt-2 line-clamp-2">{announcement.opening}</p>
+                        <p className="mt-2 text-xs text-gray-400">Audience: {announcement.audience.replaceAll("_", " ").toLowerCase()}</p>
                         <div className="flex items-center gap-4 mt-3">
                           <button
                             type="button"
@@ -592,6 +602,20 @@ export default function AdminAnnouncementsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
+                  <label htmlFor="ann-audience" className={labelClass}>Audience</label>
+                  <select
+                    id="ann-audience"
+                    value={form.audience}
+                    onChange={(e) => setForm((f) => ({ ...f, audience: e.target.value as FormState["audience"] }))}
+                    className={inputClass}
+                    disabled={isSaving}
+                  >
+                    <option value="PUBLIC">Public website</option>
+                    <option value="ALL_AFFILIATES">All affiliates</option>
+                    <option value="STAFF">Staff only</option>
+                  </select>
+                </div>
+                <div>
                   <label htmlFor="ann-chapter" className={labelClass}>
                     Target Chapter
                   </label>
@@ -609,6 +633,21 @@ export default function AdminAnnouncementsPage() {
                       </option>
                     ))}
                   </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="ann-start" className={labelClass}>
+                    Start Date <span className="text-gray-400 font-normal">(optional)</span>
+                  </label>
+                  <input
+                    id="ann-start"
+                    type="date"
+                    value={form.startDate}
+                    onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
+                    className={inputClass}
+                    disabled={isSaving}
+                  />
                 </div>
                 <div>
                   <label htmlFor="ann-expiry" className={labelClass}>

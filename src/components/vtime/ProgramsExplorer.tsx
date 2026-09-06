@@ -11,7 +11,7 @@ import {
   trainingCategories,
   trainingFormatLabels,
   trainingLevelLabels,
-  trainingPrograms,
+  type TrainingProgram,
   type TrainingFormat,
   type TrainingLevel,
   type TrainingProgramFilters,
@@ -20,15 +20,15 @@ import {
 const inputClassName =
   "min-h-11 w-full rounded-control border border-border bg-surface px-3 text-sm text-foreground outline-none transition-[border-color,box-shadow] duration-fast placeholder:text-muted-foreground focus:border-forest focus:ring-2 focus:ring-forest/20";
 
-export function ProgramsExplorer() {
+export function ProgramsExplorer({ programs }: { programs: readonly TrainingProgram[] }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<TrainingProgramFilters>(() => readFilters(searchParams));
   const filtersRef = useRef(filters);
   const query = filters.query ?? "";
 
-  const results = filterTrainingPrograms(trainingPrograms, filters);
-  const audienceOptions = useMemo(() => getTrainingAudienceOptions(), []);
+  const results = filterTrainingPrograms(programs, filters);
+  const audienceOptions = useMemo(() => getTrainingAudienceOptions(programs), [programs]);
   const activeFilterCount = [query, filters.category, filters.audience, filters.format, filters.level, filters.date]
     .filter(Boolean)
     .length;

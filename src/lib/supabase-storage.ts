@@ -17,6 +17,7 @@ const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || "chapter-profile-uploads";
 // <img src> on the homepage, so they need a bucket configured as *public*
 // in the Supabase dashboard and a permanent, non-expiring URL instead.
 const HERO_IMAGES_BUCKET = process.env.SUPABASE_HERO_IMAGES_BUCKET || "homepage-hero-images";
+const MEDIA_BUCKET = process.env.SUPABASE_MEDIA_BUCKET || "media-library";
 
 export function isSupabaseStorageConfigured(): boolean {
   return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
@@ -85,6 +86,46 @@ export async function uploadPublicSupabaseImage(
   }
 
   return `${SUPABASE_URL}/storage/v1/object/public/${HERO_IMAGES_BUCKET}/${path}`;
+}
+
+export async function uploadPublicSupabaseMedia(
+  path: string,
+  buffer: Buffer,
+  contentType: string,
+): Promise<string> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error("Supabase Storage is not configured (missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY).");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${MEDIA_BUCKET}/${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      "Content-Type": contentType,
+      "x-upsert": "false",
+    },
+    body: new Uint8Array(buffer),
+  });
+
+  if (!response.ok) throw new Error(`Supabase Storage media upload failed with status ${response.status}.`);
+  return `${SUPABASE_URL}/storage/v1/object/public/${MEDIA_BUCKET}/${path}`;
+}
+
+export async function deletePublicSupabaseMedia(fileUrl: string): Promise<void> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error("Supabase Storage is not configured (missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY).");
+  }
+
+  const prefix = `${SUPABASE_URL}/storage/v1/object/public/${MEDIA_BUCKET}/`;
+  if (!fileUrl.startsWith(prefix)) throw new Error("Media URL does not belong to the configured media bucket.");
+  const path = fileUrl.slice(prefix.length);
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${MEDIA_BUCKET}/${path}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}` },
+  });
+  if (!response.ok && response.status !== 404) {
+    throw new Error(`Supabase Storage media delete failed with status ${response.status}.`);
+  }
 }
 
 // The upload bucket is private, so viewing a document (e.g. from the admin

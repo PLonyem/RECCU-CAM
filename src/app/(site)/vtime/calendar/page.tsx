@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { TrainingCalendar } from "@/components/vtime/TrainingCalendar";
 import { Button, Container, Section } from "@/components/ui";
-import { publishedTrainingEvents } from "@/data/training-programs";
+import { getPublicTrainingPrograms } from "@/lib/data/public-training";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
@@ -13,7 +13,12 @@ export const metadata: Metadata = createPageMetadata({
   path: "/vtime/calendar",
 });
 
-export default function CalendarPage() {
+export const dynamic = "force-dynamic";
+
+export default async function CalendarPage() {
+  const events = (await getPublicTrainingPrograms()).filter(
+    (program) => program.startDate && program.registrationStatus !== "schedule-pending",
+  );
   return (
     <>
       <PageIntro
@@ -30,7 +35,7 @@ export default function CalendarPage() {
       />
       <Section>
         <Container>
-          <TrainingCalendar events={publishedTrainingEvents} />
+          <TrainingCalendar events={events} />
         </Container>
       </Section>
     </>

@@ -26,24 +26,21 @@ import {
 import {
   formatTrainingDateRange,
   getTrainingCategory,
-  getTrainingProgramBySlug,
   registrationStatusLabels,
   trainingFormatLabels,
   trainingLevelLabels,
-  trainingPrograms,
 } from "@/data/training-programs";
+import { getPublicTrainingProgramBySlug } from "@/lib/data/public-training";
 import { createPageMetadata } from "@/lib/seo";
 
 interface ProgramDetailPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export function generateStaticParams() {
-  return trainingPrograms.map((program) => ({ slug: program.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: ProgramDetailPageProps): Promise<Metadata> {
-  const program = getTrainingProgramBySlug((await params).slug);
+  const program = await getPublicTrainingProgramBySlug((await params).slug);
   if (!program) return { title: "Program not found", robots: { index: false, follow: false } };
   return createPageMetadata({
     title: `${program.title} | VTIME`,
@@ -53,7 +50,7 @@ export async function generateMetadata({ params }: ProgramDetailPageProps): Prom
 }
 
 export default async function ProgramDetailPage({ params }: ProgramDetailPageProps) {
-  const program = getTrainingProgramBySlug((await params).slug);
+  const program = await getPublicTrainingProgramBySlug((await params).slug);
   if (!program) notFound();
   const category = getTrainingCategory(program.category);
 
@@ -101,9 +98,9 @@ export default async function ProgramDetailPage({ params }: ProgramDetailPagePro
               />
               <div className="mt-8 flex flex-wrap gap-2">
                 {category && <Badge variant="primary">{category.title}</Badge>}
-                <Badge>{trainingLevelLabels[program.level]}</Badge>
+                <Badge>{trainingLevelLabels[program.level as keyof typeof trainingLevelLabels] ?? program.level}</Badge>
                 <Badge variant={program.registrationStatus === "registration-open" ? "success" : "warning"}>
-                  {registrationStatusLabels[program.registrationStatus]}
+                  {registrationStatusLabels[program.registrationStatus as keyof typeof registrationStatusLabels] ?? program.registrationStatus.replaceAll("-", " ")}
                 </Badge>
               </div>
 
@@ -140,7 +137,7 @@ export default async function ProgramDetailPage({ params }: ProgramDetailPagePro
                   <DetailFact
                     icon={MonitorSmartphone}
                     label="Format"
-                    value={program.format ? trainingFormatLabels[program.format] : "To be confirmed"}
+                    value={program.format ? trainingFormatLabels[program.format as keyof typeof trainingFormatLabels] ?? program.format : "To be confirmed"}
                   />
                   <DetailFact icon={Clock3} label="Duration" value={program.duration ?? "To be confirmed"} />
                   <DetailFact

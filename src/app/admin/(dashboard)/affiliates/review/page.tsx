@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { AdminDataFailure } from "@/components/admin/AdminDataFailure";
+import { AdminLoadingState } from "@/components/admin/AdminLoadingState";
 import { requestAdminData } from "@/lib/admin-data-client";
 import { cn } from "@/lib/utils";
 import { regions, regionLabels } from "@/data/admin-options";
@@ -262,9 +263,7 @@ export default function ChapterReviewPage() {
       </div>
 
       {isLoading ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
-          Loading...
-        </div>
+        <AdminLoadingState label="Loading affiliate profiles" />
       ) : loadError ? (
         <AdminDataFailure message={loadError} onRetry={retryLoad} />
       ) : chapters.length === 0 ? (

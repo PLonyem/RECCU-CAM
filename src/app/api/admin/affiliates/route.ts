@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
-import { isAdminRole } from "@/lib/auth/roles";
+import { isAdminRole, normalizeAuthRole } from "@/lib/auth/roles";
 import { adminDataResponse } from "@/lib/admin-data-server";
 import { prisma } from "@/lib/prisma";
 import { affiliateSchema } from "@/lib/validation/affiliate";
 import type { Prisma } from "@/generated/prisma/client";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(request: NextRequest) {
   const { userId, sessionClaims } = await auth();
@@ -17,6 +19,7 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(1000, Math.max(1, Number(params.get("limit")) || 20));
   const search = params.get("search")?.trim();
   const region = params.get("region");
+  const status = params.get("status");
 
   const where: Prisma.AffiliateWhereInput = {};
 
@@ -28,6 +31,13 @@ export async function GET(request: NextRequest) {
   }
   if (region) {
     where.region = region;
+  }
+  if (status === "active") {
+    where.isActive = true;
+  } else if (status === "inactive") {
+    where.isActive = false;
+  } else if (["pending", "approved", "rejected"].includes(status ?? "")) {
+    where.profileStatus = status;
   }
 
   return adminDataResponse("affiliates", "list", async () => {
@@ -53,7 +63,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
+  const role = normalizeAuthRole(sessionClaims?.metadata?.role);
+  if (!userId || !role || !isAdminRole(role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -80,6 +91,10 @@ export async function POST(request: NextRequest) {
   }
 
   const affiliate = await prisma.affiliate.create({ data });
+
+  await writeAuditLog({ actorId: userId, actorRole: role, action: "affiliate_created", resource: "affiliate", resourceId: affiliate.id, metadata: { active: affiliate.isActive } });
+  revalidatePath("/network/affiliates");
+  revalidatePath("/network/map");
 
   return NextResponse.json(affiliate, { status: 201 });
 }

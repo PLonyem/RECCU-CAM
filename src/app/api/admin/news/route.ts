@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
-import { isAdminRole } from "@/lib/auth/roles";
+import { isAdminRole, normalizeAuthRole } from "@/lib/auth/roles";
 import { adminDataResponse } from "@/lib/admin-data-server";
 import { prisma } from "@/lib/prisma";
 import { uniqueNewsSlug } from "@/lib/news-articles";
 import { newsArticleSchema } from "@/lib/validation/news-article";
 import type { Prisma } from "@/generated/prisma/client";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(request: NextRequest) {
   const { userId, sessionClaims } = await auth();
@@ -61,7 +63,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
+  const role = normalizeAuthRole(sessionClaims?.metadata?.role);
+  if (!userId || !role || !isAdminRole(role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -78,17 +81,26 @@ export async function POST(request: NextRequest) {
   const data = parsed.data;
   const slug = await uniqueNewsSlug(data.slug?.trim() || data.title);
 
-  const article = await prisma.newsArticle.create({
-    data: {
-      ...data,
-      slug,
-      publishedAt: data.published
-        ? data.publishedAt
-          ? new Date(data.publishedAt)
-          : new Date()
-        : null,
+  return adminDataResponse(
+    "news",
+    "create",
+    async () => {
+      const article = await prisma.newsArticle.create({
+        data: {
+          ...data,
+          slug,
+          publishedAt: data.published
+            ? data.publishedAt
+              ? new Date(data.publishedAt)
+              : new Date()
+            : null,
+        },
+      });
+      await writeAuditLog({ actorId: userId, actorRole: role, action: "news_created", resource: "news_article", resourceId: article.id, metadata: { published: article.published } });
+      revalidatePath("/news");
+      revalidatePath(`/news/${article.slug}`);
+      return article;
     },
-  });
-
-  return NextResponse.json(article, { status: 201 });
+    201,
+  );
 }

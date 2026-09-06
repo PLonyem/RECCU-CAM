@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
-import { isAdminRole } from "@/lib/auth/roles";
+import { isAdminRole, normalizeAuthRole } from "@/lib/auth/roles";
+import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { updateResourceSchema } from "@/lib/validation/resource";
 
@@ -26,7 +28,8 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
+  const role = normalizeAuthRole(sessionClaims?.metadata?.role);
+  if (!userId || !role || !isAdminRole(role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -52,12 +55,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     data: parsed.data,
   });
 
+  await writeAuditLog({ actorId: userId, actorRole: role, action: resource.published ? "resource_published_or_updated" : "resource_unpublished_or_updated", resource: "resource", resourceId: resource.id, metadata: { accessLevel: resource.accessLevel } });
+  revalidatePath("/knowledge");
+
   return NextResponse.json(resource);
 }
 
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
+  const role = normalizeAuthRole(sessionClaims?.metadata?.role);
+  if (!userId || !role || !isAdminRole(role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -69,6 +76,9 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   }
 
   await prisma.resource.delete({ where: { id } });
+
+  await writeAuditLog({ actorId: userId, actorRole: role, action: "resource_deleted", resource: "resource", resourceId: id });
+  revalidatePath("/knowledge");
 
   return NextResponse.json({ success: true });
 }

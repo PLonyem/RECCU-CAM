@@ -24,9 +24,9 @@ export function TrainingProgramCard({ detailed = false, program, showModules = f
     <Card padding="default" className="flex h-full flex-col">
       <div className="flex flex-wrap gap-2">
         {category && <Badge variant="primary">{category.title}</Badge>}
-        <Badge>{trainingLevelLabels[program.level]}</Badge>
+        <Badge>{trainingLevelLabels[program.level as keyof typeof trainingLevelLabels] ?? program.level}</Badge>
         <Badge variant={program.registrationStatus === "registration-open" ? "success" : "warning"}>
-          {registrationStatusLabels[program.registrationStatus]}
+          {registrationStatusLabels[program.registrationStatus as keyof typeof registrationStatusLabels] ?? program.registrationStatus.replaceAll("-", " ")}
         </Badge>
       </div>
       <h3 className="mt-5 font-display text-h4 text-institutional">{program.title}</h3>
@@ -38,7 +38,7 @@ export function TrainingProgramCard({ detailed = false, program, showModules = f
           <ProgramFact
             icon={MonitorSmartphone}
             label="Format"
-            value={program.format ? trainingFormatLabels[program.format] : "To be confirmed"}
+            value={program.format ? trainingFormatLabels[program.format as keyof typeof trainingFormatLabels] ?? program.format : "To be confirmed"}
           />
           <ProgramFact icon={Clock3} label="Duration" value={program.duration ?? "To be confirmed"} />
           <ProgramFact

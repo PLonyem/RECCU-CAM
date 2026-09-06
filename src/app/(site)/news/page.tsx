@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
 import { CalendarDays, Newspaper, Tags } from "lucide-react";
 import { PageIntro } from "@/components/layout/PageIntro";
-import { EventCard, NewsCard } from "@/components/news/NewsCards";
+import { NewsCard } from "@/components/news/NewsCards";
 import { Card, Container, EmptyState, Section, SectionHeader } from "@/components/ui";
 import {
-  featuredNews,
-  latestNews,
   newsCategories,
-  upcomingEvents,
 } from "@/data/news";
+import { getPublicNewsArticles } from "@/lib/data/public-news";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
@@ -17,7 +15,12 @@ export const metadata: Metadata = createPageMetadata({
   path: "/news",
 });
 
-export default function NewsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function NewsPage() {
+  const articles = await getPublicNewsArticles();
+  const featuredNews = articles.filter((article) => article.featured);
+  const latestNews = articles.filter((article) => !article.featured);
   return (
     <>
       <PageIntro
@@ -96,18 +99,12 @@ export default function NewsPage() {
             title="Confirmed dates and event details."
             subtitle="Event cards display only dates, locations, and detail links that have been verified for public release."
           />
-          {upcomingEvents.length > 0 ? (
-            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {upcomingEvents.map((event) => <EventCard key={event.id} event={event} />)}
-            </div>
-          ) : (
-            <EmptyState
-              className="mt-10"
-              icon={CalendarDays}
-              title="No upcoming events are currently confirmed"
-              description="Dates are never inferred. Confirmed AGMs, training activities, and institutional events will appear here after approval."
-            />
-          )}
+          <EmptyState
+            className="mt-10"
+            icon={CalendarDays}
+            title="No upcoming events are currently confirmed"
+            description="The current publishing model stores articles. A separate event record is not exposed until dates and locations can be managed independently."
+          />
         </Container>
       </Section>
     </>
