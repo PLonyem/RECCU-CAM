@@ -58,6 +58,7 @@ export default function SignInPage() {
             <SignIn
               routing="path"
               path="/sign-in"
+              signUpUrl="/sign-up"
               forceRedirectUrl="/auth/complete"
               appearance={{
                 variables: { colorPrimary: "#0f5f55", borderRadius: "0.75rem", fontFamily: "var(--font-inter)" },
@@ -67,7 +68,7 @@ export default function SignInPage() {
                   headerTitle: "font-display text-institutional",
                   headerSubtitle: "text-slate-500",
                   formButtonPrimary: "bg-forest hover:bg-institutional",
-                  footerAction: "hidden",
+                  footerActionLink: "text-forest hover:text-institutional",
                 },
               }}
             />

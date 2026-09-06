@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, LogIn, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, LogIn, ShieldCheck, UserPlus } from "lucide-react";
 import { Show, UserButton, useUser } from "@clerk/nextjs";
 import { isAffiliateRole, isStaffRole } from "@/lib/auth/roles";
 import { isDemoMode } from "@/lib/demo-mode";
@@ -26,6 +26,23 @@ function SignInAction({ mobile, signInLabel, onNavigate }: PortalActionsProps) {
   );
 }
 
+function SignedOutActions(props: PortalActionsProps) {
+  return (
+    <>
+      <SignInAction {...props} />
+      <Link
+        href="/sign-up"
+        onClick={props.onNavigate}
+        className={props.mobile
+          ? "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
+          : "inline-flex h-10 items-center gap-2 rounded-lg bg-primary-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"}
+      >
+        <UserPlus className="h-4 w-4" aria-hidden="true" /> Sign up
+      </Link>
+    </>
+  );
+}
+
 function ConfiguredPortalActions({ mobile, signInLabel, onNavigate }: PortalActionsProps) {
   const { user } = useUser();
   const role = user?.publicMetadata.role;
@@ -40,7 +57,7 @@ function ConfiguredPortalActions({ mobile, signInLabel, onNavigate }: PortalActi
       <div className="grid w-full gap-3">
         <Show
           when="signed-in"
-          fallback={<SignInAction mobile signInLabel={signInLabel} onNavigate={onNavigate} />}
+          fallback={<SignedOutActions mobile signInLabel={signInLabel} onNavigate={onNavigate} />}
         >
           {portal && (
             <Link
@@ -62,7 +79,7 @@ function ConfiguredPortalActions({ mobile, signInLabel, onNavigate }: PortalActi
 
   return (
     <>
-      <Show when="signed-in" fallback={<SignInAction signInLabel={signInLabel} />}>
+      <Show when="signed-in" fallback={<SignedOutActions signInLabel={signInLabel} />}>
         {portal && (
           <Link
             href={portal.href}
@@ -94,7 +111,7 @@ export function PortalActions(props: PortalActionsProps) {
   }
 
   if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
-    return <SignInAction {...props} />;
+    return <SignedOutActions {...props} />;
   }
 
   return <ConfiguredPortalActions {...props} />;

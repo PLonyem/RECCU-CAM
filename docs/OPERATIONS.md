@@ -10,7 +10,7 @@
 { "metadata": "{{user.public_metadata}}" }
 ```
 
-4. Disable public sign-ups in the Clerk Dashboard so accounts can be created or invited only by authorized administrators.
+4. Keep Clerk sign-ups enabled when public account creation is required. Registration never assigns an application role automatically.
 5. Build with `pnpm build` and deploy. Production builds cannot activate the local demo bypass and contain no hard-coded password.
 
 ## Demo users
@@ -36,19 +36,17 @@ Affiliate demo metadata (use a real `Affiliate.id`, name, and code from the data
 
 Supported staff roles are `super_admin`, `admin`, `communications`, `network_manager`, `compliance_officer`, `training_manager`, and `editor`. Affiliate accounts must use `affiliate_user`; the legacy `credit_union` value no longer grants protected access.
 
-## Controlled account lifecycle
+## Account lifecycle
 
-The public website provides sign-in only and does not expose self-registration.
-An authorized administrator creates or invites the user through Clerk, assigns
-the trusted `publicMetadata.role` (plus a verified `affiliateId` for an
-affiliate), and sends the invitation or credentials through an approved
-channel. The user then signs in at `/sign-in` and is routed server-side to the
-appropriate workspace. Accounts without a recognized role are sent to the
-no-index `/access-denied` page and never receive dashboard access.
+The public website exposes Clerk account creation at `/sign-up`. New accounts
+receive no application role and therefore cannot access staff or affiliate
+workspaces. An authorized administrator separately assigns the trusted
+`publicMetadata.role` (plus a verified `affiliateId` for an affiliate). The
+user is then routed server-side to the appropriate workspace. Accounts without
+a recognized role are sent to the no-index `/access-denied` page and never
+receive dashboard access.
 
-Application-level redirects block `/sign-up` and `/signup`. Clerk's instance
-setting must also keep public sign-ups disabled; route hiding alone is not a
-substitute for that service-side control.
+The legacy `/signup` URL redirects to the canonical `/sign-up` route.
 
 ## Security boundaries
 

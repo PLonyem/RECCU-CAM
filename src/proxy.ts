@@ -10,7 +10,6 @@ import {
 } from "@/lib/auth/roles";
 
 const isAuthPage = createRouteMatcher(["/sign-in(.*)", "/login(.*)"]);
-const isSignUpPage = createRouteMatcher(["/sign-up(.*)", "/signup(.*)"]);
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 const isAdminApiRoute = createRouteMatcher(["/api/admin(.*)"]);
 const isDashboardRoute = createRouteMatcher(["/dashboard(.*)"]);
@@ -26,10 +25,6 @@ function isCrossOriginMutation(request: NextRequest) {
 }
 
 const configuredProxy = clerkMiddleware(async (auth, req) => {
-  if (isSignUpPage(req)) {
-    return NextResponse.redirect(new URL("/sign-in", req.url));
-  }
-
   if (isDemoMode() && isAuthPage(req)) {
     return NextResponse.redirect(new URL("/admin", req.url));
   }
@@ -106,10 +101,6 @@ const configuredProxy = clerkMiddleware(async (auth, req) => {
 });
 
 function unconfiguredProxy(req: NextRequest) {
-  if (isSignUpPage(req)) {
-    return NextResponse.redirect(new URL("/sign-in", req.url));
-  }
-
   if (isDemoMode() && isAuthPage(req)) {
     return NextResponse.redirect(new URL("/admin", req.url));
   }
