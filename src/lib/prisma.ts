@@ -3,7 +3,9 @@ import "server-only";
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
+  DatabaseConfigurationError,
   databaseConfigurationMessage,
+  hasUsableDatabaseConfiguration,
   resolveDatabaseUrl,
 } from "@/lib/database-config";
 
@@ -18,9 +20,24 @@ if (configurationMessage) {
   console.error(`[database] ${configurationMessage}`);
 }
 
-const adapter = new PrismaPg({ connectionString: databaseConfiguration.url });
+function unavailablePrismaClient(): PrismaClient {
+  return new Proxy({} as PrismaClient, {
+    get() {
+      throw new DatabaseConfigurationError();
+    },
+  });
+}
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
+function createPrismaClient() {
+  if (!hasUsableDatabaseConfiguration(databaseConfiguration, process.env.NODE_ENV)) {
+    return unavailablePrismaClient();
+  }
+
+  const adapter = new PrismaPg({ connectionString: databaseConfiguration.url! });
+  return new PrismaClient({ adapter });
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

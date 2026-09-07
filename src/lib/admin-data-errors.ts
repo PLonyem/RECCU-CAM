@@ -15,6 +15,10 @@ function safePrismaCode(error: unknown): string | null {
 export function classifyAdminDataError(error: unknown): AdminDataErrorDetails {
   const code = safePrismaCode(error);
 
+  if (error instanceof Error && error.name === "DatabaseConfigurationError") {
+    return { category: "connection", code: null, status: 503 };
+  }
+
   if (code && ["P1000", "P1001", "P1002", "P1008", "P1017"].includes(code)) {
     return { category: "connection", code, status: 503 };
   }

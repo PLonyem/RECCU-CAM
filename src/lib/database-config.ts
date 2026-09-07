@@ -19,6 +19,15 @@ export interface ResolvedDatabaseUrl {
   isLoopback: boolean;
 }
 
+export class DatabaseConfigurationError extends Error {
+  readonly code = "DATABASE_CONFIGURATION_ERROR";
+
+  constructor() {
+    super("The database connection is not configured for this deployment.");
+    this.name = "DatabaseConfigurationError";
+  }
+}
+
 export function resolveDatabaseUrl(
   environment: DatabaseEnvironment,
   names: readonly string[] = RUNTIME_DATABASE_ENV_NAMES,
@@ -55,4 +64,11 @@ export function databaseConfigurationMessage(
     return `${configuration.name} points to a loopback host that is unreachable from production.`;
   }
   return null;
+}
+
+export function hasUsableDatabaseConfiguration(
+  configuration: ResolvedDatabaseUrl,
+  nodeEnvironment: string | undefined,
+) {
+  return databaseConfigurationMessage(configuration, nodeEnvironment) === null;
 }

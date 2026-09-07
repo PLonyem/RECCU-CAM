@@ -12,6 +12,16 @@ test("database connection failures are retriable without exposing their message"
   assert.equal("message" in details, false);
 });
 
+test("missing deployment database configuration is a retriable connection failure", () => {
+  const error = new Error("The database connection is not configured.");
+  error.name = "DatabaseConfigurationError";
+  assert.deepEqual(classifyAdminDataError(error), {
+    category: "connection",
+    code: null,
+    status: 503,
+  });
+});
+
 test("missing tables are classified as retriable schema failures", () => {
   assert.deepEqual(classifyAdminDataError({ code: "P2021" }), {
     category: "schema",
