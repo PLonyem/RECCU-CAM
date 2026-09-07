@@ -50,3 +50,15 @@ test("authorization failures remain distinguishable without exposing claims", as
   assert.equal(unauthenticated.ok ? 200 : unauthenticated.status, 401);
   assert.equal(forbidden.ok ? 200 : forbidden.status, 403);
 });
+
+test("validation responses preserve safe field-level errors", async () => {
+  const result = await requestAdminData("/api/admin/test", undefined, async () =>
+    Response.json({ error: "Review the highlighted fields.", errors: { title: ["Title is required."] } }, { status: 400 }),
+  );
+  assert.deepEqual(result, {
+    ok: false,
+    message: "Review the highlighted fields.",
+    status: 400,
+    fieldErrors: { title: ["Title is required."] },
+  });
+});

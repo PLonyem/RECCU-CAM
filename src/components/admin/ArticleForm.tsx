@@ -10,6 +10,7 @@ import { Button, buttonVariants } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { slugify } from "@/lib/slug";
 import { CATEGORIES, CHAPTERS } from "@/data/admin-options";
+import { httpsUrlSchema } from "@/lib/validation/url";
 
 export const FORM_CATEGORIES = CATEGORIES.filter((c) =>
   (
@@ -18,27 +19,29 @@ export const FORM_CATEGORIES = CATEGORIES.filter((c) =>
 );
 
 export const articleFormSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
+  title: z.string().trim().min(1, "Title is required").max(240, "Title must be 240 characters or fewer"),
+  slug: z.string().trim().min(1, "Slug is required").regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens only").max(240),
   language: z.enum(["en", "fr"]),
-  category: z.string().min(1, "Category is required"),
+  category: z.string().max(100),
   tags: z.string(),
   chapter: z.string(),
-  excerpt: z
-    .string()
-    .min(1, "Excerpt is required")
-    .refine((value) => {
-      const words = value.trim().split(/\s+/).filter(Boolean).length;
-      return words >= 25 && words <= 40;
-    }, "Excerpt must be between 25 and 40 words"),
-  content: z.string().min(1, "Content is required"),
-  authorName: z.string().min(1, "Author name is required"),
-  authorRole: z.string(),
+  excerpt: z.string().max(1000),
+  content: z.string().max(100_000),
+  authorName: z.string().max(160),
+  authorRole: z.string().max(160),
   featured: z.boolean(),
   published: z.boolean(),
-  heroImageUrl: z.string(),
-  heroImageAlt: z.string(),
-  heroImageCaption: z.string(),
+  heroImageUrl: z.union([z.literal(""), httpsUrlSchema]),
+  heroImageAlt: z.string().max(300),
+  heroImageCaption: z.string().max(500),
+});
+
+const articlePublishFormSchema = articleFormSchema.superRefine((data, context) => {
+  for (const [name, label] of [["category", "Category"], ["excerpt", "Excerpt"], ["content", "Content"], ["authorName", "Author name"]] as const) {
+    if (!data[name].trim()) context.addIssue({ code: "custom", path: [name], message: `${label} is required before publishing.` });
+  }
+  const words = data.excerpt.trim().split(/\s+/).filter(Boolean).length;
+  if (data.excerpt.trim() && (words < 25 || words > 40)) context.addIssue({ code: "custom", path: ["excerpt"], message: "Excerpt must be between 25 and 40 words." });
 });
 
 export type ArticleFormValues = z.infer<typeof articleFormSchema>;
@@ -93,7 +96,12 @@ interface ArticleFormProps {
   onSubmit: (
     values: ArticleFormValues,
     published: boolean
-  ) => Promise<string | void>;
+  ) => Promise<ArticleSubmitError | void>;
+}
+
+export interface ArticleSubmitError {
+  message: string;
+  fieldErrors?: Record<string, string[]>;
 }
 
 export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
@@ -108,6 +116,8 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
     handleSubmit,
     setValue,
     control,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<ArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
@@ -127,15 +137,29 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
     published: boolean
   ) {
     setSubmitError(null);
+    clearErrors();
     setPendingAction(published ? "publish" : "draft");
     const error = await onSubmit(values, published);
     setPendingAction(null);
     if (error) {
-      setSubmitError(error);
+      setSubmitError(error.message);
+      for (const [name, messages] of Object.entries(error.fieldErrors ?? {})) {
+        if (name in emptyDefaults && messages[0]) setError(name as keyof ArticleFormValues, { type: "server", message: messages[0] });
+      }
     }
   }
 
-  const onPublish = handleSubmit((values) => handleFormSubmit(values, true));
+  const onPublish = handleSubmit((values) => {
+    const parsed = articlePublishFormSchema.safeParse(values);
+    if (!parsed.success) {
+      clearErrors();
+      for (const [name, messages] of Object.entries(parsed.error.flatten().fieldErrors)) {
+        if (name in emptyDefaults && messages?.[0]) setError(name as keyof ArticleFormValues, { type: "publish", message: messages[0] });
+      }
+      return;
+    }
+    return handleFormSubmit(parsed.data, true);
+  });
   const onSaveDraft = handleSubmit((values) =>
     handleFormSubmit(values, false)
   );
@@ -399,6 +423,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition disabled:opacity-50"
                 {...register("heroImageUrl")}
               />
+              <p className="text-xs text-red-500 min-h-[16px]">{errors.heroImageUrl?.message}</p>
             </div>
 
             <div className="space-y-1 sm:col-span-2">
@@ -415,6 +440,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition disabled:opacity-50"
                 {...register("heroImageAlt")}
               />
+              <p className="text-xs text-red-500 min-h-[16px]">{errors.heroImageAlt?.message}</p>
             </div>
 
             <div className="space-y-1">
@@ -431,6 +457,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition disabled:opacity-50"
                 {...register("heroImageCaption")}
               />
+              <p className="text-xs text-red-500 min-h-[16px]">{errors.heroImageCaption?.message}</p>
             </div>
           </div>
 

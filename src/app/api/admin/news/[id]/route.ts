@@ -5,7 +5,7 @@ import { isAdminRole, normalizeAuthRole } from "@/lib/auth/roles";
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { uniqueNewsSlug } from "@/lib/news-articles";
-import { updateNewsArticleSchema } from "@/lib/validation/news-article";
+import { newsArticleSchema, updateNewsArticleSchema } from "@/lib/validation/news-article";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -41,12 +41,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const body = await request.json();
-  const parsed = updateNewsArticleSchema.safeParse(body);
+  const body = await request.json().catch(() => null);
+  const parsed = (body && typeof body === "object" && "published" in body && body.published === true
+    ? newsArticleSchema
+    : updateNewsArticleSchema).safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid input", details: parsed.error.flatten() },
+      { error: "Review the highlighted fields.", errors: parsed.error.flatten().fieldErrors, details: parsed.error.flatten() },
       { status: 400 }
     );
   }

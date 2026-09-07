@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { isAdminRole } from "@/lib/auth/roles";
+import { AUTH_PERMISSIONS, hasPermission, normalizeAuthRole } from "@/lib/auth/roles";
 import {
   isSupabaseStorageConfigured,
   uploadPublicSupabaseImage,
@@ -22,7 +22,8 @@ const ALLOWED_TYPES = new Set<string>([
 
 export async function POST(request: NextRequest) {
   const { userId, sessionClaims } = await auth();
-  if (!userId || !isAdminRole(sessionClaims?.metadata?.role)) {
+  const role = normalizeAuthRole(sessionClaims?.metadata?.role);
+  if (!userId || !role || !hasPermission(role, AUTH_PERMISSIONS.manageContent)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

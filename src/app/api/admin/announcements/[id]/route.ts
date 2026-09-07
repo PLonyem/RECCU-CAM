@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { isAdminRole, normalizeAuthRole } from "@/lib/auth/roles";
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
-import { updateAnnouncementSchema } from "@/lib/validation/announcement";
+import { announcementSchema, updateAnnouncementSchema } from "@/lib/validation/announcement";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -23,11 +23,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const body = await request.json();
-  const parsed = updateAnnouncementSchema.safeParse(body);
+  const body = await request.json().catch(() => null);
+  const publishCandidate = body && typeof body === "object" && "isPublished" in body && body.isPublished === true
+    ? {
+        ...existing,
+        ...body,
+        startDate: "startDate" in body ? body.startDate : existing.startDate?.toISOString() ?? null,
+        expiryDate: "expiryDate" in body ? body.expiryDate : existing.expiryDate?.toISOString() ?? null,
+      }
+    : body;
+  const parsed = (publishCandidate !== body ? announcementSchema : updateAnnouncementSchema).safeParse(publishCandidate);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid input", details: parsed.error.flatten() },
+      { error: "Review the highlighted fields.", errors: parsed.error.flatten().fieldErrors, details: parsed.error.flatten() },
       { status: 400 }
     );
   }

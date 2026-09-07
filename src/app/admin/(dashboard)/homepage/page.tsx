@@ -385,7 +385,7 @@ export default function AdminHomepageEditorPage() {
       });
       body = await res.json().catch(() => null) as Record<string, unknown> | null;
     } catch {
-      setToast({ type: "error", message: "Unable to save changes." });
+      setToast({ type: "error", message: "Network error. Please check your connection and retry." });
       return;
     } finally {
       setIsSaving(false);
@@ -406,7 +406,7 @@ export default function AdminHomepageEditorPage() {
     }
 
     setData(body as unknown as HomepageContentData);
-    setToast({ type: "success", message: mode === "draft" ? "Draft saved." : "Homepage published." });
+    setToast({ type: "success", message: mode === "draft" ? "Draft saved successfully." : "Homepage published successfully." });
   }
 
   return (

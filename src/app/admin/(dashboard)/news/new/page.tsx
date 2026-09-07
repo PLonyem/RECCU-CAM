@@ -19,7 +19,7 @@ export default function NewArticlePage() {
 
     if (!res.ok) {
       const body = await res.json().catch(() => null);
-      return body?.error ?? "Something went wrong. Please try again.";
+      return { message: body?.error ?? "Something went wrong. Please try again.", fieldErrors: body?.errors ?? body?.details?.fieldErrors };
     }
 
     router.push("/admin/news?created=1");

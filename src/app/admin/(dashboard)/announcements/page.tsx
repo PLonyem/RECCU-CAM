@@ -237,6 +237,11 @@ export default function AdminAnnouncementsPage() {
       });
 
       if (!result.ok) {
+        const nextErrors: Record<string, string> = {};
+        for (const [name, messages] of Object.entries(result.fieldErrors ?? {})) {
+          if (messages[0]) nextErrors[name] = messages[0];
+        }
+        setFieldErrors(nextErrors);
         setToast({ type: "error", message: result.message });
         return;
       }

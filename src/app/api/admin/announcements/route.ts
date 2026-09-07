@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { isAdminRole, normalizeAuthRole } from "@/lib/auth/roles";
 import { adminDataResponse } from "@/lib/admin-data-server";
 import { prisma } from "@/lib/prisma";
-import { announcementSchema } from "@/lib/validation/announcement";
+import { announcementDraftSchema, announcementSchema } from "@/lib/validation/announcement";
 import type { Prisma } from "@/generated/prisma/client";
 import { writeAuditLog } from "@/lib/audit";
 
@@ -45,11 +45,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const parsed = announcementSchema.safeParse(body);
+  const body = await request.json().catch(() => null);
+  const parsed = (body && typeof body === "object" && "isPublished" in body && body.isPublished === true
+    ? announcementSchema
+    : announcementDraftSchema).safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid input", details: parsed.error.flatten() },
+      { error: "Review the highlighted fields.", errors: parsed.error.flatten().fieldErrors, details: parsed.error.flatten() },
       { status: 400 }
     );
   }

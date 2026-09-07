@@ -8,6 +8,7 @@ export interface AdminDataFailure {
   ok: false;
   message: string;
   status: number | null;
+  fieldErrors?: Record<string, string[]>;
 }
 
 export type AdminDataResult<T> = AdminDataSuccess<T> | AdminDataFailure;
@@ -27,6 +28,19 @@ export async function requestAdminData<T>(
   try {
     const response = await fetcher(input, init);
     if (!response.ok) {
+      if (response.status === 400) {
+        const body = await response.json().catch(() => null) as {
+          error?: unknown;
+          errors?: unknown;
+          details?: { fieldErrors?: unknown };
+        } | null;
+        return {
+          ok: false,
+          message: typeof body?.error === "string" ? body.error : "Review the highlighted fields.",
+          status: response.status,
+          fieldErrors: (body?.errors ?? body?.details?.fieldErrors) as Record<string, string[]> | undefined,
+        };
+      }
       return { ok: false, message: messageForStatus(response.status), status: response.status };
     }
 

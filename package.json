@@ -25,7 +25,7 @@
     "test:loan": "tsx --test src/lib/loan-calculator/*.test.ts",
     "test:security": "tsx --test src/lib/security/*.test.ts",
     "test:admin-routes": "tsx --test src/lib/admin-data-client.test.ts src/lib/admin-data-errors.test.ts src/lib/database-config.test.ts src/lib/data/public-content-mappers.test.ts src/lib/message-inbox.test.ts src/components/admin/nav-items.test.ts",
-    "test:homepage": "tsx --test src/lib/validation/homepage-content.test.ts src/data/homepage-cms.test.ts",
+    "test:homepage": "tsx --test src/lib/validation/homepage-content.test.ts src/lib/validation/website-content.test.ts src/data/homepage-cms.test.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
