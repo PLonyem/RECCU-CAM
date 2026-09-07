@@ -8,6 +8,7 @@ import {
 import { vtimeRegistrationSchema } from "@/lib/validation/vtime-registration";
 import { enforceRateLimit, readBoundedJson } from "@/lib/security/request";
 import { reportServerError } from "@/lib/security/logging";
+import { createIncomingContactMessageRecord } from "@/lib/message-service";
 
 export async function POST(request: Request) {
   const limited = enforceRateLimit(request, {
@@ -52,8 +53,8 @@ export async function POST(request: Request) {
       registration.notes || "No additional notes provided.",
     ].join("\n");
 
-    await prisma.$transaction([
-      prisma.trainingRegistration.create({
+    await prisma.$transaction(async (tx) => {
+      await tx.trainingRegistration.create({
         data: {
           programId: publishedProgram.id,
           participantName: registration.participantName,
@@ -63,21 +64,20 @@ export async function POST(request: Request) {
           phone: registration.phone,
           notes: registration.notes,
         },
-      }),
-      prisma.contactMessage.create({
-        data: {
-          name: registration.participantName,
-          email: registration.email,
-          phone: registration.phone,
-          organization: registration.institution,
-          role: registration.role,
-          purpose: "training",
-          department: "VTIME Training",
-          subject: `VTIME registration — ${publishedProgram.title}`,
-          message,
-        },
-      }),
-    ]);
+      });
+      await createIncomingContactMessageRecord(tx, {
+        name: registration.participantName,
+        email: registration.email,
+        phone: registration.phone,
+        organization: registration.institution,
+        role: registration.role,
+        purpose: "training-vtime",
+        department: "VTIME Training",
+        subject: `VTIME registration — ${publishedProgram.title}`,
+        message,
+        consent: false,
+      });
+    });
   } catch (error) {
     reportServerError("vtime-registration.store_failed", error);
     return NextResponse.json(

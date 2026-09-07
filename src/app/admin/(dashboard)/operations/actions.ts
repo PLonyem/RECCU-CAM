@@ -11,14 +11,13 @@ import { slugify } from "@/lib/slug";
 import type { Prisma } from "@/generated/prisma/client";
 import { defaultHomepageSections } from "@/data/homepage-cms";
 
-const kinds = ["message", "affiliation", "support", "banking"] as const;
+const kinds = ["affiliation", "support", "banking"] as const;
 const updateSchema = z.object({
   kind: z.enum(kinds), id: z.string().min(1), status: z.string().trim().min(1).max(40),
   assignedTo: z.string().trim().max(160).optional(), note: z.string().trim().max(2000).optional(),
 });
 
 const permissions = {
-  message: AUTH_PERMISSIONS.manageMessages,
   affiliation: AUTH_PERMISSIONS.manageAffiliationRequests,
   support: AUTH_PERMISSIONS.manageSupport,
   banking: AUTH_PERMISSIONS.manageAffiliateBanking,
@@ -33,10 +32,7 @@ export async function updateOperationalRecord(formData: FormData) {
   const parsed = updateSchema.parse(Object.fromEntries(formData));
   const actor = await requireStaffPermission(permissions[parsed.kind]);
   const shared = { status: parsed.status, assignedTo: parsed.assignedTo || null };
-  if (parsed.kind === "message") {
-    const existing = await prisma.contactMessage.findUniqueOrThrow({ where: { id: parsed.id } });
-    await prisma.contactMessage.update({ where: { id: parsed.id }, data: { ...shared, isRead: true, internalNotes: appendNote(existing.internalNotes, parsed.note, actor.userId) } });
-  } else if (parsed.kind === "affiliation") {
+  if (parsed.kind === "affiliation") {
     const existing = await prisma.affiliationInquiry.findUniqueOrThrow({ where: { id: parsed.id } });
     await prisma.affiliationInquiry.update({ where: { id: parsed.id }, data: { ...shared, internalNotes: appendNote(existing.internalNotes, parsed.note, actor.userId) } });
   } else if (parsed.kind === "support") {
@@ -47,7 +43,7 @@ export async function updateOperationalRecord(formData: FormData) {
     await prisma.affiliateBankingInquiry.update({ where: { id: parsed.id }, data: { ...shared, internalNotes: appendNote(existing.internalNotes, parsed.note, actor.userId) } });
   }
   await writeAuditLog({ actorId: actor.userId, actorRole: actor.role, action: "status_changed", resource: parsed.kind, resourceId: parsed.id, metadata: { status: parsed.status } });
-  revalidatePath(`/admin/${parsed.kind === "affiliation" ? "affiliation-requests" : parsed.kind === "banking" ? "affiliate-banking" : `${parsed.kind}s`}`);
+  revalidatePath(`/admin/${parsed.kind === "affiliation" ? "affiliation-requests" : parsed.kind === "banking" ? "affiliate-banking" : "support"}`);
 }
 
 export async function createComplianceRecord(formData: FormData) {

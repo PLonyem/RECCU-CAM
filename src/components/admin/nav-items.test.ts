@@ -44,7 +44,7 @@ test("unknown and mismatched role spellings remain unauthorized", () => {
 
 test("data-backed sidebar modules define a zero-record state", () => {
   const expectations = [
-    ["messages/page.tsx", "No messages yet."],
+    ["../../../components/admin/MessagesInbox.tsx", "No messages yet."],
     ["affiliates/page.tsx", "No affiliates found."],
     ["affiliation-requests/page.tsx", "No affiliation requests yet."],
     ["affiliate-banking/page.tsx", "No Affiliate Banking inquiries yet."],

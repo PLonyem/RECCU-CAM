@@ -410,28 +410,66 @@ model Announcement {
 }
 
 model ContactMessage {
-  id            String   @id @default(cuid())
-  name          String
-  phone         String?
-  email         String?
-  organization  String?
-  role          String?
-  purpose       String   @default("general-inquiry")
-  department    String   @default("Administration / Front Office")
-  subject       String
-  message       String   @db.Text
-  consent       Boolean  @default(false)
-  status        String   @default("new") // new | in-review | responded | closed
-  isRead        Boolean  @default(false)
-  assignedTo    String?
-  internalNotes Json     @default("[]")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String        @id @default(cuid())
+  referenceNumber String        @unique
+  name            String
+  phone           String?
+  email           String?
+  organization    String?
+  role            String?
+  purpose         String        @default("general-inquiry")
+  department      String        @default("Administration / Front Office")
+  subject         String
+  message         String        @db.Text
+  consent         Boolean       @default(false)
+  status          String        @default("new") // new | open | in-review | awaiting-response | responded | resolved | archived
+  priority        String        @default("normal") // low | normal | high | urgent
+  priorityRank    Int           @default(1)
+  isRead          Boolean       @default(false)
+  readAt          DateTime?
+  assignedUserId  String?
+  assignedTo      String?
+  respondedAt     DateTime?
+  respondedBy     String?
+  responseMethod  String?
+  responseNote    String?       @db.Text
+  responseDueAt   DateTime?
+  archivedAt      DateTime?
+  internalNotes   Json          @default("[]") // legacy notes retained for migrated records
+  notes           MessageNote[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   @@index([purpose])
   @@index([status])
+  @@index([priority])
+  @@index([priorityRank, createdAt])
+  @@index([isRead, archivedAt])
+  @@index([assignedUserId, archivedAt])
+  @@index([responseDueAt])
+  @@index([updatedAt])
   @@index([createdAt])
   @@map("contact_messages")
+}
+
+model MessageReferenceCounter {
+  year      Int      @id
+  sequence  Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@map("message_reference_counters")
+}
+
+model MessageNote {
+  id           String         @id @default(cuid())
+  messageId    String
+  message      ContactMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  authorUserId String
+  body         String         @db.Text
+  createdAt    DateTime       @default(now())
+
+  @@index([messageId, createdAt])
+  @@map("message_notes")
 }
 
 model AffiliateUpdateRequest {

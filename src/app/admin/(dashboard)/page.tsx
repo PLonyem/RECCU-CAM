@@ -9,6 +9,7 @@ import {
   CalendarDays,
   CheckCircle2,
   CircleAlert,
+  Clock3,
   ClipboardList,
   FilePenLine,
   FileText,
@@ -20,6 +21,7 @@ import {
   ScrollText,
   Server,
   ShieldCheck,
+  Star,
 } from "lucide-react";
 import { AdminDashboardWelcome } from "@/components/admin/AdminDashboardWelcome";
 import { Badge, type BadgeProps } from "@/components/ui/Badge";
@@ -165,21 +167,22 @@ export default async function AdminDashboardPage() {
     : (await requireStaffPermission(AUTH_PERMISSIONS.accessAdmin)).role;
   const can = (permission: AuthPermission) => hasPermission(role, permission);
   const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
   const messageRequest = can(AUTH_PERMISSIONS.manageMessages)
     ? loadSection("messages", async () => {
-        const [newCount, receivedToday, recent] = await Promise.all([
-          prisma.contactMessage.count({ where: { status: "new" } }),
-          prisma.contactMessage.count({ where: { createdAt: { gte: startOfToday } } }),
+        const [unread, needsResponse, highPriority, recent] = await Promise.all([
+          prisma.contactMessage.count({ where: { isRead: false, archivedAt: null } }),
+          prisma.contactMessage.count({ where: { status: { in: ["new", "open", "in-review", "awaiting-response"] }, archivedAt: null } }),
+          prisma.contactMessage.count({ where: { priority: { in: ["high", "urgent"] }, archivedAt: null } }),
           prisma.contactMessage.findMany({
+            where: { archivedAt: null },
             orderBy: { createdAt: "desc" },
             take: 5,
-            select: { id: true, name: true, organization: true, purpose: true, subject: true, status: true, createdAt: true },
+            select: { id: true, referenceNumber: true, name: true, organization: true, purpose: true, subject: true, status: true, priority: true, isRead: true, createdAt: true },
           }),
         ]);
-        return { newCount, receivedToday, recent };
+        return { unread, needsResponse, highPriority, recent };
       })
     : Promise.resolve(null);
 
@@ -361,7 +364,11 @@ export default async function AdminDashboardPage() {
   ]);
 
   const summaryCards: Array<{ label: string; value: number; detail: string; icon: LucideIcon; href: string }> = [];
-  if (messages?.available) summaryCards.push({ label: "New Contact Messages", value: messages.data.newCount, detail: messages.data.receivedToday ? `${messages.data.receivedToday} received today` : "No messages received today", icon: Mail, href: "/admin/messages" });
+  if (messages?.available) {
+    summaryCards.push({ label: "Unread Messages", value: messages.data.unread, detail: messages.data.unread ? "Awaiting staff review" : "Inbox is up to date", icon: Mail, href: "/admin/messages?folder=unread" });
+    summaryCards.push({ label: "Needs Response", value: messages.data.needsResponse, detail: "Active correspondence workflow", icon: Clock3, href: "/admin/messages?folder=needs-response" });
+    summaryCards.push({ label: "High Priority", value: messages.data.highPriority, detail: "High or urgent attention", icon: Star, href: "/admin/messages?folder=high-priority" });
+  }
   if (affiliations?.available) summaryCards.push({ label: "Pending Affiliation Requests", value: affiliations.data.pending, detail: affiliations.data.pending ? "Awaiting staff review" : "No institutions awaiting review", icon: ClipboardList, href: "/admin/affiliation-requests" });
   if (affiliates?.available) summaryCards.push({ label: "Active Affiliates", value: affiliates.data.active, detail: "Current operational records", icon: Building2, href: "/admin/affiliates" });
   if (training?.available) summaryCards.push({ label: "Upcoming VTIME Programs", value: training.data.upcoming, detail: training.data.upcoming ? "Published with future dates" : "No scheduled programmes", icon: CalendarDays, href: "/admin/vtime" });
@@ -439,7 +446,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {messages && (
-        <Panel title="Recent Contact Messages" description="The five most recent public website inquiries." action={<PanelLink href="/admin/messages">Open Inbox</PanelLink>}>
+        <Panel title="Recent Messages" description="The five most recent incoming institutional enquiries." action={<PanelLink href="/admin/messages">View all messages</PanelLink>}>
           {!messages.available ? <DataUnavailable /> : messages.data.recent.length === 0 ? (
             <EmptyState icon={Mail} title="No contact messages" description="New public inquiries will appear here when they are received." />
           ) : <ContactMessages rows={messages.data.recent} />}
@@ -600,17 +607,17 @@ function HealthRow({ icon: Icon, label, value, healthy }: { icon: LucideIcon; la
 }
 
 function ContactMessages({ rows }: {
-  rows: Array<{ id: string; name: string; organization: string | null; purpose: string; subject: string; status: string; createdAt: Date }>;
+  rows: Array<{ id: string; referenceNumber: string; name: string; organization: string | null; purpose: string; subject: string; status: string; priority: string; isRead: boolean; createdAt: Date }>;
 }) {
   return (
     <>
       <div className="space-y-3 md:hidden">
-        {rows.map((message) => <article key={message.id} className={cn("rounded-xl border p-4", message.status === "new" ? "border-primary-200 bg-primary-50/60" : "border-slate-200")}><div className="flex items-start justify-between gap-3"><div><p className="font-semibold text-slate-900">{message.name}</p><p className="mt-1 text-xs text-slate-500">{message.organization || "No organization provided"}</p></div><Badge variant={statusVariant(message.status)}>{labelize(message.status)}</Badge></div><p className="mt-3 text-sm font-medium text-slate-800">{message.subject}</p><p className="mt-2 text-xs text-slate-500">{labelize(message.purpose)} · {formatDate(message.createdAt)}</p></article>)}
+        {rows.map((message) => <Link href={`/admin/messages?message=${message.id}`} key={message.id} className={cn("block rounded-xl border p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest", !message.isRead ? "border-primary-200 bg-primary-50/60" : "border-slate-200")}><div className="flex items-start justify-between gap-3"><div><p className={cn("text-slate-900", !message.isRead ? "font-bold" : "font-semibold")}>{message.name}</p><p className="mt-1 text-xs text-slate-500">{message.organization || "No organization provided"}</p></div><Badge variant={statusVariant(message.status)}>{labelize(message.status)}</Badge></div><p className="mt-3 text-sm font-medium text-slate-800">{message.subject}</p><p className="mt-2 text-xs text-slate-500">{message.referenceNumber} · {labelize(message.purpose)} · {message.priority} · {formatDate(message.createdAt)}</p></Link>)}
       </div>
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[50rem] text-left text-sm">
           <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500"><tr><th className="pb-3 font-semibold">Sender</th><th className="pb-3 font-semibold">Organization</th><th className="pb-3 font-semibold">Purpose</th><th className="pb-3 font-semibold">Subject</th><th className="pb-3 font-semibold">Date</th><th className="pb-3 text-right font-semibold">Status</th></tr></thead>
-          <tbody className="divide-y divide-slate-200">{rows.map((message) => <tr key={message.id} className={message.status === "new" ? "bg-primary-50/50" : undefined}><td className="py-3 pr-4 font-semibold text-slate-900">{message.name}</td><td className="py-3 pr-4 text-slate-600">{message.organization || "—"}</td><td className="py-3 pr-4 capitalize text-slate-600">{labelize(message.purpose)}</td><td className="max-w-64 truncate py-3 pr-4 text-slate-700">{message.subject}</td><td className="whitespace-nowrap py-3 pr-4 text-slate-500">{formatDate(message.createdAt)}</td><td className="py-3 text-right"><Badge variant={statusVariant(message.status)}>{labelize(message.status)}</Badge></td></tr>)}</tbody>
+          <tbody className="divide-y divide-slate-200">{rows.map((message) => <tr key={message.id} className={!message.isRead ? "bg-primary-50/50" : undefined}><td className={cn("py-3 pr-4 text-slate-900", !message.isRead ? "font-bold" : "font-semibold")}><Link href={`/admin/messages?message=${message.id}`} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest">{message.name}</Link></td><td className="py-3 pr-4 text-slate-600">{message.organization || "—"}</td><td className="py-3 pr-4 capitalize text-slate-600">{labelize(message.purpose)}</td><td className="max-w-64 truncate py-3 pr-4 text-slate-700">{message.subject}</td><td className="whitespace-nowrap py-3 pr-4 text-slate-500">{formatDate(message.createdAt)}</td><td className="py-3 text-right"><Badge variant={statusVariant(message.status)}>{labelize(message.status)}</Badge></td></tr>)}</tbody>
         </table>
       </div>
     </>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
@@ -64,6 +65,26 @@ function AdminNavbarContent({
   accountControl,
 }: AdminNavbarContentProps) {
   const pathname = usePathname();
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    if (!canViewMessages || demo) return;
+    let ignore = false;
+    const refresh = () => {
+      fetch("/api/admin/messages?status=unread&limit=10", { cache: "no-store" })
+        .then((response) => response.ok ? response.json() : null)
+        .then((data: { unreadCount?: number } | null) => {
+          if (!ignore && typeof data?.unreadCount === "number") setUnreadMessages(data.unreadCount);
+        })
+        .catch(() => {});
+    };
+    refresh();
+    window.addEventListener("admin-badge-refresh", refresh);
+    return () => {
+      ignore = true;
+      window.removeEventListener("admin-badge-refresh", refresh);
+    };
+  }, [canViewMessages, demo, pathname]);
 
   return (
     <header className="sticky top-0 z-40 shrink-0 border-b border-slate-200 bg-white/95 backdrop-blur">
@@ -100,8 +121,9 @@ function AdminNavbarContent({
             </Link>
           )}
           {canViewMessages && (
-            <Link href="/admin/messages" aria-label="Open message notifications" className="grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-institutional focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest">
+            <Link href="/admin/messages" aria-label={`Open message notifications${unreadMessages ? `, ${unreadMessages} unread` : ""}`} className="relative grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-institutional focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest">
               <Bell className="h-5 w-5" aria-hidden="true" />
+              {unreadMessages > 0 && <span className="absolute right-0.5 top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-600 px-1 text-[9px] font-bold text-white">{unreadMessages > 99 ? "99+" : unreadMessages}</span>}
             </Link>
           )}
           <div className="hidden min-w-0 text-right md:block">

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getContactPurpose } from "@/data/contact";
 import { contactMessageSchema, normalizeContactPhone } from "@/lib/validation/contact";
 import {
@@ -9,6 +8,7 @@ import {
 import { sendContactFormNotification } from "@/lib/email";
 import { enforceRateLimit, readBoundedJson } from "@/lib/security/request";
 import { reportServerError } from "@/lib/security/logging";
+import { createIncomingContactMessage } from "@/lib/message-service";
 
 // Public endpoint — the site's contact form, not an admin route. No auth
 // check by design. The same schema is used by the client for inline feedback
@@ -43,20 +43,17 @@ export async function POST(request: NextRequest) {
   const normalizedPhone = normalizeContactPhone(message.phone);
 
   try {
-    await prisma.contactMessage.create({
-      data: {
-        name: message.fullName,
-        phone: normalizedPhone,
-        email: message.email || null,
-        organization: message.organization || null,
-        role: message.role || null,
-        purpose: purpose.value,
-        department: purpose.department,
-        subject: message.subject,
-        message: message.message,
-        consent: message.consent,
-        status: "new",
-      },
+    await createIncomingContactMessage({
+      name: message.fullName,
+      phone: normalizedPhone,
+      email: message.email || null,
+      organization: message.organization || null,
+      role: message.role || null,
+      purpose: purpose.value,
+      department: purpose.department,
+      subject: message.subject,
+      message: message.message,
+      consent: message.consent,
     });
   } catch (error) {
     reportServerError("contact.store_failed", error);

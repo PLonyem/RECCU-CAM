@@ -11,18 +11,28 @@ export async function adminDataResponse<T>(
 ) {
   try {
     const data = await load();
-    return NextResponse.json(data, { status: successStatus });
+    return NextResponse.json(data, {
+      status: successStatus,
+      headers: { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow" },
+    });
   } catch (error) {
-    const details = classifyAdminDataError(error);
-    const codeSuffix = details.code ? `:${details.code}` : "";
-
-    console.error(
-      `[admin-data] ${moduleName}.${operation} failed (${details.category}${codeSuffix})`,
-    );
-
-    return NextResponse.json(
-      { error: "Admin data is temporarily unavailable. Please retry." },
-      { status: details.status },
-    );
+    return adminDataErrorResponse(moduleName, operation, error);
   }
+}
+
+export function adminDataErrorResponse(moduleName: string, operation: string, error: unknown) {
+  const details = classifyAdminDataError(error);
+  const codeSuffix = details.code ? `:${details.code}` : "";
+
+  console.error(
+    `[admin-data] ${moduleName}.${operation} failed (${details.category}${codeSuffix})`,
+  );
+
+  return NextResponse.json(
+    { error: "Admin data is temporarily unavailable. Please retry." },
+    {
+      status: details.status,
+      headers: { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow" },
+    },
+  );
 }

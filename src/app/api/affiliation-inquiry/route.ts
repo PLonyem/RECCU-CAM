@@ -8,6 +8,7 @@ import {
 } from "@/lib/validation/form-security";
 import { enforceRateLimit, readBoundedJson } from "@/lib/security/request";
 import { reportServerError } from "@/lib/security/logging";
+import { createIncomingContactMessageRecord } from "@/lib/message-service";
 
 export async function POST(request: Request) {
   const limited = enforceRateLimit(request, {
@@ -44,29 +45,30 @@ export async function POST(request: Request) {
   ].join("\n");
 
   try {
-    await prisma.affiliationInquiry.create({
-      data: {
-        institution: inquiry.institution,
-        contactPerson: inquiry.contactPerson,
-        email: inquiry.email,
-        phone: inquiry.phone,
-        role: inquiry.role,
-        city: inquiry.city,
-        message: inquiry.message,
-      },
-    });
-    await prisma.contactMessage.create({
-      data: {
+    await prisma.$transaction(async (tx) => {
+      await tx.affiliationInquiry.create({
+        data: {
+          institution: inquiry.institution,
+          contactPerson: inquiry.contactPerson,
+          email: inquiry.email,
+          phone: inquiry.phone,
+          role: inquiry.role,
+          city: inquiry.city,
+          message: inquiry.message,
+        },
+      });
+      await createIncomingContactMessageRecord(tx, {
         name: inquiry.contactPerson,
         email: inquiry.email,
         phone: inquiry.phone,
         organization: inquiry.institution,
         role: inquiry.role,
-        purpose: "affiliation",
+        purpose: "becoming-an-affiliate",
         department: "Network Administration",
         subject: `Affiliation inquiry — ${inquiry.institution}`,
         message,
-      },
+        consent: false,
+      });
     });
   } catch (error) {
     reportServerError("affiliation-inquiry.store_failed", error);

@@ -12,6 +12,7 @@ import {
 } from "@/lib/validation/form-security";
 import { enforceRateLimit, readBoundedJson } from "@/lib/security/request";
 import { reportServerError } from "@/lib/security/logging";
+import { createIncomingContactMessageRecord } from "@/lib/message-service";
 
 export async function POST(request: Request) {
   const limited = enforceRateLimit(request, {
@@ -55,22 +56,22 @@ export async function POST(request: Request) {
       where: { name: { equals: inquiry.institution, mode: "insensitive" } },
       select: { id: true },
     });
-    await prisma.affiliateBankingInquiry.create({
-      data: {
-        reference: `AB-${new Date().getUTCFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
-        affiliateId: affiliate?.id,
-        institution: inquiry.institution,
-        contactPerson: inquiry.contactPerson,
-        email: inquiry.email,
-        phone: inquiry.phone,
-        role: inquiry.role,
-        city: inquiry.city,
-        supportCategory: inquiry.supportCategory,
-        message: inquiry.message,
-      },
-    });
-    await prisma.contactMessage.create({
-      data: {
+    await prisma.$transaction(async (tx) => {
+      await tx.affiliateBankingInquiry.create({
+        data: {
+          reference: `AB-${new Date().getUTCFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+          affiliateId: affiliate?.id,
+          institution: inquiry.institution,
+          contactPerson: inquiry.contactPerson,
+          email: inquiry.email,
+          phone: inquiry.phone,
+          role: inquiry.role,
+          city: inquiry.city,
+          supportCategory: inquiry.supportCategory,
+          message: inquiry.message,
+        },
+      });
+      await createIncomingContactMessageRecord(tx, {
         name: inquiry.contactPerson,
         email: inquiry.email,
         phone: inquiry.phone,
@@ -80,7 +81,8 @@ export async function POST(request: Request) {
         department: "Affiliate Banking",
         subject: `Affiliate Banking inquiry — ${category}`,
         message,
-      },
+        consent: false,
+      });
     });
   } catch (error) {
     reportServerError("affiliate-banking-inquiry.store_failed", error);
