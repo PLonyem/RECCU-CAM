@@ -44,19 +44,19 @@ export function HomeHero({ content }: { content?: HomeHeroContent | null }) {
           <p className="inline-flex items-center gap-2 rounded-pill border border-white/20 bg-institutional/50 px-4 py-2 text-meta uppercase text-accent-200 backdrop-blur-sm">
             <BadgeCheck className="h-4 w-4" aria-hidden="true" /> {content?.heroBadge ?? institution.displayName}
           </p>
-          <h1 className="mt-7 font-display text-h1 text-white sm:text-display">
+          <h1 className="mt-7 whitespace-pre-line font-display text-h1 text-white sm:text-display">
             {content?.heroTitle ?? <>Building Stronger Credit Unions. <span className="text-accent-300">Building Stronger Communities.</span></>}
           </h1>
           <p className="mt-7 max-w-[45rem] text-lead text-primary-50 sm:text-xl sm:leading-9">
             {content?.heroSubtitle ?? "RECCU-CAM strengthens cooperative financial institutions through institutional support, responsible governance, professional development and shared growth."}
           </p>
           <div className={cn("mt-9 flex flex-col gap-3 sm:flex-row", content?.textAlignment === "center" && "justify-center", content?.textAlignment === "right" && "justify-end")}>
-            <Link href={content?.primaryButtonLink ?? "/about"} className={buttonVariants({ variant: "accent", size: "lg" })}>
+            {(!content || (content.primaryButtonText && content.primaryButtonLink)) && <Link href={content?.primaryButtonLink ?? "/about"} className={buttonVariants({ variant: "accent", size: "lg" })}>
               {content?.primaryButtonText ?? "Learn About RECCU-CAM"} <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-            <Link href={content?.secondaryButtonLink ?? "/contact"} className={buttonVariants({ variant: "secondary", size: "lg", className: "border-white/40 bg-white/10 text-white hover:border-white/70 hover:bg-white/15" })}>
+            </Link>}
+            {(!content || (content.secondaryButtonText && content.secondaryButtonLink)) && <Link href={content?.secondaryButtonLink ?? "/contact"} className={buttonVariants({ variant: "secondary", size: "lg", className: "border-white/40 bg-white/10 text-white hover:border-white/70 hover:bg-white/15" })}>
               {content?.secondaryButtonText ?? "Contact RECCU-CAM"}
-            </Link>
+            </Link>}
           </div>
         </div>
       </Container>

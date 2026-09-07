@@ -20,41 +20,14 @@ import { Card } from "@/components/ui/Card";
 import { cn, heroOverlayGradient } from "@/lib/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import type { TranslationKey } from "@/lib/i18n";
+import { HOMEPAGE_CONTENT_LIMITS, type HomepageContentInput } from "@/lib/validation/homepage-content";
 
 type Tab = "content" | "appearance" | "sections";
 type GradientDirection = "to-r" | "to-b" | "to-br" | "to-bl";
 type TextAlignment = "left" | "center" | "right";
 type ButtonStyle = "solid" | "outline" | "ghost";
 
-interface HomepageContentData {
-  // Content
-  heroBadge: string;
-  heroTitle: string;
-  heroSubtitle: string;
-  primaryButtonText: string;
-  primaryButtonLink: string;
-  secondaryButtonText: string;
-  secondaryButtonLink: string;
-  heroImages: string[];
-  statsAffiliates: number;
-  statsMembers: string;
-  statsAssets: string;
-  // Appearance
-  showOverlay: boolean;
-  overlayColor: string;
-  overlayOpacity: number;
-  backgroundColor: string;
-  gradientDirection: GradientDirection;
-  textAlignment: TextAlignment;
-  buttonStyle: ButtonStyle;
-  // Sections
-  showHero: boolean;
-  showStats: boolean;
-  showMission: boolean;
-  showServices: boolean;
-  showReach: boolean;
-  showNews: boolean;
-}
+type HomepageContentData = HomepageContentInput;
 
 const SECTION_VISIBILITY_FIELDS: {
   key: "showHero" | "showStats" | "showMission" | "showServices" | "showReach" | "showNews";
@@ -275,7 +248,7 @@ function HeroPreview({ data }: { data: HomepageContentData }) {
           >
             {data.heroBadge || "Badge text"}
           </p>
-          <p className="text-white font-bold text-sm leading-tight" style={textShadowStyle}>
+          <p className="whitespace-pre-line text-white font-bold text-sm leading-tight" style={textShadowStyle}>
             {data.heroTitle || "Headline"}
           </p>
           <p
@@ -344,6 +317,12 @@ export default function AdminHomepageEditorPage() {
     value: HomepageContentData[K]
   ) {
     setData((prev) => (prev ? { ...prev, [key]: value } : prev));
+    setFieldErrors((previous) => {
+      if (!previous[key]) return previous;
+      const next = { ...previous };
+      delete next[key];
+      return next;
+    });
   }
 
   async function handleAddImage(e: React.ChangeEvent<HTMLInputElement>) {
@@ -396,17 +375,25 @@ export default function AdminHomepageEditorPage() {
     setFieldErrors({});
     setToast(null);
 
-    const res = await fetch(`/api/admin/homepage?mode=${mode}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    const body = await res.json().catch(() => null);
-    setIsSaving(false);
-    setSaveMode(null);
+    let res: Response;
+    let body: Record<string, unknown> | null;
+    try {
+      res = await fetch(`/api/admin/homepage?mode=${mode}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      body = await res.json().catch(() => null) as Record<string, unknown> | null;
+    } catch {
+      setToast({ type: "error", message: "Unable to save changes." });
+      return;
+    } finally {
+      setIsSaving(false);
+      setSaveMode(null);
+    }
 
     if (!res.ok) {
-      const details = body?.details?.fieldErrors as Record<string, string[] | undefined> | undefined;
+      const details = (body?.errors ?? (body?.details as { fieldErrors?: unknown } | undefined)?.fieldErrors) as Record<string, string[] | undefined> | undefined;
       const nextErrors: Record<string, string> = {};
       if (details) {
         for (const [field, messages] of Object.entries(details)) {
@@ -414,12 +401,12 @@ export default function AdminHomepageEditorPage() {
         }
       }
       setFieldErrors(nextErrors);
-      setToast({ type: "error", message: body?.error ?? "Could not save changes." });
+      setToast({ type: "error", message: typeof body?.error === "string" ? body.error : "Unable to save changes." });
       return;
     }
 
-    setData(body);
-    setToast({ type: "success", message: mode === "draft" ? "Homepage draft saved" : "Homepage published" });
+    setData(body as unknown as HomepageContentData);
+    setToast({ type: "success", message: mode === "draft" ? "Draft saved." : "Homepage published." });
   }
 
   return (
@@ -721,6 +708,7 @@ export default function AdminHomepageEditorPage() {
               {isUploading ? t("admin.uploading") : t("admin.addImage")}
             </button>
             <p className="text-xs text-gray-400 mt-2">Recommended size: 1920×1080px</p>
+            {fieldErrors.heroImages && <p className={errorClass}>{fieldErrors.heroImages}</p>}
           </Card>
 
           {/* SECTION 2: HERO TEXT */}
@@ -737,10 +725,12 @@ export default function AdminHomepageEditorPage() {
                 placeholder="Regulated by COBAC"
                 value={data.heroBadge}
                 onChange={(e) => updateField("heroBadge", e.target.value)}
+                maxLength={HOMEPAGE_CONTENT_LIMITS.heroBadge}
+                aria-invalid={Boolean(fieldErrors.heroBadge)}
                 className={inputClass}
               />
               {fieldErrors.heroBadge && <p className={errorClass}>{fieldErrors.heroBadge}</p>}
-              <p className={countClass}>{data.heroBadge.length} characters</p>
+              <p className={countClass}>{data.heroBadge.length}/{HOMEPAGE_CONTENT_LIMITS.heroBadge} characters</p>
             </div>
 
             <div>
@@ -752,10 +742,12 @@ export default function AdminHomepageEditorPage() {
                 rows={2}
                 value={data.heroTitle}
                 onChange={(e) => updateField("heroTitle", e.target.value)}
+                maxLength={HOMEPAGE_CONTENT_LIMITS.heroTitle}
+                aria-invalid={Boolean(fieldErrors.heroTitle)}
                 className={cn(inputClass, "text-lg font-display")}
               />
               {fieldErrors.heroTitle && <p className={errorClass}>{fieldErrors.heroTitle}</p>}
-              <p className={countClass}>{data.heroTitle.length} characters</p>
+              <p className={countClass}>{data.heroTitle.length}/{HOMEPAGE_CONTENT_LIMITS.heroTitle} characters</p>
             </div>
 
             <div>
@@ -767,10 +759,12 @@ export default function AdminHomepageEditorPage() {
                 rows={3}
                 value={data.heroSubtitle}
                 onChange={(e) => updateField("heroSubtitle", e.target.value)}
+                maxLength={HOMEPAGE_CONTENT_LIMITS.heroSubtitle}
+                aria-invalid={Boolean(fieldErrors.heroSubtitle)}
                 className={inputClass}
               />
               {fieldErrors.heroSubtitle && <p className={errorClass}>{fieldErrors.heroSubtitle}</p>}
-              <p className={countClass}>{data.heroSubtitle.length} characters</p>
+              <p className={countClass}>{data.heroSubtitle.length}/{HOMEPAGE_CONTENT_LIMITS.heroSubtitle} characters</p>
             </div>
           </Card>
 
@@ -788,11 +782,14 @@ export default function AdminHomepageEditorPage() {
                   type="text"
                   value={data.primaryButtonText}
                   onChange={(e) => updateField("primaryButtonText", e.target.value)}
+                  maxLength={HOMEPAGE_CONTENT_LIMITS.buttonText}
+                  aria-invalid={Boolean(fieldErrors.primaryButtonText)}
                   className={inputClass}
                 />
                 {fieldErrors.primaryButtonText && (
                   <p className={errorClass}>{fieldErrors.primaryButtonText}</p>
                 )}
+                <p className={countClass}>{data.primaryButtonText.length}/{HOMEPAGE_CONTENT_LIMITS.buttonText} characters</p>
               </div>
               <div>
                 <label htmlFor="primaryButtonLink" className={labelClass}>
@@ -803,14 +800,17 @@ export default function AdminHomepageEditorPage() {
                   type="text"
                   value={data.primaryButtonLink}
                   onChange={(e) => updateField("primaryButtonLink", e.target.value)}
+                  maxLength={HOMEPAGE_CONTENT_LIMITS.buttonLink}
+                  aria-invalid={Boolean(fieldErrors.primaryButtonLink)}
                   className={inputClass}
                 />
-                {!data.primaryButtonLink.startsWith("/") && (
+                {data.primaryButtonLink && !data.primaryButtonLink.startsWith("/") && (
                   <p className={errorClass}>Link must start with /</p>
                 )}
                 {fieldErrors.primaryButtonLink && (
                   <p className={errorClass}>{fieldErrors.primaryButtonLink}</p>
                 )}
+                <p className={countClass}>{data.primaryButtonLink.length}/{HOMEPAGE_CONTENT_LIMITS.buttonLink} characters</p>
               </div>
               <div>
                 <label htmlFor="secondaryButtonText" className={labelClass}>
@@ -821,11 +821,14 @@ export default function AdminHomepageEditorPage() {
                   type="text"
                   value={data.secondaryButtonText}
                   onChange={(e) => updateField("secondaryButtonText", e.target.value)}
+                  maxLength={HOMEPAGE_CONTENT_LIMITS.buttonText}
+                  aria-invalid={Boolean(fieldErrors.secondaryButtonText)}
                   className={inputClass}
                 />
                 {fieldErrors.secondaryButtonText && (
                   <p className={errorClass}>{fieldErrors.secondaryButtonText}</p>
                 )}
+                <p className={countClass}>{data.secondaryButtonText.length}/{HOMEPAGE_CONTENT_LIMITS.buttonText} characters</p>
               </div>
               <div>
                 <label htmlFor="secondaryButtonLink" className={labelClass}>
@@ -836,14 +839,17 @@ export default function AdminHomepageEditorPage() {
                   type="text"
                   value={data.secondaryButtonLink}
                   onChange={(e) => updateField("secondaryButtonLink", e.target.value)}
+                  maxLength={HOMEPAGE_CONTENT_LIMITS.buttonLink}
+                  aria-invalid={Boolean(fieldErrors.secondaryButtonLink)}
                   className={inputClass}
                 />
-                {!data.secondaryButtonLink.startsWith("/") && (
+                {data.secondaryButtonLink && !data.secondaryButtonLink.startsWith("/") && (
                   <p className={errorClass}>Link must start with /</p>
                 )}
                 {fieldErrors.secondaryButtonLink && (
                   <p className={errorClass}>{fieldErrors.secondaryButtonLink}</p>
                 )}
+                <p className={countClass}>{data.secondaryButtonLink.length}/{HOMEPAGE_CONTENT_LIMITS.buttonLink} characters</p>
               </div>
             </div>
           </Card>
@@ -879,9 +885,12 @@ export default function AdminHomepageEditorPage() {
                   placeholder="1.2M+"
                   value={data.statsMembers}
                   onChange={(e) => updateField("statsMembers", e.target.value)}
+                  maxLength={HOMEPAGE_CONTENT_LIMITS.statistic}
+                  aria-invalid={Boolean(fieldErrors.statsMembers)}
                   className={inputClass}
                 />
                 {fieldErrors.statsMembers && <p className={errorClass}>{fieldErrors.statsMembers}</p>}
+                <p className={countClass}>{data.statsMembers.length}/{HOMEPAGE_CONTENT_LIMITS.statistic} characters</p>
               </div>
               <div>
                 <label htmlFor="statsAssets" className={labelClass}>
@@ -893,9 +902,12 @@ export default function AdminHomepageEditorPage() {
                   placeholder="550B+"
                   value={data.statsAssets}
                   onChange={(e) => updateField("statsAssets", e.target.value)}
+                  maxLength={HOMEPAGE_CONTENT_LIMITS.statistic}
+                  aria-invalid={Boolean(fieldErrors.statsAssets)}
                   className={inputClass}
                 />
                 {fieldErrors.statsAssets && <p className={errorClass}>{fieldErrors.statsAssets}</p>}
+                <p className={countClass}>{data.statsAssets.length}/{HOMEPAGE_CONTENT_LIMITS.statistic} characters</p>
               </div>
             </div>
           </Card>
