@@ -9,6 +9,7 @@ const messageId = z.string().trim().min(1).max(200);
 
 export const updateMessageSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("set-read"), isRead: z.boolean() }).strict(),
+  z.object({ action: z.literal("set-star"), isStarred: z.boolean() }).strict(),
   z.object({ action: z.literal("set-status"), status: z.enum(MESSAGE_STATUSES) }).strict(),
   z.object({ action: z.literal("set-priority"), priority: z.enum(MESSAGE_PRIORITIES) }).strict(),
   z.object({ action: z.literal("assign"), assignedUserId: z.string().trim().max(200).nullable() }).strict(),
@@ -23,6 +24,7 @@ export const updateMessageSchema = z.discriminatedUnion("action", [
 
 export const bulkMessageSchema = z.discriminatedUnion("action", [
   z.object({ action: z.enum(["mark-read", "mark-unread"]), ids: z.array(messageId).min(1).max(100) }).strict(),
+  z.object({ action: z.literal("set-star"), ids: z.array(messageId).min(1).max(100), isStarred: z.boolean() }).strict(),
   z.object({ action: z.literal("set-status"), ids: z.array(messageId).min(1).max(100), status: z.enum(MESSAGE_STATUSES) }).strict(),
   z.object({ action: z.literal("set-priority"), ids: z.array(messageId).min(1).max(100), priority: z.enum(MESSAGE_PRIORITIES) }).strict(),
   z.object({ action: z.literal("assign"), ids: z.array(messageId).min(1).max(100), assignedUserId: z.string().trim().max(200).nullable() }).strict(),

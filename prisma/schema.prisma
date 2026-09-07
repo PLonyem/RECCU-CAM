@@ -426,6 +426,7 @@ model ContactMessage {
   priority        String        @default("normal") // low | normal | high | urgent
   priorityRank    Int           @default(1)
   isRead          Boolean       @default(false)
+  isStarred       Boolean       @default(false)
   readAt          DateTime?
   assignedUserId  String?
   assignedTo      String?
@@ -445,6 +446,7 @@ model ContactMessage {
   @@index([priority])
   @@index([priorityRank, createdAt])
   @@index([isRead, archivedAt])
+  @@index([isStarred, archivedAt, createdAt])
   @@index([assignedUserId, archivedAt])
   @@index([responseDueAt])
   @@index([updatedAt])

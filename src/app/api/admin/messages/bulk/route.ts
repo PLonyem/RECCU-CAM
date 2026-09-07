@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDataErrorResponse } from "@/lib/admin-data-server";
 import { getMessageActor } from "@/lib/message-auth";
-import { messageArchiveUpdate, messagePriorityRank, messageReadUpdate } from "@/lib/message-inbox";
+import { messageArchiveUpdate, messagePriorityRank, messageReadUpdate, messageStarUpdate } from "@/lib/message-inbox";
 import { resolveMessageAssignee } from "@/lib/message-service";
 import { prisma } from "@/lib/prisma";
 import { bulkMessageSchema } from "@/lib/validation/message";
@@ -62,6 +62,10 @@ export async function POST(request: NextRequest) {
     } else if (parsed.data.action === "mark-unread") {
       data = messageReadUpdate(false, now);
       action = "marked_unread";
+    } else if (parsed.data.action === "set-star") {
+      data = messageStarUpdate(parsed.data.isStarred);
+      action = parsed.data.isStarred ? "starred" : "unstarred";
+      metadata = { isStarred: parsed.data.isStarred };
     } else if (parsed.data.action === "set-status") {
       data = {
         status: parsed.data.status,

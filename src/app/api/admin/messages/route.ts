@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   const where = buildMessageWhere(query, actor.userId);
 
   return adminDataResponse("messages", "list", async () => {
-    const [rows, total, unread, needsResponse, highPriority, resolved, archived, purposeGroups] = await Promise.all([
+    const [rows, total, inbox, unread, starred, needsResponse, highPriority, resolved, archived, purposeGroups] = await Promise.all([
       prisma.contactMessage.findMany({
         where,
         orderBy: buildMessageOrderBy(query.sort),
@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
           status: true,
           priority: true,
           isRead: true,
+          isStarred: true,
           assignedUserId: true,
           assignedTo: true,
           archivedAt: true,
@@ -52,7 +53,9 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.contactMessage.count({ where }),
+      prisma.contactMessage.count({ where: { archivedAt: null } }),
       prisma.contactMessage.count({ where: { isRead: false, archivedAt: null } }),
+      prisma.contactMessage.count({ where: { isStarred: true, archivedAt: null } }),
       prisma.contactMessage.count({ where: { status: { in: [...NEEDS_RESPONSE_STATUSES] }, archivedAt: null } }),
       prisma.contactMessage.count({ where: { priority: { in: ["high", "urgent"] }, archivedAt: null } }),
       prisma.contactMessage.count({ where: { status: "resolved", archivedAt: null } }),
@@ -70,7 +73,7 @@ export async function GET(request: NextRequest) {
         ...row,
         preview: message.replace(/\s+/g, " ").trim().slice(0, 220),
       })),
-      summary: { unread, needsResponse, highPriority, resolved, archived },
+      summary: { inbox, unread, starred, needsResponse, highPriority, resolved, archived },
       purposeCounts: Object.fromEntries(purposeGroups.map((group) => [group.purpose, group._count._all])),
       total,
       page: query.page,

@@ -9,6 +9,7 @@ import {
   messageArchiveUpdate,
   messagePriorityRank,
   messageReadUpdate,
+  messageStarUpdate,
   newMessageWorkflow,
   parseMessageListQuery,
 } from "./message-inbox";
@@ -22,6 +23,7 @@ test("new correspondence starts unread with a stable institutional reference", (
     priority: "normal",
     priorityRank: 1,
     isRead: false,
+    isStarred: false,
     readAt: null,
   });
   assert.equal(formatMessageReference(2027, 1), "RECCU-MSG-2027-000001");
@@ -31,6 +33,11 @@ test("opening and manually marking unread produce persisted read timestamps", ()
   const at = new Date("2026-09-07T08:00:00.000Z");
   assert.deepEqual(messageReadUpdate(true, at), { isRead: true, readAt: at });
   assert.deepEqual(messageReadUpdate(false, at), { isRead: false, readAt: null });
+});
+
+test("starring and unstarring produce durable database updates", () => {
+  assert.deepEqual(messageStarUpdate(true), { isStarred: true });
+  assert.deepEqual(messageStarUpdate(false), { isStarred: false });
 });
 
 test("archive is soft and restore returns correspondence to the open workflow", () => {
@@ -61,7 +68,10 @@ test("combined inbox filters include body and reference search without exposing 
   assert.ok(where.createdAt && typeof where.createdAt === "object" && "gte" in where.createdAt && "lt" in where.createdAt);
 });
 
-test("folder filters support needs-response, assigned-to-me, and unassigned queues", () => {
+test("folder filters support the simple starred inbox and preserve advanced backend queues", () => {
+  const starred = buildMessageWhere(parseMessageListQuery(new URLSearchParams({ folder: "starred" })), "actor_1");
+  assert.equal(starred.isStarred, true);
+  assert.equal(starred.archivedAt, null);
   const needsResponse = buildMessageWhere(parseMessageListQuery(new URLSearchParams({ folder: "needs-response" })), "actor_1");
   assert.deepEqual(needsResponse.status, { in: ["new", "open", "in-review", "awaiting-response"] });
   const assigned = buildMessageWhere(parseMessageListQuery(new URLSearchParams({ folder: "assigned-to-me" })), "actor_1");
@@ -78,6 +88,8 @@ test("sorting is deterministic and priority uses the explicit institutional rank
 
 test("message lifecycle mutations accept only supported operations", () => {
   assert.equal(updateMessageSchema.safeParse({ action: "set-read", isRead: true }).success, true);
+  assert.equal(updateMessageSchema.safeParse({ action: "set-star", isStarred: true }).success, true);
+  assert.equal(updateMessageSchema.safeParse({ action: "set-star", isStarred: false }).success, true);
   assert.equal(updateMessageSchema.safeParse({ action: "set-status", status: "awaiting-response" }).success, true);
   assert.equal(updateMessageSchema.safeParse({ action: "set-priority", priority: "urgent" }).success, true);
   assert.equal(updateMessageSchema.safeParse({ action: "mark-responded", responseMethod: "phone" }).success, true);
@@ -88,6 +100,7 @@ test("message lifecycle mutations accept only supported operations", () => {
 test("bulk actions cap selection and never expose a hard-delete operation", () => {
   assert.equal(bulkMessageSchema.safeParse({ action: "archive", ids: ["message_1"] }).success, true);
   assert.equal(bulkMessageSchema.safeParse({ action: "restore", ids: ["message_1"] }).success, true);
+  assert.equal(bulkMessageSchema.safeParse({ action: "set-star", ids: ["message_1"], isStarred: true }).success, true);
   assert.equal(bulkMessageSchema.safeParse({ action: "delete", ids: ["message_1"] }).success, false);
   assert.equal(bulkMessageSchema.safeParse({ action: "mark-read", ids: Array.from({ length: 101 }, (_, index) => `message_${index}`) }).success, false);
 });
@@ -109,17 +122,26 @@ test("internal notes stay behind the protected admin detail boundary", () => {
   assert.match(adminDetailRoute, /include: \{ notes:/);
 });
 
-test("messages workspace exposes explicit empty, error, retry, and loading states", () => {
+test("simplified messages workspace exposes its four folders and resilient states", () => {
   const component = readFileSync(path.join(process.cwd(), "src", "components", "admin", "MessagesInbox.tsx"), "utf8");
-  assert.match(component, /No messages yet\./);
-  assert.match(component, /Unable to load messages\./);
+  for (const label of ["Inbox", "Unread", "Starred", "Archived"]) assert.match(component, new RegExp(label));
+  for (const state of ["No messages yet.", "No unread messages.", "No starred messages.", "No archived messages."]) {
+    assert.equal(component.includes(state), true, `${state} must be present`);
+  }
+  assert.match(component, /Messages could not be loaded\./);
   assert.match(component, /setRefreshKey/);
   assert.match(component, /Loading messages/);
+  assert.match(component, /Back to Inbox/);
+  for (const removedLabel of ["Needs Response", "Assigned to Me", "High Priority", "By purpose"]) {
+    assert.equal(component.includes(removedLabel), false, `${removedLabel} must not appear in the simplified UI`);
+  }
 });
 
-test("admin dashboard includes operational message summaries and recent correspondence", () => {
+test("admin dashboard keeps only the simple unread summary and recent correspondence", () => {
   const dashboard = readFileSync(path.join(process.cwd(), "src", "app", "admin", "(dashboard)", "page.tsx"), "utf8");
-  for (const label of ["Unread Messages", "Needs Response", "High Priority", "Recent Messages"]) {
+  for (const label of ["Unread Messages", "Recent Messages", "View Inbox"]) {
     assert.equal(dashboard.includes(label), true, `${label} must be present`);
   }
+  assert.equal(dashboard.includes("Needs Response"), false);
+  assert.equal(dashboard.includes("High Priority"), false);
 });

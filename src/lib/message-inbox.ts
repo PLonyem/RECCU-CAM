@@ -16,12 +16,15 @@ export const MESSAGE_SORTS = ["newest", "oldest", "priority", "unread", "updated
 export const MESSAGE_FOLDERS = [
   "inbox",
   "unread",
+  "starred",
   "needs-response",
   "assigned-to-me",
   "high-priority",
   "resolved",
   "archived",
 ] as const;
+
+export const PRIMARY_MESSAGE_FOLDERS = ["inbox", "unread", "starred", "archived"] as const;
 
 export const NEEDS_RESPONSE_STATUSES = ["new", "open", "in-review", "awaiting-response"] as const;
 
@@ -87,6 +90,7 @@ export function buildMessageWhere(query: MessageListQuery, actorUserId: string):
   else where.archivedAt = null;
 
   if (query.folder === "unread") where.isRead = false;
+  if (query.folder === "starred") where.isStarred = true;
   if (query.folder === "needs-response") where.status = { in: [...NEEDS_RESPONSE_STATUSES] };
   if (query.folder === "assigned-to-me") where.assignedUserId = actorUserId;
   if (query.folder === "high-priority") where.priority = { in: ["high", "urgent"] };
@@ -151,12 +155,17 @@ export function newMessageWorkflow(year: number, sequence: number) {
     priority: "normal" as const,
     priorityRank: messagePriorityRank("normal"),
     isRead: false,
+    isStarred: false,
     readAt: null,
   };
 }
 
 export function messageReadUpdate(isRead: boolean, at: Date) {
   return { isRead, readAt: isRead ? at : null };
+}
+
+export function messageStarUpdate(isStarred: boolean) {
+  return { isStarred };
 }
 
 export function messageArchiveUpdate(archived: boolean, at: Date) {

@@ -9,7 +9,6 @@ import {
   CalendarDays,
   CheckCircle2,
   CircleAlert,
-  Clock3,
   ClipboardList,
   FilePenLine,
   FileText,
@@ -21,7 +20,6 @@ import {
   ScrollText,
   Server,
   ShieldCheck,
-  Star,
 } from "lucide-react";
 import { AdminDashboardWelcome } from "@/components/admin/AdminDashboardWelcome";
 import { Badge, type BadgeProps } from "@/components/ui/Badge";
@@ -171,10 +169,8 @@ export default async function AdminDashboardPage() {
 
   const messageRequest = can(AUTH_PERMISSIONS.manageMessages)
     ? loadSection("messages", async () => {
-        const [unread, needsResponse, highPriority, recent] = await Promise.all([
+        const [unread, recent] = await Promise.all([
           prisma.contactMessage.count({ where: { isRead: false, archivedAt: null } }),
-          prisma.contactMessage.count({ where: { status: { in: ["new", "open", "in-review", "awaiting-response"] }, archivedAt: null } }),
-          prisma.contactMessage.count({ where: { priority: { in: ["high", "urgent"] }, archivedAt: null } }),
           prisma.contactMessage.findMany({
             where: { archivedAt: null },
             orderBy: { createdAt: "desc" },
@@ -182,7 +178,7 @@ export default async function AdminDashboardPage() {
             select: { id: true, referenceNumber: true, name: true, organization: true, purpose: true, subject: true, status: true, priority: true, isRead: true, createdAt: true },
           }),
         ]);
-        return { unread, needsResponse, highPriority, recent };
+        return { unread, recent };
       })
     : Promise.resolve(null);
 
@@ -366,8 +362,6 @@ export default async function AdminDashboardPage() {
   const summaryCards: Array<{ label: string; value: number; detail: string; icon: LucideIcon; href: string }> = [];
   if (messages?.available) {
     summaryCards.push({ label: "Unread Messages", value: messages.data.unread, detail: messages.data.unread ? "Awaiting staff review" : "Inbox is up to date", icon: Mail, href: "/admin/messages?folder=unread" });
-    summaryCards.push({ label: "Needs Response", value: messages.data.needsResponse, detail: "Active correspondence workflow", icon: Clock3, href: "/admin/messages?folder=needs-response" });
-    summaryCards.push({ label: "High Priority", value: messages.data.highPriority, detail: "High or urgent attention", icon: Star, href: "/admin/messages?folder=high-priority" });
   }
   if (affiliations?.available) summaryCards.push({ label: "Pending Affiliation Requests", value: affiliations.data.pending, detail: affiliations.data.pending ? "Awaiting staff review" : "No institutions awaiting review", icon: ClipboardList, href: "/admin/affiliation-requests" });
   if (affiliates?.available) summaryCards.push({ label: "Active Affiliates", value: affiliates.data.active, detail: "Current operational records", icon: Building2, href: "/admin/affiliates" });
@@ -446,7 +440,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {messages && (
-        <Panel title="Recent Messages" description="The five most recent incoming institutional enquiries." action={<PanelLink href="/admin/messages">View all messages</PanelLink>}>
+        <Panel title="Recent Messages" description="The five most recent incoming institutional enquiries." action={<PanelLink href="/admin/messages">View Inbox</PanelLink>}>
           {!messages.available ? <DataUnavailable /> : messages.data.recent.length === 0 ? (
             <EmptyState icon={Mail} title="No contact messages" description="New public inquiries will appear here when they are received." />
           ) : <ContactMessages rows={messages.data.recent} />}

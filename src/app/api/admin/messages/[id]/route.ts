@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDataErrorResponse } from "@/lib/admin-data-server";
 import { getMessageActor } from "@/lib/message-auth";
-import { messageArchiveUpdate, messagePriorityRank, messageReadUpdate } from "@/lib/message-inbox";
+import { messageArchiveUpdate, messagePriorityRank, messageReadUpdate, messageStarUpdate } from "@/lib/message-inbox";
 import { prisma } from "@/lib/prisma";
 import { resolveMessageAssignee } from "@/lib/message-service";
 import { updateMessageSchema } from "@/lib/validation/message";
@@ -100,6 +100,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         data = messageReadUpdate(parsed.data.isRead, now);
         action = parsed.data.isRead ? "marked_read" : "marked_unread";
         metadata = { isRead: parsed.data.isRead };
+      } else if (parsed.data.action === "set-star") {
+        data = messageStarUpdate(parsed.data.isStarred);
+        action = parsed.data.isStarred ? "starred" : "unstarred";
+        metadata = { isStarred: parsed.data.isStarred };
       } else if (parsed.data.action === "set-status") {
         data = {
           status: parsed.data.status,
