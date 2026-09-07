@@ -48,6 +48,79 @@ body {
   @apply outline-none ring-2 ring-forest ring-offset-2 ring-offset-background transition-shadow duration-fast;
 }
 
+.public-site-shell {
+  background-color: var(--brand-surface);
+}
+
+.public-navbar,
+.public-mobile-navigation {
+  background-color: color-mix(in srgb, var(--brand-surface) 95%, transparent);
+}
+
+.public-nav-active,
+.public-nav-link:hover {
+  color: var(--brand-primary);
+}
+
+.public-nav-active::after {
+  background-color: var(--brand-secondary);
+}
+
+.public-nav-overview,
+.public-nav-chevron {
+  color: var(--brand-secondary);
+}
+
+.public-accent {
+  color: var(--brand-accent);
+}
+
+.public-nav-overview:hover {
+  color: var(--brand-primary);
+}
+
+.public-nav-highlight {
+  color: var(--brand-primary);
+  background-color: color-mix(in srgb, var(--brand-secondary) 12%, var(--brand-surface));
+}
+
+.public-primary-button {
+  color: white;
+  background-color: var(--brand-button);
+}
+
+.public-primary-button:hover {
+  background-color: var(--brand-button-hover);
+}
+
+.public-secondary-button {
+  color: var(--brand-primary);
+  border-color: var(--brand-primary);
+  background-color: var(--brand-surface);
+}
+
+.public-secondary-button:hover {
+  color: white;
+  border-color: var(--brand-button-hover);
+  background-color: var(--brand-button-hover);
+}
+
+.public-ghost-button {
+  color: var(--brand-accent);
+  border-color: transparent;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.public-ghost-button:hover {
+  color: white;
+  background-color: color-mix(in srgb, var(--brand-button-hover) 72%, transparent);
+}
+
+.public-footer {
+  background-color: var(--brand-footer);
+}
+
 .styled-range {
   appearance: none;
   background: transparent;

@@ -687,13 +687,20 @@ model HomepageContent {
   heroImages          Json   @default("[]")
 
   // HERO APPEARANCE
-  overlayColor      String  @default("#000000")
-  overlayOpacity    Int     @default(40)
-  backgroundColor   String  @default("#0A2647")
-  gradientDirection String  @default("to-br")
-  textAlignment     String  @default("left")
-  buttonStyle       String  @default("solid")
-  showOverlay       Boolean @default(true)
+  overlayColor          String  @default("#0D3D2E")
+  overlayOpacity        Int     @default(68)
+  backgroundColor       String  @default("#124C37")
+  gradientDirection     String  @default("to-br")
+  textAlignment         String  @default("left")
+  buttonStyle           String  @default("solid")
+  showOverlay           Boolean @default(true)
+  primaryColor          String  @default("#0D3D2E")
+  secondaryColor        String  @default("#267A57")
+  accentColor           String  @default("#C58B2A")
+  surfaceColor          String  @default("#FFFFFF")
+  buttonColor           String  @default("#0D3D2E")
+  buttonHoverColor      String  @default("#082D22")
+  footerBackgroundColor String  @default("#082D22")
 
   // HERO STATISTICS
   statsAffiliates Int    @default(0)

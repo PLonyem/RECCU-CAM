@@ -38,6 +38,13 @@ export async function GET() {
     gradientDirection: content.gradientDirection,
     textAlignment: content.textAlignment,
     buttonStyle: content.buttonStyle,
+    primaryColor: content.primaryColor,
+    secondaryColor: content.secondaryColor,
+    accentColor: content.accentColor,
+    surfaceColor: content.surfaceColor,
+    buttonColor: content.buttonColor,
+    buttonHoverColor: content.buttonHoverColor,
+    footerBackgroundColor: content.footerBackgroundColor,
     showHero: content.showHero,
     showStats: content.showStats,
     showMission: content.showMission,
@@ -77,7 +84,7 @@ export async function PUT(request: NextRequest) {
       resource: "homepage",
       resourceId: content.id,
     }),
-    revalidatePublishedHomepage: () => revalidatePath("/"),
+    revalidatePublishedHomepage: () => revalidatePath("/", "layout"),
   });
 
   if (!result.success) {

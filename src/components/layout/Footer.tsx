@@ -41,7 +41,7 @@ export function Footer({ settings }: { settings?: SiteSettings | null }) {
     : `Address not published - ${institution.location.city}, ${institution.location.country}`);
 
   return (
-    <footer className="bg-institutional text-white print:hidden">
+    <footer className="public-footer text-white print:hidden">
       <Container className="grid gap-10 py-section-sm md:grid-cols-2 xl:grid-cols-[1.3fr_repeat(4,1fr)]">
         <section aria-labelledby="footer-reccu-cam">
           <div className="flex items-center gap-3">
@@ -52,14 +52,14 @@ export function Footer({ settings }: { settings?: SiteSettings | null }) {
             </div>
           </div>
           <p className="mt-5 max-w-sm text-sm leading-7 text-primary-100">{institution.platformStatement}</p>
-          <Link href="/about" className="mt-5 inline-flex items-center gap-1.5 rounded-sm text-sm font-semibold text-accent-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold">
+          <Link href="/about" className="public-accent mt-5 inline-flex items-center gap-1.5 rounded-sm text-sm font-semibold hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold">
             About the institution <ArrowUpRight className="h-4 w-4" />
           </Link>
         </section>
 
         {footerGroups.map((group) => (
           <nav key={group.title} aria-labelledby={`footer-${group.title.toLowerCase()}`}>
-            <h2 id={`footer-${group.title.toLowerCase()}`} className="text-meta uppercase text-accent-300">{group.title}</h2>
+            <h2 id={`footer-${group.title.toLowerCase()}`} className="public-accent text-meta uppercase">{group.title}</h2>
             <ul className="mt-4 space-y-3">
               {group.links.map(([label, href]) => (
                 <li key={`${href}-${label}`}>
@@ -73,7 +73,7 @@ export function Footer({ settings }: { settings?: SiteSettings | null }) {
         ))}
 
         <section aria-labelledby="footer-contact">
-          <h2 id="footer-contact" className="text-meta uppercase text-accent-300">Contact</h2>
+          <h2 id="footer-contact" className="public-accent text-meta uppercase">Contact</h2>
           <address className="mt-4 space-y-4 not-italic text-sm leading-6 text-primary-100">
             <p className="flex gap-2.5"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" /><span>{address}</span></p>
             <p className="flex gap-2.5"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-accent-300" /><span>{settings?.email || institution.contact.email || "Email not published"}</span></p>

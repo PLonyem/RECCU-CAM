@@ -5,7 +5,7 @@ import { Container } from "@/components/ui/Container";
 import { buttonVariants } from "@/components/ui/Button";
 import { institution } from "@/config/institution";
 import heroImage from "../../../public/images/home/cooperative-network-hero.webp";
-import { cn, heroOverlayGradient } from "@/lib/utils";
+import { cn, heroGradientAngle, heroOverlayGradient } from "@/lib/utils";
 
 export interface HomeHeroContent {
   heroBadge: string;
@@ -19,7 +19,9 @@ export interface HomeHeroContent {
   overlayColor: string;
   overlayOpacity: number;
   backgroundColor: string;
+  gradientDirection: string;
   textAlignment: string;
+  buttonStyle: string;
   showOverlay: boolean;
 }
 
@@ -36,7 +38,7 @@ export function HomeHero({ content }: { content?: HomeHeroContent | null }) {
         sizes="100vw"
         className="-z-20 object-cover object-[62%_center]"
       />
-      {content?.showOverlay !== false && <div className="absolute inset-0 -z-10" style={{ background: heroOverlayGradient(content?.overlayColor ?? "#102a43", content?.overlayOpacity ?? 78, content?.textAlignment === "right" ? 270 : 90, 35, 82) }} />}
+      {content?.showOverlay !== false && <div className="absolute inset-0 -z-10" style={{ background: heroOverlayGradient(content?.overlayColor ?? "#0D3D2E", content?.overlayOpacity ?? 68, heroGradientAngle(content?.gradientDirection ?? "to-r"), 35, 82) }} />}
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-institutional/80 via-transparent to-institutional/20 lg:hidden" />
 
       <Container className="flex min-h-[42rem] items-center py-16 sm:min-h-[46rem] lg:min-h-[48rem] lg:py-24">
@@ -51,10 +53,10 @@ export function HomeHero({ content }: { content?: HomeHeroContent | null }) {
             {content?.heroSubtitle ?? "RECCU-CAM strengthens cooperative financial institutions through institutional support, responsible governance, professional development and shared growth."}
           </p>
           <div className={cn("mt-9 flex flex-col gap-3 sm:flex-row", content?.textAlignment === "center" && "justify-center", content?.textAlignment === "right" && "justify-end")}>
-            {(!content || (content.primaryButtonText && content.primaryButtonLink)) && <Link href={content?.primaryButtonLink ?? "/about"} className={buttonVariants({ variant: "accent", size: "lg" })}>
+            {(!content || (content.primaryButtonText && content.primaryButtonLink)) && <Link href={content?.primaryButtonLink ?? "/about"} className={buttonVariants({ variant: "default", size: "lg", className: content?.buttonStyle === "outline" ? "public-secondary-button" : content?.buttonStyle === "ghost" ? "public-ghost-button" : "public-primary-button" })}>
               {content?.primaryButtonText ?? "Learn About RECCU-CAM"} <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>}
-            {(!content || (content.secondaryButtonText && content.secondaryButtonLink)) && <Link href={content?.secondaryButtonLink ?? "/contact"} className={buttonVariants({ variant: "secondary", size: "lg", className: "border-white/40 bg-white/10 text-white hover:border-white/70 hover:bg-white/15" })}>
+            {(!content || (content.secondaryButtonText && content.secondaryButtonLink)) && <Link href={content?.secondaryButtonLink ?? "/contact"} className={buttonVariants({ variant: "secondary", size: "lg", className: "public-secondary-button" })}>
               {content?.secondaryButtonText ?? "Contact RECCU-CAM"}
             </Link>}
           </div>

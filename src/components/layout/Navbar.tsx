@@ -92,7 +92,7 @@ function DesktopNavigationItem({
         aria-current={active ? "page" : undefined}
         className={cn(
           "relative inline-flex min-h-12 items-center whitespace-nowrap px-3 text-sm font-semibold transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-inset",
-          active ? "text-institutional after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-gold" : "text-muted-foreground hover:text-institutional",
+          active ? "public-nav-active after:absolute after:inset-x-3 after:bottom-0 after:h-0.5" : "public-nav-link text-muted-foreground",
         )}
       >
         {item.label}
@@ -140,7 +140,7 @@ function DesktopNavigationItem({
         }}
         className={cn(
           "relative inline-flex min-h-12 items-center gap-1 whitespace-nowrap px-3 text-sm font-semibold transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-inset",
-          active ? "text-institutional after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-gold" : "text-muted-foreground hover:text-institutional",
+          active ? "public-nav-active after:absolute after:inset-x-3 after:bottom-0 after:h-0.5" : "public-nav-link text-muted-foreground",
         )}
       >
         {item.label}
@@ -163,7 +163,7 @@ function DesktopNavigationItem({
         >
           <div className="border-b border-border px-3 pb-3 pt-1">
             <p className="font-display text-sm font-bold text-institutional">{item.label}</p>
-            <Link href={item.href} onClick={() => setOpenMenu(null)} className="mt-1 inline-flex text-xs font-semibold text-gold-strong hover:text-institutional">
+            <Link href={item.href} onClick={() => setOpenMenu(null)} className="public-nav-overview mt-1 inline-flex text-xs font-semibold">
               {getOverviewLabel(item, "View section overview")}
             </Link>
           </div>
@@ -181,12 +181,12 @@ function DesktopNavigationItem({
                     aria-current={childActive ? "page" : undefined}
                     className={cn(
                       "group block rounded-control px-3 py-2.5 transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest",
-                      childActive ? "bg-primary-50" : "hover:bg-muted",
+                      childActive ? "public-nav-highlight" : "hover:bg-muted",
                     )}
                   >
                     <span className="flex items-center justify-between gap-3 text-sm font-semibold text-institutional">
                       {child.label}
-                      <ChevronRight className="h-3.5 w-3.5 text-gold-strong transition-transform duration-fast group-hover:translate-x-0.5" />
+                      <ChevronRight className="public-nav-chevron h-3.5 w-3.5 transition-transform duration-fast group-hover:translate-x-0.5" />
                     </span>
                     <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{child.description}</span>
                   </Link>
@@ -263,7 +263,7 @@ export function Navbar() {
   }, [mobileOpen]);
 
   return (
-    <header ref={headerRef} className="sticky top-0 z-50 border-b border-border bg-surface/95 shadow-sm backdrop-blur-md print:hidden">
+    <header ref={headerRef} className="public-navbar sticky top-0 z-50 border-b border-border shadow-sm backdrop-blur-md print:hidden">
       <Container className="flex h-[4.5rem] items-center justify-between gap-4 xl:h-20">
         <Link href="/" onClick={() => { setOpenMenu(null); setMobileOpen(false); }} className="flex min-w-0 items-center gap-3 rounded-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-4">
           <BrandMark />
@@ -315,7 +315,7 @@ export function Navbar() {
           role="dialog"
           aria-modal="true"
           aria-label="Site navigation"
-          className="absolute inset-x-0 top-full h-[calc(100dvh-4.5rem)] overflow-y-auto border-t border-border bg-surface xl:hidden"
+          className="public-mobile-navigation absolute inset-x-0 top-full h-[calc(100dvh-4.5rem)] overflow-y-auto border-t border-border xl:hidden"
         >
           <Container className="py-5">
             <nav aria-label="Mobile navigation">
@@ -333,10 +333,10 @@ export function Navbar() {
                           aria-current={active ? "page" : undefined}
                           className={cn(
                             "flex min-h-12 items-center justify-between rounded-control px-4 py-3 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest",
-                            active ? "bg-primary-50 text-institutional" : "text-foreground hover:bg-muted",
+                            active ? "public-nav-highlight public-nav-active" : "text-foreground hover:bg-muted",
                           )}
                         >
-                          {item.label}<ChevronRight className="h-4 w-4 text-gold-strong" />
+                          {item.label}<ChevronRight className="public-nav-chevron h-4 w-4" />
                         </Link>
                       </li>
                     );
@@ -351,14 +351,14 @@ export function Navbar() {
                         onClick={() => setMobileSection(expanded ? null : item.label)}
                         className={cn(
                           "flex min-h-12 w-full items-center justify-between rounded-control px-4 py-3 text-left font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest",
-                          active ? "bg-primary-50 text-institutional" : "text-foreground hover:bg-muted",
+                          active ? "public-nav-highlight public-nav-active" : "text-foreground hover:bg-muted",
                         )}
                       >
-                        {item.label}<ChevronDown className={cn("h-4 w-4 text-gold-strong transition-transform duration-base", expanded && "rotate-180")} />
+                        {item.label}<ChevronDown className={cn("public-nav-chevron h-4 w-4 transition-transform duration-base", expanded && "rotate-180")} />
                       </button>
                       {expanded && (
                         <div id={sectionId} className="ml-4 border-l border-primary-200 py-2 pl-3">
-                          <Link href={item.href} onClick={() => setMobileOpen(false)} className="block rounded-control px-3 py-2 text-sm font-bold text-gold-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest">
+                          <Link href={item.href} onClick={() => setMobileOpen(false)} className="public-nav-overview block rounded-control px-3 py-2 text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest">
                             {getOverviewLabel(item, "Section overview")}
                           </Link>
                           {item.children.map((child) => (

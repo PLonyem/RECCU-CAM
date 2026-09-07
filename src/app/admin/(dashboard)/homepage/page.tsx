@@ -17,10 +17,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { cn, heroOverlayGradient } from "@/lib/utils";
+import { cn, heroGradientAngle, heroOverlayGradient } from "@/lib/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import type { TranslationKey } from "@/lib/i18n";
 import { HOMEPAGE_CONTENT_LIMITS, type HomepageContentInput } from "@/lib/validation/homepage-content";
+import { RECCUCAM_GREEN_APPEARANCE } from "@/lib/public-appearance";
 
 type Tab = "content" | "appearance" | "sections";
 type GradientDirection = "to-r" | "to-b" | "to-br" | "to-bl";
@@ -50,18 +51,17 @@ const tabs: { key: Tab; labelKey: TranslationKey }[] = [
   { key: "sections", labelKey: "admin.sections" },
 ];
 
-// RECCU-CAM primary and accent palette shortcuts.
-// (primary-700), Black — plus the ColorField's own free-text/native
-// color-picker input for anything else.
-const OVERLAY_COLOR_PRESETS = ["#205295", "#0A2647", "#144272", "#000000"];
-const BACKGROUND_COLOR_PRESETS = ["#0A2647", "#144272", "#205295"];
+// Approved institutional shortcuts. ColorField also supports any valid hex value.
+const GREEN_COLOR_PRESETS = ["#082D22", "#0D3D2E", "#124C37", "#185F43", "#267A57"];
+const SURFACE_COLOR_PRESETS = ["#FFFFFF", "#FAF8F2", "#EEF7F2"];
+const ACCENT_COLOR_PRESETS = ["#C58B2A", "#A56920", "#267A57"];
 
 const OVERLAY_OPACITY_PRESETS: { value: number; label: string }[] = [
   { value: 0, label: "Transparent" },
   { value: 25, label: "Light" },
   { value: 50, label: "Medium" },
   { value: 75, label: "Strong" },
-  { value: 100, label: "Solid Blue" },
+  { value: 100, label: "Solid Green" },
 ];
 
 const GRADIENT_DIRECTION_OPTIONS: { value: GradientDirection; label: string; css: string }[] = [
@@ -176,10 +176,10 @@ function Toggle({
   );
 }
 
-function heroPreviewButtonClass(style: ButtonStyle) {
-  if (style === "solid") return "bg-white text-primary-700";
-  if (style === "outline") return "border border-white text-white";
-  return "text-white underline underline-offset-2"; // ghost
+function heroPreviewButtonStyle(data: HomepageContentData): React.CSSProperties {
+  if (data.buttonStyle === "solid") return { backgroundColor: hexToCss(data.buttonColor), color: "#FFFFFF" };
+  if (data.buttonStyle === "outline") return { backgroundColor: hexToCss(data.surfaceColor), border: `1px solid ${hexToCss(data.primaryColor)}`, color: hexToCss(data.primaryColor) };
+  return { color: hexToCss(data.accentColor), textDecoration: "underline", textUnderlineOffset: "2px" };
 }
 
 function HeroPreview({ data }: { data: HomepageContentData }) {
@@ -231,14 +231,14 @@ function HeroPreview({ data }: { data: HomepageContentData }) {
             bgImage
               ? { backgroundImage: `url(${bgImage})`, backgroundSize: "cover", backgroundPosition: "center" }
               : {
-                  backgroundImage: `linear-gradient(${gradientCss}, ${hexToCss(data.backgroundColor)}, transparent)`,
+                  backgroundImage: `linear-gradient(${gradientCss}, ${hexToCss(data.backgroundColor)}, ${hexToCss(data.secondaryColor)})`,
                 }
           }
         />
         {data.showOverlay && data.overlayOpacity > 0 && (
           <div
             className="absolute inset-0"
-            style={{ background: heroOverlayGradient(hexToCss(data.overlayColor), data.overlayOpacity, 100, 30, 65) }}
+            style={{ background: heroOverlayGradient(hexToCss(data.overlayColor), data.overlayOpacity, heroGradientAngle(data.gradientDirection), 30, 65) }}
           />
         )}
         <div className={cn("absolute inset-0 flex flex-col justify-center gap-1.5 p-4", alignItems)}>
@@ -259,15 +259,20 @@ function HeroPreview({ data }: { data: HomepageContentData }) {
           </p>
           <div className={cn("flex gap-1.5 mt-1.5", justifyButtons)}>
             <span
-              className={cn(
-                "px-2.5 py-1 rounded text-[9px] font-semibold",
-                heroPreviewButtonClass(data.buttonStyle)
-              )}
+              className="px-2.5 py-1 rounded text-[9px] font-semibold transition-colors"
+              style={heroPreviewButtonStyle(data)}
             >
               {data.primaryButtonText || "Primary"}
             </span>
           </div>
         </div>
+        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between border-t px-4 py-2" style={{ backgroundColor: hexToCss(data.surfaceColor), borderColor: hexToCss(data.secondaryColor) }}>
+          <span className="text-[9px] font-semibold uppercase" style={{ color: hexToCss(data.accentColor) }}>Institutional section</span>
+          <span className="text-[9px] font-semibold underline" style={{ color: hexToCss(data.primaryColor) }}>Public link</span>
+        </div>
+      </div>
+      <div className="flex items-center justify-between rounded-b-lg px-4 py-2 text-[9px] text-white" style={{ backgroundColor: hexToCss(data.footerBackgroundColor) }}>
+        <span>RECCU-CAM footer</span><span style={{ color: hexToCss(data.accentColor) }}>Contact</span>
       </div>
     </div>
   );
@@ -323,6 +328,12 @@ export default function AdminHomepageEditorPage() {
       delete next[key];
       return next;
     });
+  }
+
+  function applyGreenPreset() {
+    setData((previous) => previous ? { ...previous, ...RECCUCAM_GREEN_APPEARANCE } : previous);
+    setFieldErrors({});
+    setToast({ type: "success", message: "RECCU-CAM Green preset applied. Save or publish to keep it." });
   }
 
   async function handleAddImage(e: React.ChangeEvent<HTMLInputElement>) {
@@ -463,6 +474,22 @@ export default function AdminHomepageEditorPage() {
       ) : activeTab === "appearance" ? (
         <div className="mt-8 grid lg:grid-cols-[1fr_320px] gap-8 items-start">
           <div className="space-y-8 min-w-0">
+            <Card className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div><h2 className="font-semibold text-gray-900">RECCU-CAM Green</h2><p className="mt-1 text-sm text-gray-500">Apply the approved institutional green, white, and restrained gold system.</p></div>
+              <button type="button" onClick={applyGreenPreset} className="shrink-0 rounded-lg px-4 py-2.5 text-sm font-semibold text-white" style={{ backgroundColor: RECCUCAM_GREEN_APPEARANCE.primaryColor }}>Apply preset</button>
+            </Card>
+
+            <Card className="p-6 space-y-5">
+              <div><h2 className="font-semibold text-gray-900">Public brand palette</h2><p className="mt-1 text-sm text-gray-500">Controls navigation accents, public surfaces, links, and the footer.</p></div>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div><ColorField label="Primary green" value={data.primaryColor} presets={GREEN_COLOR_PRESETS} onChange={(value) => updateField("primaryColor", value)} />{fieldErrors.primaryColor && <p className={errorClass}>{fieldErrors.primaryColor}</p>}</div>
+                <div><ColorField label="Supporting green" value={data.secondaryColor} presets={GREEN_COLOR_PRESETS} onChange={(value) => updateField("secondaryColor", value)} />{fieldErrors.secondaryColor && <p className={errorClass}>{fieldErrors.secondaryColor}</p>}</div>
+                <div><ColorField label="Accent" value={data.accentColor} presets={ACCENT_COLOR_PRESETS} onChange={(value) => updateField("accentColor", value)} />{fieldErrors.accentColor && <p className={errorClass}>{fieldErrors.accentColor}</p>}</div>
+                <div><ColorField label="Public surface" value={data.surfaceColor} presets={SURFACE_COLOR_PRESETS} onChange={(value) => updateField("surfaceColor", value)} />{fieldErrors.surfaceColor && <p className={errorClass}>{fieldErrors.surfaceColor}</p>}</div>
+                <div className="sm:col-span-2"><ColorField label="Footer background" value={data.footerBackgroundColor} presets={GREEN_COLOR_PRESETS} onChange={(value) => updateField("footerBackgroundColor", value)} />{fieldErrors.footerBackgroundColor && <p className={errorClass}>{fieldErrors.footerBackgroundColor}</p>}</div>
+              </div>
+            </Card>
+
             {/* SECTION 1: OVERLAY CONTROLS */}
             <Card className="p-6 space-y-5">
               <div className="flex items-center justify-between">
@@ -480,7 +507,7 @@ export default function AdminHomepageEditorPage() {
               <ColorField
                 label={t("admin.overlayColor")}
                 value={data.overlayColor}
-                presets={OVERLAY_COLOR_PRESETS}
+                presets={GREEN_COLOR_PRESETS}
                 onChange={(v) => updateField("overlayColor", v)}
                 disabled={!data.showOverlay}
               />
@@ -513,7 +540,7 @@ export default function AdminHomepageEditorPage() {
 
                 <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
                   <span>0% = transparent</span>
-                  <span>100% = solid blue</span>
+                  <span>100% = solid green</span>
                 </div>
                 {fieldErrors.overlayOpacity && <p className={errorClass}>{fieldErrors.overlayOpacity}</p>}
 
@@ -545,7 +572,7 @@ export default function AdminHomepageEditorPage() {
               <ColorField
                 label={t("admin.backgroundColor")}
                 value={data.backgroundColor}
-                presets={BACKGROUND_COLOR_PRESETS}
+                presets={GREEN_COLOR_PRESETS}
                 onChange={(v) => updateField("backgroundColor", v)}
               />
               {fieldErrors.backgroundColor && <p className={errorClass}>{fieldErrors.backgroundColor}</p>}
@@ -620,6 +647,10 @@ export default function AdminHomepageEditorPage() {
                   <option value="ghost">Ghost</option>
                 </select>
                 {fieldErrors.buttonStyle && <p className={errorClass}>{fieldErrors.buttonStyle}</p>}
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div><ColorField label="Primary button" value={data.buttonColor} presets={GREEN_COLOR_PRESETS} onChange={(value) => updateField("buttonColor", value)} />{fieldErrors.buttonColor && <p className={errorClass}>{fieldErrors.buttonColor}</p>}</div>
+                <div><ColorField label="Button hover" value={data.buttonHoverColor} presets={GREEN_COLOR_PRESETS} onChange={(value) => updateField("buttonHoverColor", value)} />{fieldErrors.buttonHoverColor && <p className={errorClass}>{fieldErrors.buttonHoverColor}</p>}</div>
               </div>
             </Card>
           </div>

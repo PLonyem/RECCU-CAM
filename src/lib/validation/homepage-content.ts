@@ -17,7 +17,29 @@ const trimmedText = (maximum: number, message: string) =>
 const hexColor = z
   .string()
   .trim()
-  .regex(/^#[0-9A-Fa-f]{6}$/, "Enter a hex color like #0A2647.");
+  .regex(/^#[0-9A-Fa-f]{6}$/, "Enter a valid hex color, such as #0D3D2E.");
+
+function channelToLinear(channel: number) {
+  const value = channel / 255;
+  return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+}
+
+function relativeLuminance(hex: string) {
+  const red = channelToLinear(Number.parseInt(hex.slice(1, 3), 16));
+  const green = channelToLinear(Number.parseInt(hex.slice(3, 5), 16));
+  const blue = channelToLinear(Number.parseInt(hex.slice(5, 7), 16));
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+}
+
+export function contrastRatio(first: string, second: string) {
+  const lighter = Math.max(relativeLuminance(first), relativeLuminance(second));
+  const darker = Math.min(relativeLuminance(first), relativeLuminance(second));
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+export function contrastWithWhite(hex: string) {
+  return contrastRatio(hex, "#FFFFFF");
+}
 
 const homepageFieldsSchema = z.object({
   heroBadge: trimmedText(
@@ -67,6 +89,13 @@ const homepageFieldsSchema = z.object({
   gradientDirection: z.enum(["to-r", "to-b", "to-br", "to-bl"]),
   textAlignment: z.enum(["left", "center", "right"]),
   buttonStyle: z.enum(["solid", "outline", "ghost"]),
+  primaryColor: hexColor,
+  secondaryColor: hexColor,
+  accentColor: hexColor,
+  surfaceColor: hexColor,
+  buttonColor: hexColor,
+  buttonHoverColor: hexColor,
+  footerBackgroundColor: hexColor,
   showHero: z.boolean(),
   showStats: z.boolean(),
   showMission: z.boolean(),
@@ -108,6 +137,25 @@ export const homepagePublishSchema = homepageFieldsSchema.superRefine((data, con
 
   if (data.showStats && !data.statsMembers) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["statsMembers"], message: "Members count is required when statistics are shown." });
+  }
+
+  for (const [field, label] of [
+    ["overlayColor", "Overlay color"],
+    ["buttonColor", "Button color"],
+    ["buttonHoverColor", "Button hover color"],
+    ["footerBackgroundColor", "Footer background"],
+  ] as const) {
+    if (contrastWithWhite(data[field]) < 4.5) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: `${label} needs more contrast with white text.` });
+    }
+  }
+
+  if (contrastRatio(data.primaryColor, data.surfaceColor) < 4.5) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["primaryColor"], message: "Primary color needs more contrast with the public surface." });
+  }
+
+  if (contrastRatio(data.accentColor, data.footerBackgroundColor) < 4.5) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["accentColor"], message: "Accent color needs more contrast with the footer background." });
   }
 });
 

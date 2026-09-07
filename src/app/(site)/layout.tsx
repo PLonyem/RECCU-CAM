@@ -4,6 +4,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { createSiteStructuredData } from "@/lib/structured-data";
 import { prisma } from "@/lib/prisma";
 import { readPublicData } from "@/lib/public-data";
+import { publicAppearanceStyle } from "@/lib/public-appearance";
 
 export const dynamic = "force-dynamic";
 
@@ -12,13 +13,31 @@ export default async function SiteLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await readPublicData(
-    "site settings",
-    () => prisma.siteSettings.findUnique({ where: { id: "default" } }),
-    null,
-  );
+  const [settings, appearance] = await Promise.all([
+    readPublicData(
+      "site settings",
+      () => prisma.siteSettings.findUnique({ where: { id: "default" } }),
+      null,
+    ),
+    readPublicData(
+      "public appearance",
+      () => prisma.homepageContent.findUnique({
+        where: { id: "default" },
+        select: {
+          primaryColor: true,
+          secondaryColor: true,
+          accentColor: true,
+          surfaceColor: true,
+          buttonColor: true,
+          buttonHoverColor: true,
+          footerBackgroundColor: true,
+        },
+      }),
+      null,
+    ),
+  ]);
   return (
-    <div className="min-h-full flex flex-col flex-1">
+    <div className="public-site-shell min-h-full flex flex-col flex-1" style={publicAppearanceStyle(appearance)}>
       <JsonLd data={createSiteStructuredData()} />
       <a
         href="#main-content"
