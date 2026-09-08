@@ -510,7 +510,7 @@ export default function AdminAnnouncementsPage() {
 
               <div>
                 <label htmlFor="ann-title-fr" className={labelClass}>
-                  Titre — Français
+                  Title — French
                 </label>
                 <input
                   id="ann-title-fr"
@@ -581,7 +581,7 @@ export default function AdminAnnouncementsPage() {
 
               <div>
                 <label htmlFor="ann-opening-fr" className={labelClass}>
-                  Message d’ouverture — Français
+                  Opening Message — French
                 </label>
                 <textarea
                   id="ann-opening-fr"

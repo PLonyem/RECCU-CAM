@@ -27,6 +27,7 @@
     "test:admin-routes": "tsx --test src/lib/admin-data-client.test.ts src/lib/admin-data-errors.test.ts src/lib/database-config.test.ts src/lib/data/public-content-mappers.test.ts src/lib/message-inbox.test.ts src/components/admin/nav-items.test.ts",
     "test:homepage": "tsx --test src/lib/validation/homepage-content.test.ts src/lib/validation/website-content.test.ts src/data/homepage-cms.test.ts",
     "test:i18n": "tsx --test src/lib/i18n.test.ts",
+    "audit:i18n": "tsx scripts/audit-i18n.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

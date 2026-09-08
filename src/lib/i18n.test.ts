@@ -10,6 +10,7 @@ import {
   normalizeLanguage,
   translateAdminText,
   translateText,
+  translateUiText,
   translateValidationMessage,
   translations,
 } from "@/lib/i18n";
@@ -23,6 +24,7 @@ import {
   localizeTrainingProgram,
   translationCompleteness,
 } from "@/lib/localized-content";
+import { getDictionaryParity, getInformationPageTranslationGaps, getNavigationTranslationGaps } from "@/lib/i18n-audit";
 import { blankHomepageSections, defaultHomepageSections } from "@/data/homepage-cms";
 
 test("locale configuration is cookie-backed and fail-safe", () => {
@@ -36,6 +38,20 @@ test("English and French dictionaries expose the same translation keys", () => {
   assert.deepEqual(Object.keys(translations.en).sort(), Object.keys(translations.fr).sort());
   assert.equal(translations.fr["admin.dashboard"], "Tableau de bord");
   assert.equal(translations.fr["language.french"], "Français");
+});
+
+test("navbar dropdown microcopy and every navigation destination have French coverage", () => {
+  assert.equal(translations.en["nav.servicesOverview"], "Services overview");
+  assert.equal(translations.fr["nav.servicesOverview"], "Vue d’ensemble des services");
+  assert.deepEqual(getNavigationTranslationGaps(), []);
+  assert.deepEqual(getInformationPageTranslationGaps(), []);
+});
+
+test("static UI dictionaries have parity and common microcopy switches both ways", () => {
+  assert.deepEqual(getDictionaryParity(), { missingInEnglish: [], missingInFrench: [] });
+  assert.equal(translateUiText("fr", "Show password"), "Afficher le mot de passe");
+  assert.equal(translateUiText("fr", "No public documents match these filters"), "Aucun document public ne correspond à ces filtres");
+  assert.equal(translateUiText("en", "Show password"), "Show password");
 });
 
 test("shared frontend and admin interface labels translate", () => {
@@ -194,8 +210,18 @@ test("every application surface is covered by the global instant localization bo
   assert.match(boundary, /alt.*aria-label.*placeholder.*title/);
   assert.match(boundary, /data-radix-portal/);
   assert.match(boundary, /translateUiText\(language, source\)/);
+  assert.match(boundary, /content\.replace\(\/\\s\+\/g, " "\)/);
   assert.doesNotMatch(boundary, /router\.|location\.|reload\(/);
   assert.doesNotMatch(adminLayout, /AdminLocalizationBoundary/);
+});
+
+test("the repeatable static microcopy audit is wired into the repository", () => {
+  const packageJson = readFileSync("package.json", "utf8");
+  const audit = readFileSync("scripts/audit-i18n.ts", "utf8");
+  assert.match(packageJson, /"audit:i18n": "tsx scripts\/audit-i18n\.ts"/);
+  assert.match(audit, /getDictionaryParity/);
+  assert.match(audit, /getNavigationTranslationGaps/);
+  assert.match(audit, /obviousHardcodedGaps/);
 });
 
 test("bilingual announcements are persisted safely and localized on every consumer", () => {
@@ -240,7 +266,8 @@ test("localized public CMS responses are cookie-varying and production builds de
   assert.match(homepagePage, /getServerTranslator/);
   assert.match(homepagePage, /<HomeHero content=\{homepageContent\}/);
   assert.match(hero, /localizeHomepageContent\(content, language\)/);
-  assert.match(footer, /language === "fr"/);
+  assert.match(footer, /t\("common\.rightsReserved"\)/);
+  assert.match(footer, /tText\(institution\.platformStatement\)/);
   assert.match(packageJson, /node scripts\/deploy-migrations\.mjs/);
   assert.match(migrationDeploy, /prisma", "migrate", "deploy"/);
 });
@@ -260,8 +287,8 @@ test("language switching updates client state before background persistence and 
   assert.doesNotMatch(provider, /window\.location/);
   assert.doesNotMatch(switcher, /await setLanguage|disabled=\{pending\}/);
   assert.match(switcher, /aria-pressed=\{language === locale\}/);
-  assert.match(switcher, /Switch to English/);
-  assert.match(switcher, /Passer au français/);
+  assert.match(switcher, /language\.switchToEnglish/);
+  assert.match(switcher, /language\.switchToFrench/);
   assert.match(localeRoute, /LOCALE_COOKIE_MAX_AGE/);
   assert.match(localeRoute, /Cache-Control", "no-store"/);
   assert.ok(navbar.indexOf("<LanguageSwitcher />") < navbar.indexOf("<PortalActions"));

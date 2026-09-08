@@ -23,7 +23,7 @@ export function LanguageSwitcher({ inverse = false, className }: { inverse?: boo
           type="button"
           onClick={() => select(locale)}
           aria-pressed={language === locale}
-          aria-label={locale === "en" ? "Switch to English" : "Passer au français"}
+          aria-label={t(locale === "en" ? "language.switchToEnglish" : "language.switchToFrench")}
           className={cn(
             "min-h-8 rounded-md px-2.5 text-xs font-bold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest",
             language === locale

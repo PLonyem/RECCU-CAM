@@ -699,7 +699,7 @@ export default function AdminHomepageEditorPage() {
             <div className="flex items-center gap-3">
               <span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", frenchStatus?.complete ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800")}>{frenchStatus?.complete ? "FR Complete" : `FR ${frenchStatus?.completed ?? 0}/${frenchStatus?.total ?? HOMEPAGE_TRANSLATABLE_FIELDS.length}`}</span>
               <div className="inline-flex rounded-lg border border-gray-300 bg-white p-0.5" role="tablist" aria-label="Editorial language">
-                {(["en", "fr"] as const).map((locale) => <button key={locale} type="button" role="tab" aria-selected={contentLanguage === locale} onClick={() => setContentLanguage(locale)} className={cn("rounded-md px-3 py-1.5 text-xs font-bold", contentLanguage === locale ? "bg-primary-800 text-white" : "text-gray-600 hover:bg-gray-50")}>{locale === "en" ? "English" : "Français"}</button>)}
+                {(["en", "fr"] as const).map((locale) => <button key={locale} type="button" role="tab" aria-selected={contentLanguage === locale} onClick={() => setContentLanguage(locale)} className={cn("rounded-md px-3 py-1.5 text-xs font-bold", contentLanguage === locale ? "bg-primary-800 text-white" : "text-gray-600 hover:bg-gray-50")}>{t(locale === "en" ? "language.english" : "language.french")}</button>)}
               </div>
             </div>
           </Card>

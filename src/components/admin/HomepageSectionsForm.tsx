@@ -23,6 +23,7 @@ function SubmitButtons() {
 }
 
 export function HomepageSectionsEditor({ english, french, frenchPublished }: { english: HomepageSectionsContent; french: HomepageSectionsContent; frenchPublished: boolean }) {
+  const { t } = useLanguage();
   const [locale, setLocale] = useState<"en" | "fr">("en");
   const frenchFields = [
     french.whoTitle, french.whoDescription, french.missionTitle, french.missionBody,
@@ -36,7 +37,7 @@ export function HomepageSectionsEditor({ english, french, frenchPublished }: { e
   return <div className="space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4">
       <div><p className="font-semibold text-institutional">Editorial language</p><p className="text-xs text-slate-500">English remains the safe public fallback.</p></div>
-      <div className="flex items-center gap-3"><span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", frenchComplete ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800")}>{frenchComplete ? "FR Complete" : `FR Missing ${missingFrenchFields} field${missingFrenchFields === 1 ? "" : "s"}`}</span><div role="tablist" aria-label="Editorial language" className="inline-flex rounded-lg border border-slate-300 p-0.5">{(["en", "fr"] as const).map((item) => <button key={item} type="button" role="tab" aria-selected={locale === item} onClick={() => setLocale(item)} className={cn("rounded-md px-3 py-1.5 text-xs font-bold", locale === item ? "bg-institutional text-white" : "text-slate-600")}>{item === "en" ? "English" : "Français"}</button>)}</div></div>
+      <div className="flex items-center gap-3"><span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", frenchComplete ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800")}>{frenchComplete ? "FR Complete" : `FR Missing ${missingFrenchFields} field${missingFrenchFields === 1 ? "" : "s"}`}</span><div role="tablist" aria-label="Editorial language" className="inline-flex rounded-lg border border-slate-300 p-0.5">{(["en", "fr"] as const).map((item) => <button key={item} type="button" role="tab" aria-selected={locale === item} onClick={() => setLocale(item)} className={cn("rounded-md px-3 py-1.5 text-xs font-bold", locale === item ? "bg-institutional text-white" : "text-slate-600")}>{t(item === "en" ? "language.english" : "language.french")}</button>)}</div></div>
     </div>
     <div hidden={locale !== "en"}><HomepageSectionsForm data={english} locale="en" /></div>
     <div hidden={locale !== "fr"}><HomepageSectionsForm data={french} locale="fr" /></div>

@@ -4,18 +4,16 @@ import { AppProviders } from "@/components/i18n/AppProviders";
 import { institution, siteUrl } from "@/config/institution";
 import { designTokens } from "@/config/design-tokens";
 import { isClerkConfigured } from "@/lib/auth/config";
-import { getServerLanguage } from "@/lib/i18n-server";
+import { getServerLanguage, getServerTranslator } from "@/lib/i18n-server";
 import "./globals.css";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "swap" });
 const lexend = Lexend({ variable: "--font-lexend", subsets: ["latin"], display: "swap" });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const language = await getServerLanguage();
-  const platformLabel = language === "fr" ? "Plateforme du réseau coopératif" : "Cooperative network platform";
-  const description = language === "fr"
-    ? "La plateforme numérique institutionnelle de RECCU-CAM pour le réseau coopératif au Cameroun."
-    : institution.platformStatement;
+  const { language, tText } = await getServerTranslator();
+  const platformLabel = tText("Cooperative network platform");
+  const description = tText("The institutional digital platform of RECCU-CAM for the cooperative network in Cameroon.");
   return {
     metadataBase: new URL(siteUrl),
     title: { default: `${institution.brandName} | ${platformLabel}`, template: `%s | ${institution.brandName}` },

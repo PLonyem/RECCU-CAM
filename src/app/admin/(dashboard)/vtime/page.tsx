@@ -26,9 +26,9 @@ export default async function VtimeAdminPage() {
         <form action={createTrainingProgram} className="mt-5 grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2 grid gap-4 rounded-lg border border-primary-100 p-4 sm:grid-cols-2">
             <label className="text-xs font-semibold text-slate-600">English ✓<input required name="title" placeholder="Programme title" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
-            <label className="text-xs font-semibold text-slate-600">Français — Missing<input name="titleFr" placeholder="Titre du programme" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+            <label className="text-xs font-semibold text-slate-600">French — Missing<input name="titleFr" placeholder="Programme title in French" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
             <label className="text-xs font-semibold text-slate-600 sm:col-span-1">English summary<textarea required name="summary" placeholder="Programme summary" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
-            <label className="text-xs font-semibold text-slate-600 sm:col-span-1">Résumé français<textarea name="summaryFr" placeholder="Résumé du programme" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+            <label className="text-xs font-semibold text-slate-600 sm:col-span-1">French summary<textarea name="summaryFr" placeholder="Programme summary in French" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
           </div>
           <input required name="category" placeholder="Category" className="rounded-lg border border-slate-300 px-3 py-2" />
           <input required name="level" placeholder="Level" className="rounded-lg border border-slate-300 px-3 py-2" />
@@ -79,10 +79,10 @@ export default async function VtimeAdminPage() {
                   <form action={updateTrainingProgram} className="mt-4 grid gap-3 sm:grid-cols-2">
                     <input type="hidden" name="id" value={program.id} />
                     <label className="text-xs font-semibold text-slate-600">English ✓<input required name="title" defaultValue={program.title} aria-label="Programme title" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
-                    <label className="text-xs font-semibold text-slate-600">{titleFr && summaryFr ? "Français ✓" : "Français — Missing"}<input name="titleFr" defaultValue={titleFr} aria-label="Titre du programme en français" placeholder="Titre du programme" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+                    <label className="text-xs font-semibold text-slate-600">{titleFr && summaryFr ? "French ✓" : "French — Missing"}<input name="titleFr" defaultValue={titleFr} aria-label="Programme title in French" placeholder="Programme title in French" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
                     <input required name="category" defaultValue={program.category} aria-label="Category" className="rounded-lg border border-slate-300 px-3 py-2" />
                     <textarea required name="summary" defaultValue={program.summary} aria-label="Programme summary in English" className="rounded-lg border border-slate-300 px-3 py-2" />
-                    <textarea name="summaryFr" defaultValue={summaryFr} aria-label="Résumé du programme en français" placeholder="Résumé du programme" className="rounded-lg border border-slate-300 px-3 py-2" />
+                    <textarea name="summaryFr" defaultValue={summaryFr} aria-label="Programme summary in French" placeholder="Programme summary in French" className="rounded-lg border border-slate-300 px-3 py-2" />
                     <input required name="level" defaultValue={program.level} aria-label="Level" className="rounded-lg border border-slate-300 px-3 py-2" />
                     <select name="format" defaultValue={program.format ?? ""} aria-label="Format" className="rounded-lg border border-slate-300 px-3 py-2"><option value="">Format pending</option><option value="in-person">In person</option><option value="online">Online</option><option value="hybrid">Hybrid</option></select>
                     <input name="venue" defaultValue={program.venue ?? ""} aria-label="Venue" placeholder="Venue" className="rounded-lg border border-slate-300 px-3 py-2" />

@@ -45,7 +45,7 @@ function regionLabel(region: string): string {
 }
 
 export default function AdminAffiliatesPage() {
-  const { t } = useLanguage();
+  const { t, tText } = useLanguage();
   const [affiliates, setAffiliates] = useState<AffiliateRow[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -371,7 +371,7 @@ export default function AdminAffiliatesPage() {
                           <Link
                             href={`/network/affiliates/${slugify(affiliate.code)}`}
                             className="text-gray-400 hover:text-primary-600 transition-colors"
-                            aria-label={`View ${affiliate.name} public profile`}
+                            aria-label={`${tText("View public profile")}: ${affiliate.name}`}
                           >
                             <Eye className="h-4 w-4" />
                           </Link>
@@ -380,7 +380,7 @@ export default function AdminAffiliatesPage() {
                             disabled={updatingId === affiliate.id}
                             onClick={() => void toggleActive(affiliate)}
                             className="text-gray-400 hover:text-primary-600 transition-colors disabled:opacity-40"
-                            aria-label={`${affiliate.isActive ? "Deactivate" : "Activate"} ${affiliate.name}`}
+                            aria-label={`${tText(affiliate.isActive ? "Deactivate" : "Activate")}: ${affiliate.name}`}
                           >
                             <Power className="h-4 w-4" />
                           </button>
@@ -426,7 +426,7 @@ export default function AdminAffiliatesPage() {
                     <Link
                       href={`/network/affiliates/${slugify(affiliate.code)}`}
                       className="text-gray-400 hover:text-primary-600 transition-colors"
-                      aria-label={`View ${affiliate.name} public profile`}
+                      aria-label={`${tText("View public profile")}: ${affiliate.name}`}
                     >
                       <Eye className="h-4 w-4" />
                     </Link>
@@ -435,7 +435,7 @@ export default function AdminAffiliatesPage() {
                       disabled={updatingId === affiliate.id}
                       onClick={() => void toggleActive(affiliate)}
                       className="text-gray-400 hover:text-primary-600 transition-colors disabled:opacity-40"
-                      aria-label={`${affiliate.isActive ? "Deactivate" : "Activate"} ${affiliate.name}`}
+                      aria-label={`${tText(affiliate.isActive ? "Deactivate" : "Activate")}: ${affiliate.name}`}
                     >
                       <Power className="h-4 w-4" />
                     </button>

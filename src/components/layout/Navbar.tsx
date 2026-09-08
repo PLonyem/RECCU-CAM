@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { PortalActions } from "@/components/layout/PortalActions";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import type { TranslationKey } from "@/lib/i18n";
 
 const DESKTOP_HOVER_QUERY = "(any-hover: hover) and (any-pointer: fine)";
 
@@ -32,9 +33,9 @@ function isSectionActive(pathname: string, item: NavigationLink) {
     || false;
 }
 
-function getOverviewLabel(item: NavigationLink, fallback: string) {
-  if (item.label === "Our Network") return "Network Overview";
-  if (item.label === "Services") return "Services overview";
+function getOverviewKey(item: NavigationLink, fallback: TranslationKey): TranslationKey {
+  if (item.label === "Our Network") return "nav.networkOverview";
+  if (item.label === "Services") return "nav.servicesOverview";
   return fallback;
 }
 
@@ -53,7 +54,7 @@ function DesktopNavigationItem({
   pathname: string;
   setOpenMenu: Dispatch<SetStateAction<string | null>>;
 }) {
-  const { tText } = useLanguage();
+  const { t, tText } = useLanguage();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -167,7 +168,7 @@ function DesktopNavigationItem({
           <div className="border-b border-border px-3 pb-3 pt-1">
             <p className="font-display text-sm font-bold text-institutional">{tText(item.label)}</p>
             <Link href={item.href} onClick={() => setOpenMenu(null)} className="public-nav-overview mt-1 inline-flex text-xs font-semibold">
-              {tText(getOverviewLabel(item, "View section overview"))}
+              {t(getOverviewKey(item, "nav.viewSectionOverview"))}
             </Link>
           </div>
           <ul className="mt-2 grid gap-1">
@@ -204,7 +205,7 @@ function DesktopNavigationItem({
 }
 
 export function Navbar() {
-  const { tText } = useLanguage();
+  const { t, tText } = useLanguage();
   const pathname = usePathname();
   const headerRef = useRef<HTMLElement>(null);
   const mobileNavigationRef = useRef<HTMLDivElement>(null);
@@ -368,7 +369,7 @@ export function Navbar() {
                       {expanded && (
                         <div id={sectionId} className="ml-4 border-l border-primary-200 py-2 pl-3">
                           <Link href={item.href} onClick={() => setMobileOpen(false)} className="public-nav-overview block rounded-control px-3 py-2 text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest">
-                            {tText(getOverviewLabel(item, "Section overview"))}
+                            {t(getOverviewKey(item, "nav.sectionOverview"))}
                           </Link>
                           {item.children.map((child) => (
                             <Link

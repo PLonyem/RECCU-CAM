@@ -14,7 +14,8 @@ function translatePreservingWhitespace(value: string, language: "en" | "fr") {
   const match = value.match(/^(\s*)([\s\S]*?)(\s*)$/);
   if (!match || !match[2]) return value;
   const [, before, content, after] = match;
-  return `${before}${translateUiText(language, content)}${after}`;
+  const lookupValue = content.replace(/\s+/g, " ");
+  return `${before}${translateUiText(language, lookupValue)}${after}`;
 }
 
 function isExcluded(node: Node) {

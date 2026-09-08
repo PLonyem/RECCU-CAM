@@ -47,7 +47,7 @@ export function ShareArticle({ title, slug }: ShareArticleProps) {
           aria-live="polite"
         >
           {copyState === "copied" ? <Check className="h-4 w-4" /> : copyState === "error" ? <AlertTriangle className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
-          {copyState === "copied" ? t("news_copied") : copyState === "error" ? "Copy unavailable" : t("news_copy_link")}
+          {copyState === "copied" ? t("news_copied") : copyState === "error" ? t("common.copyUnavailable") : t("news_copy_link")}
         </button>
 
         <a

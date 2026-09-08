@@ -187,7 +187,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
       <Card className="p-6">
         <form noValidate className="space-y-5">
           <div className="rounded-lg border border-primary-100 bg-primary-50/40 p-4 text-sm text-institutional">
-            <strong>English ✓</strong><span className="mx-2">|</span><strong>{defaultValues?.titleFr && defaultValues?.excerptFr && defaultValues?.contentFr ? "Français ✓" : "Français — Missing"}</strong>
+            <strong>English ✓</strong><span className="mx-2">|</span><strong>{defaultValues?.titleFr && defaultValues?.excerptFr && defaultValues?.contentFr ? "French ✓" : "French — Missing"}</strong>
           </div>
           <div className="space-y-1">
             <label htmlFor="title" className="text-sm font-medium text-gray-700">
@@ -212,11 +212,11 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
           </div>
 
           <fieldset className="space-y-4 rounded-lg border border-primary-100 p-4">
-            <legend className="px-2 text-sm font-semibold text-institutional">Français</legend>
-            <label className="block text-sm font-medium text-gray-700">Titre<input type="text" disabled={isSubmitting} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5" {...register("titleFr")} /></label>
-            <label className="block text-sm font-medium text-gray-700">Résumé<textarea rows={3} disabled={isSubmitting} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5" {...register("excerptFr")} /></label>
-            <label className="block text-sm font-medium text-gray-700">Contenu<textarea rows={12} disabled={isSubmitting} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5" {...register("contentFr")} /></label>
-            <p className="text-xs text-muted-foreground">Les champs français vides utilisent automatiquement le contenu anglais publié.</p>
+            <legend className="px-2 text-sm font-semibold text-institutional">French</legend>
+            <label className="block text-sm font-medium text-gray-700">Title — French<input type="text" disabled={isSubmitting} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5" {...register("titleFr")} /></label>
+            <label className="block text-sm font-medium text-gray-700">Summary — French<textarea rows={3} disabled={isSubmitting} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5" {...register("excerptFr")} /></label>
+            <label className="block text-sm font-medium text-gray-700">Content — French<textarea rows={12} disabled={isSubmitting} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5" {...register("contentFr")} /></label>
+            <p className="text-xs text-muted-foreground">Empty French fields automatically use the published English content.</p>
           </fieldset>
 
           <div className="space-y-1">

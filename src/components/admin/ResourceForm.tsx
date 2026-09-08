@@ -101,7 +101,7 @@ export function ResourceForm({ defaultValues, onSubmit }: ResourceFormProps) {
       <Card className="p-6">
         <form onSubmit={submit} noValidate className="space-y-5">
           <div className="rounded-lg border border-primary-100 bg-primary-50/40 p-4 text-sm text-institutional">
-            <strong>English ✓</strong><span className="mx-2">|</span><strong>{defaultValues?.titleFr && defaultValues?.descriptionFr ? "Français ✓" : "Français — Missing"}</strong>
+            <strong>English ✓</strong><span className="mx-2">|</span><strong>{defaultValues?.titleFr && defaultValues?.descriptionFr ? "French ✓" : "French — Missing"}</strong>
           </div>
           <div className="space-y-1">
             <label htmlFor="title" className="text-sm font-medium text-gray-700">
@@ -120,10 +120,10 @@ export function ResourceForm({ defaultValues, onSubmit }: ResourceFormProps) {
           </div>
 
           <fieldset className="grid gap-4 rounded-lg border border-primary-100 p-4 sm:grid-cols-2">
-            <legend className="px-2 text-sm font-semibold text-institutional">Français</legend>
-            <label className="text-sm font-medium text-gray-700">Titre<input type="text" disabled={isSubmitting} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5" {...register("titleFr")} /></label>
+            <legend className="px-2 text-sm font-semibold text-institutional">French</legend>
+            <label className="text-sm font-medium text-gray-700">Title — French<input type="text" disabled={isSubmitting} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5" {...register("titleFr")} /></label>
             <label className="text-sm font-medium text-gray-700">Description<textarea rows={3} disabled={isSubmitting} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5" {...register("descriptionFr")} /></label>
-            <p className="text-xs text-muted-foreground sm:col-span-2">Les champs français vides utilisent automatiquement le contenu anglais publié.</p>
+            <p className="text-xs text-muted-foreground sm:col-span-2">Empty French fields automatically use the published English content.</p>
           </fieldset>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
