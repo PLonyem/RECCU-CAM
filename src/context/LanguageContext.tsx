@@ -1,12 +1,12 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, startTransition, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { normalizeLanguage, translateText, translations, type Language, type TranslationKey } from "@/lib/i18n";
 
 interface LanguageContextValue {
   language: Language;
-  setLanguage: (language: Language) => Promise<void>;
+  setLanguage: (language: Language) => void;
   t: (key: TranslationKey) => string;
   tText: (value: string) => string;
 }
@@ -19,6 +19,10 @@ const LANGUAGE_EVENT = "reccucam-language-change";
 export function LanguageProvider({ children, initialLanguage }: { children: ReactNode; initialLanguage: Language }) {
   const router = useRouter();
   const [language, updateLanguage] = useState(initialLanguage);
+  const languageRef = useRef(initialLanguage);
+  const confirmedLanguageRef = useRef(initialLanguage);
+  const pendingLanguageRef = useRef<Language | null>(null);
+  const persistenceActiveRef = useRef(false);
 
   useEffect(() => {
     document.documentElement.lang = initialLanguage;
@@ -28,9 +32,10 @@ export function LanguageProvider({ children, initialLanguage }: { children: Reac
   useEffect(() => {
     const synchronize = (event: StorageEvent | Event) => {
       const next = event instanceof StorageEvent ? normalizeLanguage(event.newValue) : normalizeLanguage(localStorage.getItem(STORAGE_KEY));
+      languageRef.current = next;
       updateLanguage(next);
       document.documentElement.lang = next;
-      router.refresh();
+      startTransition(() => router.refresh());
     };
     window.addEventListener("storage", synchronize);
     window.addEventListener(LANGUAGE_EVENT, synchronize);
@@ -40,27 +45,41 @@ export function LanguageProvider({ children, initialLanguage }: { children: Reac
     };
   }, [router]);
 
-  const setLanguage = useCallback(async (next: Language) => {
-    if (next === language) return;
-    const previous = language;
+  const setLanguage = useCallback((next: Language) => {
+    if (next === languageRef.current) return;
+    languageRef.current = next;
     updateLanguage(next);
     document.documentElement.lang = next;
     localStorage.setItem(STORAGE_KEY, next);
-    try {
-      const response = await fetch("/api/locale", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ locale: next }),
-      });
-      if (!response.ok) throw new Error("Unable to persist language preference.");
-      router.refresh();
-    } catch (error) {
-      updateLanguage(previous);
-      document.documentElement.lang = previous;
-      localStorage.setItem(STORAGE_KEY, previous);
-      throw error;
-    }
-  }, [language, router]);
+    pendingLanguageRef.current = next;
+
+    void (async () => {
+      if (persistenceActiveRef.current) return;
+      persistenceActiveRef.current = true;
+      while (pendingLanguageRef.current) {
+        const target = pendingLanguageRef.current;
+        pendingLanguageRef.current = null;
+        try {
+          const response = await fetch("/api/locale", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ locale: target }),
+          });
+          if (!response.ok) throw new Error("Unable to persist language preference.");
+          confirmedLanguageRef.current = target;
+        } catch {
+          if (pendingLanguageRef.current) continue;
+          const confirmed = confirmedLanguageRef.current;
+          languageRef.current = confirmed;
+          updateLanguage(confirmed);
+          document.documentElement.lang = confirmed;
+          localStorage.setItem(STORAGE_KEY, confirmed);
+        }
+      }
+      persistenceActiveRef.current = false;
+      startTransition(() => router.refresh());
+    })();
+  }, [router]);
 
   const t = useCallback(
     (key: TranslationKey) => translations[language][key],

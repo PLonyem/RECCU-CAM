@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
 
   const locale = normalizeLanguage(body.locale);
   const response = NextResponse.json({ locale });
+  response.headers.set("Cache-Control", "no-store");
   response.cookies.set(LOCALE_COOKIE, locale, {
     path: "/",
     maxAge: LOCALE_COOKIE_MAX_AGE,

@@ -1,25 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 
 export function LanguageSwitcher({ inverse = false, className }: { inverse?: boolean; className?: string }) {
-  const { language, setLanguage, t, tText } = useLanguage();
-  const [pending, setPending] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
 
-  async function select(next: "en" | "fr") {
-    if (next === language || pending) return;
-    setPending(true);
-    setFailed(false);
-    try {
-      await setLanguage(next);
-    } catch {
-      setFailed(true);
-    } finally {
-      setPending(false);
-    }
+  function select(next: "en" | "fr") {
+    if (next !== language) setLanguage(next);
   }
 
   return (
@@ -33,12 +21,11 @@ export function LanguageSwitcher({ inverse = false, className }: { inverse?: boo
         <button
           key={locale}
           type="button"
-          onClick={() => void select(locale)}
-          disabled={pending}
+          onClick={() => select(locale)}
           aria-pressed={language === locale}
-          aria-label={locale === "en" ? t("language.english") : t("language.french")}
+          aria-label={locale === "en" ? "Switch to English" : "Passer au français"}
           className={cn(
-            "min-h-8 rounded-md px-2.5 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest disabled:opacity-60",
+            "min-h-8 rounded-md px-2.5 text-xs font-bold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest",
             language === locale
               ? "bg-institutional text-white"
               : inverse ? "text-white hover:bg-white/10" : "text-institutional hover:bg-primary-50",
@@ -48,7 +35,6 @@ export function LanguageSwitcher({ inverse = false, className }: { inverse?: boo
         </button>
         ))}
       </div>
-      {failed && <span className="sr-only" role="status">{tText("Unable to change language.")}</span>}
     </div>
   );
 }

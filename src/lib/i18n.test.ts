@@ -150,14 +150,39 @@ test("localized public CMS responses are cookie-varying and production builds de
   const homepageApi = readFileSync("src/app/api/homepage/route.ts", "utf8");
   const homepagePage = readFileSync("src/app/(site)/page.tsx", "utf8");
   const footer = readFileSync("src/components/layout/Footer.tsx", "utf8");
+  const hero = readFileSync("src/components/home/HomeHero.tsx", "utf8");
   const packageJson = readFileSync("package.json", "utf8");
   const migrationDeploy = readFileSync("scripts/deploy-migrations.mjs", "utf8");
 
   assert.match(homepageApi, /private, no-store/);
   assert.match(homepageApi, /Vary: "Cookie"/);
   assert.match(homepagePage, /getServerTranslator/);
-  assert.match(homepagePage, /localizeHomepageContent\(homepageContent, language\)/);
+  assert.match(homepagePage, /<HomeHero content=\{homepageContent\}/);
+  assert.match(hero, /localizeHomepageContent\(content, language\)/);
   assert.match(footer, /language === "fr"/);
   assert.match(packageJson, /node scripts\/deploy-migrations\.mjs/);
   assert.match(migrationDeploy, /prisma", "migrate", "deploy"/);
+});
+
+test("language switching updates client state before background persistence and route reconciliation", () => {
+  const provider = readFileSync("src/context/LanguageContext.tsx", "utf8");
+  const switcher = readFileSync("src/components/i18n/LanguageSwitcher.tsx", "utf8");
+  const localeRoute = readFileSync("src/app/api/locale/route.ts", "utf8");
+  const navbar = readFileSync("src/components/layout/Navbar.tsx", "utf8");
+  const portalActions = readFileSync("src/components/layout/PortalActions.tsx", "utf8");
+
+  assert.ok(provider.indexOf("updateLanguage(next)") < provider.indexOf('fetch("/api/locale"'));
+  assert.match(provider, /document\.documentElement\.lang = next/);
+  assert.match(provider, /localStorage\.setItem\(STORAGE_KEY, next\)/);
+  assert.match(provider, /startTransition\(\(\) => router\.refresh\(\)\)/);
+  assert.doesNotMatch(provider, /router\.(push|replace)\(/);
+  assert.doesNotMatch(provider, /window\.location/);
+  assert.doesNotMatch(switcher, /await setLanguage|disabled=\{pending\}/);
+  assert.match(switcher, /aria-pressed=\{language === locale\}/);
+  assert.match(switcher, /Switch to English/);
+  assert.match(switcher, /Passer au français/);
+  assert.match(localeRoute, /LOCALE_COOKIE_MAX_AGE/);
+  assert.match(localeRoute, /Cache-Control", "no-store"/);
+  assert.ok(navbar.indexOf("<LanguageSwitcher />") < navbar.indexOf("<PortalActions"));
+  assert.ok(portalActions.indexOf("{portal && (") < portalActions.lastIndexOf("<UserButton />"));
 });
