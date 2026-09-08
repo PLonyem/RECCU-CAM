@@ -14,6 +14,10 @@ export const resourceSchema = z.object({
   published: z.boolean().default(false),
   downloadCount: z.number().int().nonnegative().default(0),
   isActive: z.boolean().default(true),
+  translations: z.object({ fr: z.object({
+    title: z.string().trim().max(240).optional(),
+    description: z.string().trim().max(4000).optional(),
+  }).optional() }).default({}),
 });
 
 export const updateResourceSchema = resourceSchema.partial();

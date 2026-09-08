@@ -25,6 +25,12 @@ export const defaultHomepageSections: HomepageSectionsContent = {
   contactButtonText: "Contact RECCU-CAM",
 };
 
+export const blankHomepageSections: HomepageSectionsContent = {
+  whoTitle: "", whoDescription: "", missionTitle: "", missionBody: "", visionTitle: "", visionBody: "",
+  values: Array.from({ length: 5 }, () => ({ title: "", description: "" })),
+  leaderName: "", leaderRole: "", leaderMessage: "", contactTitle: "", contactDescription: "", contactButtonText: "",
+};
+
 export function parseHomepageSections(value: unknown): HomepageSectionsContent {
   if (!value || typeof value !== "object" || Array.isArray(value)) return defaultHomepageSections;
   const candidate = value as Partial<HomepageSectionsContent>;

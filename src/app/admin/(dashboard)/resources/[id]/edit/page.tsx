@@ -7,6 +7,7 @@ import {
   buildResourcePayload,
   type ResourceFormValues,
 } from "@/components/admin/ResourceForm";
+import { getTranslationDraft } from "@/lib/localized-content";
 
 interface FetchedResource {
   id: string;
@@ -20,9 +21,11 @@ interface FetchedResource {
   accessLevel: "PUBLIC" | "AFFILIATE_ONLY" | "STAFF_ONLY";
   published: boolean;
   isActive: boolean;
+  translations: unknown;
 }
 
 function toFormValues(resource: FetchedResource): Partial<ResourceFormValues> {
+  const french = getTranslationDraft(resource.translations);
   return {
     title: resource.title,
     description: resource.description ?? "",
@@ -34,6 +37,8 @@ function toFormValues(resource: FetchedResource): Partial<ResourceFormValues> {
     accessLevel: resource.accessLevel,
     published: resource.published,
     isActive: resource.isActive,
+    titleFr: typeof french.title === "string" ? french.title : "",
+    descriptionFr: typeof french.description === "string" ? french.description : "",
   };
 }
 

@@ -28,13 +28,14 @@ import {
 import { createPageMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import { readPublicData } from "@/lib/public-data";
+import { getServerTranslator } from "@/lib/i18n-server";
+import { formatDate } from "@/lib/i18n";
+import { getLocalizedFields } from "@/lib/localized-content";
 
-export const metadata: Metadata = createPageMetadata({
-  title: "Knowledge and Compliance Centre",
-  description:
-    "Search source-labelled regulatory guidance, circulars, publications, governance resources, and professional materials for cooperative financial institutions.",
-  path: "/knowledge",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const { language, tText } = await getServerTranslator();
+  return createPageMetadata({ title: tText("Knowledge and Compliance Centre"), description: tText("Search source-labelled regulatory guidance, circulars, publications, governance resources, and professional materials for cooperative financial institutions."), path: "/knowledge", locale: language });
+}
 
 const categoryIcons: Record<KnowledgeCategorySlug, LucideIcon> = {
   "regulatory-library": Library,
@@ -53,6 +54,7 @@ const categoryIcons: Record<KnowledgeCategorySlug, LucideIcon> = {
 };
 
 export default async function KnowledgePage() {
+  const { language, tText } = await getServerTranslator();
   const publishedResources = await readPublicData(
     "public knowledge resources",
     () =>
@@ -62,6 +64,7 @@ export default async function KnowledgePage() {
       }),
     [],
   );
+  const localizedResources = publishedResources.map((resource) => ({ ...resource, ...getLocalizedFields({ title: resource.title, description: resource.description ?? "" }, resource.translations, language) }));
   return (
     <>
       <PageIntro
@@ -94,8 +97,8 @@ export default async function KnowledgePage() {
                     <span className="grid h-10 w-10 place-items-center rounded-control bg-primary-50 text-forest" aria-hidden="true">
                       <Icon className="h-5 w-5" />
                     </span>
-                    <h3 className="mt-4 font-display text-lg font-semibold text-institutional">{category.title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{category.description}</p>
+                    <h3 className="mt-4 font-display text-lg font-semibold text-institutional">{tText(category.title)}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{tText(category.description)}</p>
                   </Card>
                 </Link>
               );
@@ -119,7 +122,7 @@ export default async function KnowledgePage() {
         </Container>
       </Section>
 
-      {publishedResources.length > 0 && <Section tone="surface"><Container><SectionHeader eyebrow="RECCU-CAM publications" title="Recently published resources." subtitle="These records are managed by authorized staff and classified for public access." /><div className="mt-8 grid gap-4 md:grid-cols-2">{publishedResources.map((resource) => <Card key={resource.id} padding="default"><span className="rounded-pill bg-primary-50 px-3 py-1 text-xs font-semibold uppercase text-forest">{resource.category}</span><h3 className="mt-4 font-display text-xl font-semibold text-institutional">{resource.title}</h3>{resource.description && <p className="mt-2 text-sm leading-6 text-muted-foreground">{resource.description}</p>}<p className="mt-3 text-xs text-muted-foreground">{resource.issuingAuthority || "RECCU-CAM"}{resource.publicationDate ? ` · ${resource.publicationDate.toLocaleDateString("en-GB")}` : ""}</p>{resource.fileUrl && <a href={resource.fileUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex font-semibold text-forest underline-offset-4 hover:underline">Open resource</a>}</Card>)}</div></Container></Section>}
+      {localizedResources.length > 0 && <Section tone="surface"><Container><SectionHeader eyebrow="RECCU-CAM publications" title="Recently published resources." subtitle="These records are managed by authorized staff and classified for public access." /><div className="mt-8 grid gap-4 md:grid-cols-2">{localizedResources.map((resource) => <Card key={resource.id} padding="default"><span className="rounded-pill bg-primary-50 px-3 py-1 text-xs font-semibold uppercase text-forest">{tText(resource.category)}</span><h3 className="mt-4 font-display text-xl font-semibold text-institutional">{resource.title}</h3>{resource.description && <p className="mt-2 text-sm leading-6 text-muted-foreground">{resource.description}</p>}<p className="mt-3 text-xs text-muted-foreground">{resource.issuingAuthority || "RECCU-CAM"}{resource.publicationDate ? ` · ${formatDate(resource.publicationDate, language, { dateStyle: "medium" })}` : ""}</p>{resource.fileUrl && <a href={resource.fileUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex font-semibold text-forest underline-offset-4 hover:underline">{tText("Open resource")}</a>}</Card>)}</div></Container></Section>}
 
       <Section>
         <Container>
@@ -131,21 +134,21 @@ export default async function KnowledgePage() {
           <div className="mt-10 grid gap-5 md:grid-cols-3">
             <AccessCard
               icon={FileText}
-              title="Public"
-              status="Available here"
-              description="Source-labelled records and files approved for unrestricted public access."
+              title={tText("Public")}
+              status={tText("Available here")}
+              description={tText("Source-labelled records and files approved for unrestricted public access.")}
             />
             <AccessCard
               icon={FileLock2}
-              title="Affiliate Only"
-              status="Not exposed"
-              description="Requires a future authenticated affiliate workflow and explicit document authorization."
+              title={tText("Affiliate Only")}
+              status={tText("Not exposed")}
+              description={tText("Requires a future authenticated affiliate workflow and explicit document authorization.")}
             />
             <AccessCard
               icon={ShieldCheck}
-              title="Staff Only"
-              status="Not exposed"
-              description="Requires a future staff identity, role check, and controlled delivery path."
+              title={tText("Staff Only")}
+              status={tText("Not exposed")}
+              description={tText("Requires a future staff identity, role check, and controlled delivery path.")}
             />
           </div>
         </Container>

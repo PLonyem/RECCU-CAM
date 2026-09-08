@@ -1,6 +1,10 @@
+"use client";
+
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
+import { translateValidationMessage } from "@/lib/i18n";
 
 export const formControlClassName =
   "mt-2 min-h-12 w-full rounded-control border border-border bg-surface px-4 text-base text-foreground outline-none transition-[border-color,box-shadow] duration-fast placeholder:text-muted-foreground focus:border-forest focus:ring-2 focus:ring-forest/20 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground aria-[invalid=true]:border-error aria-[invalid=true]:focus:ring-error/20";
@@ -14,19 +18,21 @@ export function RequiredMark() {
 }
 
 export function RequiredFieldsNote() {
+  const { tText } = useLanguage();
   return (
     <p className="text-sm text-muted-foreground">
-      Fields marked <span className="font-semibold text-error" aria-hidden="true">*</span>{" "}
-      are required.
+      {tText("Fields marked")} <span className="font-semibold text-error" aria-hidden="true">*</span>{" "}
+      {tText("are required.")}
     </p>
   );
 }
 
 export function FieldError({ id, message }: { id: string; message?: string }) {
+  const { language } = useLanguage();
   if (!message) return null;
   return (
     <p id={id} className="mt-2 text-sm font-medium text-error" role="alert">
-      {message}
+      {translateValidationMessage(language, message)}
     </p>
   );
 }
@@ -39,6 +45,7 @@ interface FormNoticeProps extends HTMLAttributes<HTMLDivElement> {
 
 export const FormNotice = forwardRef<HTMLDivElement, FormNoticeProps>(
   ({ children, className, title, variant, ...props }, ref) => {
+    const { tText } = useLanguage();
     const Icon = variant === "success" ? CheckCircle2 : AlertTriangle;
     return (
       <div
@@ -60,7 +67,7 @@ export const FormNotice = forwardRef<HTMLDivElement, FormNoticeProps>(
             aria-hidden="true"
           />
           <div>
-            <h2 className={cn("font-display text-h4", variant === "success" ? "text-institutional" : "text-error")}>{title}</h2>
+            <h2 className={cn("font-display text-h4", variant === "success" ? "text-institutional" : "text-error")}>{tText(title)}</h2>
             <div className="mt-2 text-body text-foreground">{children}</div>
           </div>
         </div>

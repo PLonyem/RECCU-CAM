@@ -4,13 +4,12 @@ import { notFound } from "next/navigation";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Badge, Card, Container, Section } from "@/components/ui";
-import {
-  formatNewsDate,
-  getNewsCategory,
-} from "@/data/news";
+import { getNewsCategory } from "@/data/news";
 import { getPublicNewsArticleBySlug } from "@/lib/data/public-news";
 import { createNewsArticleMetadata } from "@/lib/seo";
 import { createNewsArticleStructuredData } from "@/lib/structured-data";
+import { getServerTranslator } from "@/lib/i18n-server";
+import { formatDate } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +17,7 @@ export async function generateMetadata({ params }: PageProps<"/news/[slug]">): P
   const { slug } = await params;
   const item = await getPublicNewsArticleBySlug(slug);
   if (!item) return {};
+  const { language } = await getServerTranslator();
 
   return createNewsArticleMetadata({
     title: item.title,
@@ -26,10 +26,12 @@ export async function generateMetadata({ params }: PageProps<"/news/[slug]">): P
     publishedTime: item.publishedAt,
     modifiedTime: item.updatedAt ?? undefined,
     authors: item.authorName ? [item.authorName] : undefined,
+    locale: language,
   });
 }
 
 export default async function NewsDetailPage({ params }: PageProps<"/news/[slug]">) {
+  const { language, tText } = await getServerTranslator();
   const { slug } = await params;
   const item = await getPublicNewsArticleBySlug(slug);
   if (!item) notFound();
@@ -65,16 +67,16 @@ export default async function NewsDetailPage({ params }: PageProps<"/news/[slug]
               {item.body.map((paragraph, index) => <p key={`${item.id}-${index}`}>{paragraph}</p>)}
             </div>
           </article>
-          <Card padding="default" aria-label="Publication details">
-            <Badge variant="primary">{category?.label ?? item.category}</Badge>
+          <Card padding="default" aria-label={tText("Publication details")}>
+            <Badge variant="primary">{tText(category?.label ?? item.category)}</Badge>
             <dl className="mt-6 space-y-5 text-sm">
               <div>
-                <dt className="font-semibold text-institutional">Published</dt>
-                <dd className="mt-1 inline-flex items-center gap-2 text-muted-foreground"><CalendarDays className="h-4 w-4" aria-hidden="true" />{formatNewsDate(item.publishedAt)}</dd>
+                <dt className="font-semibold text-institutional">{tText("Published")}</dt>
+                <dd className="mt-1 inline-flex items-center gap-2 text-muted-foreground"><CalendarDays className="h-4 w-4" aria-hidden="true" />{formatDate(item.publishedAt, language)}</dd>
               </div>
               {item.authorName && (
                 <div>
-                  <dt className="font-semibold text-institutional">Author</dt>
+                  <dt className="font-semibold text-institutional">{tText("Author")}</dt>
                   <dd className="mt-1 inline-flex items-center gap-2 text-muted-foreground"><UserRound className="h-4 w-4" aria-hidden="true" />{item.authorName}</dd>
                 </div>
               )}

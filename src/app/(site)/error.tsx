@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { Button, Container, ErrorState, Section } from "@/components/ui";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function SiteError({
   error,
@@ -10,6 +11,7 @@ export default function SiteError({
   error: Error & { digest?: string };
   unstable_retry: () => void;
 }) {
+  const { tText } = useLanguage();
   useEffect(() => {
     console.error("Public route failed to render:", error);
   }, [error]);
@@ -20,7 +22,7 @@ export default function SiteError({
         <ErrorState
           title="This page could not be loaded"
           description="The rest of the RECCU-CAM platform is still available. Try this page again, or return through the main navigation."
-          action={<Button type="button" onClick={unstable_retry}>Try again</Button>}
+          action={<Button type="button" onClick={unstable_retry}>{tText("Try again")}</Button>}
         />
       </Container>
     </Section>

@@ -20,8 +20,9 @@ import { Card } from "@/components/ui/Card";
 import { cn, heroGradientAngle, heroOverlayGradient } from "@/lib/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import type { TranslationKey } from "@/lib/i18n";
-import { HOMEPAGE_CONTENT_LIMITS, type HomepageContentInput } from "@/lib/validation/homepage-content";
+import { HOMEPAGE_CONTENT_LIMITS, HOMEPAGE_TRANSLATABLE_FIELDS, type HomepageContentInput, type HomepageTranslationField } from "@/lib/validation/homepage-content";
 import { RECCUCAM_GREEN_APPEARANCE } from "@/lib/public-appearance";
+import { getTranslationDraft, localizeHomepageContent, translationCompleteness } from "@/lib/localized-content";
 
 type Tab = "content" | "appearance" | "sections";
 type GradientDirection = "to-r" | "to-b" | "to-br" | "to-bl";
@@ -281,6 +282,7 @@ function HeroPreview({ data }: { data: HomepageContentData }) {
 export default function AdminHomepageEditorPage() {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<Tab>("content");
+  const [contentLanguage, setContentLanguage] = useState<"en" | "fr">("en");
   const [data, setData] = useState<HomepageContentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -330,11 +332,40 @@ export default function AdminHomepageEditorPage() {
     });
   }
 
+  function localizedFieldValue(field: HomepageTranslationField) {
+    if (!data) return "";
+    if (contentLanguage === "en") return data[field];
+    const value = getTranslationDraft(data.translations)[field];
+    return typeof value === "string" ? value : "";
+  }
+
+  function updateLocalizedField(field: HomepageTranslationField, value: string) {
+    if (contentLanguage === "en") {
+      updateField(field, value);
+      return;
+    }
+    setData((previous) => previous ? {
+      ...previous,
+      translations: {
+        ...previous.translations,
+        fr: { ...getTranslationDraft(previous.translations), [field]: value },
+      },
+    } : previous);
+    setFieldErrors((previous) => {
+      const next = { ...previous };
+      delete next.translations;
+      return next;
+    });
+  }
+
   function applyGreenPreset() {
     setData((previous) => previous ? { ...previous, ...RECCUCAM_GREEN_APPEARANCE } : previous);
     setFieldErrors({});
     setToast({ type: "success", message: "RECCU-CAM Green preset applied. Save or publish to keep it." });
   }
+
+  const previewData = data ? localizeHomepageContent(data, contentLanguage) : null;
+  const frenchStatus = data ? translationCompleteness(data.translations, HOMEPAGE_TRANSLATABLE_FIELDS) : null;
 
   async function handleAddImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -469,7 +500,7 @@ export default function AdminHomepageEditorPage() {
               </div>
             ))}
           </Card>
-          <HeroPreview data={data} />
+          <HeroPreview data={previewData ?? data} />
         </div>
       ) : activeTab === "appearance" ? (
         <div className="mt-8 grid lg:grid-cols-[1fr_320px] gap-8 items-start">
@@ -655,11 +686,23 @@ export default function AdminHomepageEditorPage() {
             </Card>
           </div>
 
-          <HeroPreview data={data} />
+          <HeroPreview data={previewData ?? data} />
         </div>
       ) : (
         <div className="mt-8 grid lg:grid-cols-[1fr_320px] gap-8 items-start">
           <div className="space-y-8 min-w-0">
+          <Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Editorial language</p>
+              <p className="mt-1 text-xs text-gray-500">Edit both versions independently. Missing French fields fall back to English on the public site.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", frenchStatus?.complete ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800")}>{frenchStatus?.complete ? "FR Complete" : `FR ${frenchStatus?.completed ?? 0}/${frenchStatus?.total ?? HOMEPAGE_TRANSLATABLE_FIELDS.length}`}</span>
+              <div className="inline-flex rounded-lg border border-gray-300 bg-white p-0.5" role="tablist" aria-label="Editorial language">
+                {(["en", "fr"] as const).map((locale) => <button key={locale} type="button" role="tab" aria-selected={contentLanguage === locale} onClick={() => setContentLanguage(locale)} className={cn("rounded-md px-3 py-1.5 text-xs font-bold", contentLanguage === locale ? "bg-primary-800 text-white" : "text-gray-600 hover:bg-gray-50")}>{locale === "en" ? "English" : "Français"}</button>)}
+              </div>
+            </div>
+          </Card>
           {/* SECTION 1: HERO IMAGES */}
           <Card className="p-6">
             <h2 className="font-semibold text-gray-900">{t("admin.heroImages")}</h2>
@@ -754,14 +797,14 @@ export default function AdminHomepageEditorPage() {
                 id="heroBadge"
                 type="text"
                 placeholder="Regulated by COBAC"
-                value={data.heroBadge}
-                onChange={(e) => updateField("heroBadge", e.target.value)}
+                value={localizedFieldValue("heroBadge")}
+                onChange={(e) => updateLocalizedField("heroBadge", e.target.value)}
                 maxLength={HOMEPAGE_CONTENT_LIMITS.heroBadge}
                 aria-invalid={Boolean(fieldErrors.heroBadge)}
                 className={inputClass}
               />
               {fieldErrors.heroBadge && <p className={errorClass}>{fieldErrors.heroBadge}</p>}
-              <p className={countClass}>{data.heroBadge.length}/{HOMEPAGE_CONTENT_LIMITS.heroBadge} characters</p>
+              <p className={countClass}>{localizedFieldValue("heroBadge").length}/{HOMEPAGE_CONTENT_LIMITS.heroBadge} characters</p>
             </div>
 
             <div>
@@ -771,14 +814,14 @@ export default function AdminHomepageEditorPage() {
               <textarea
                 id="heroTitle"
                 rows={2}
-                value={data.heroTitle}
-                onChange={(e) => updateField("heroTitle", e.target.value)}
+                value={localizedFieldValue("heroTitle")}
+                onChange={(e) => updateLocalizedField("heroTitle", e.target.value)}
                 maxLength={HOMEPAGE_CONTENT_LIMITS.heroTitle}
                 aria-invalid={Boolean(fieldErrors.heroTitle)}
                 className={cn(inputClass, "text-lg font-display")}
               />
               {fieldErrors.heroTitle && <p className={errorClass}>{fieldErrors.heroTitle}</p>}
-              <p className={countClass}>{data.heroTitle.length}/{HOMEPAGE_CONTENT_LIMITS.heroTitle} characters</p>
+              <p className={countClass}>{localizedFieldValue("heroTitle").length}/{HOMEPAGE_CONTENT_LIMITS.heroTitle} characters</p>
             </div>
 
             <div>
@@ -788,14 +831,14 @@ export default function AdminHomepageEditorPage() {
               <textarea
                 id="heroSubtitle"
                 rows={3}
-                value={data.heroSubtitle}
-                onChange={(e) => updateField("heroSubtitle", e.target.value)}
+                value={localizedFieldValue("heroSubtitle")}
+                onChange={(e) => updateLocalizedField("heroSubtitle", e.target.value)}
                 maxLength={HOMEPAGE_CONTENT_LIMITS.heroSubtitle}
                 aria-invalid={Boolean(fieldErrors.heroSubtitle)}
                 className={inputClass}
               />
               {fieldErrors.heroSubtitle && <p className={errorClass}>{fieldErrors.heroSubtitle}</p>}
-              <p className={countClass}>{data.heroSubtitle.length}/{HOMEPAGE_CONTENT_LIMITS.heroSubtitle} characters</p>
+              <p className={countClass}>{localizedFieldValue("heroSubtitle").length}/{HOMEPAGE_CONTENT_LIMITS.heroSubtitle} characters</p>
             </div>
           </Card>
 
@@ -811,8 +854,8 @@ export default function AdminHomepageEditorPage() {
                 <input
                   id="primaryButtonText"
                   type="text"
-                  value={data.primaryButtonText}
-                  onChange={(e) => updateField("primaryButtonText", e.target.value)}
+                  value={localizedFieldValue("primaryButtonText")}
+                  onChange={(e) => updateLocalizedField("primaryButtonText", e.target.value)}
                   maxLength={HOMEPAGE_CONTENT_LIMITS.buttonText}
                   aria-invalid={Boolean(fieldErrors.primaryButtonText)}
                   className={inputClass}
@@ -820,7 +863,7 @@ export default function AdminHomepageEditorPage() {
                 {fieldErrors.primaryButtonText && (
                   <p className={errorClass}>{fieldErrors.primaryButtonText}</p>
                 )}
-                <p className={countClass}>{data.primaryButtonText.length}/{HOMEPAGE_CONTENT_LIMITS.buttonText} characters</p>
+                <p className={countClass}>{localizedFieldValue("primaryButtonText").length}/{HOMEPAGE_CONTENT_LIMITS.buttonText} characters</p>
               </div>
               <div>
                 <label htmlFor="primaryButtonLink" className={labelClass}>
@@ -829,19 +872,19 @@ export default function AdminHomepageEditorPage() {
                 <input
                   id="primaryButtonLink"
                   type="text"
-                  value={data.primaryButtonLink}
-                  onChange={(e) => updateField("primaryButtonLink", e.target.value)}
+                  value={localizedFieldValue("primaryButtonLink")}
+                  onChange={(e) => updateLocalizedField("primaryButtonLink", e.target.value)}
                   maxLength={HOMEPAGE_CONTENT_LIMITS.buttonLink}
                   aria-invalid={Boolean(fieldErrors.primaryButtonLink)}
                   className={inputClass}
                 />
-                {data.primaryButtonLink && !data.primaryButtonLink.startsWith("/") && (
+                {localizedFieldValue("primaryButtonLink") && !localizedFieldValue("primaryButtonLink").startsWith("/") && (
                   <p className={errorClass}>Link must start with /</p>
                 )}
                 {fieldErrors.primaryButtonLink && (
                   <p className={errorClass}>{fieldErrors.primaryButtonLink}</p>
                 )}
-                <p className={countClass}>{data.primaryButtonLink.length}/{HOMEPAGE_CONTENT_LIMITS.buttonLink} characters</p>
+                <p className={countClass}>{localizedFieldValue("primaryButtonLink").length}/{HOMEPAGE_CONTENT_LIMITS.buttonLink} characters</p>
               </div>
               <div>
                 <label htmlFor="secondaryButtonText" className={labelClass}>
@@ -850,8 +893,8 @@ export default function AdminHomepageEditorPage() {
                 <input
                   id="secondaryButtonText"
                   type="text"
-                  value={data.secondaryButtonText}
-                  onChange={(e) => updateField("secondaryButtonText", e.target.value)}
+                  value={localizedFieldValue("secondaryButtonText")}
+                  onChange={(e) => updateLocalizedField("secondaryButtonText", e.target.value)}
                   maxLength={HOMEPAGE_CONTENT_LIMITS.buttonText}
                   aria-invalid={Boolean(fieldErrors.secondaryButtonText)}
                   className={inputClass}
@@ -859,7 +902,7 @@ export default function AdminHomepageEditorPage() {
                 {fieldErrors.secondaryButtonText && (
                   <p className={errorClass}>{fieldErrors.secondaryButtonText}</p>
                 )}
-                <p className={countClass}>{data.secondaryButtonText.length}/{HOMEPAGE_CONTENT_LIMITS.buttonText} characters</p>
+                <p className={countClass}>{localizedFieldValue("secondaryButtonText").length}/{HOMEPAGE_CONTENT_LIMITS.buttonText} characters</p>
               </div>
               <div>
                 <label htmlFor="secondaryButtonLink" className={labelClass}>
@@ -868,19 +911,19 @@ export default function AdminHomepageEditorPage() {
                 <input
                   id="secondaryButtonLink"
                   type="text"
-                  value={data.secondaryButtonLink}
-                  onChange={(e) => updateField("secondaryButtonLink", e.target.value)}
+                  value={localizedFieldValue("secondaryButtonLink")}
+                  onChange={(e) => updateLocalizedField("secondaryButtonLink", e.target.value)}
                   maxLength={HOMEPAGE_CONTENT_LIMITS.buttonLink}
                   aria-invalid={Boolean(fieldErrors.secondaryButtonLink)}
                   className={inputClass}
                 />
-                {data.secondaryButtonLink && !data.secondaryButtonLink.startsWith("/") && (
+                {localizedFieldValue("secondaryButtonLink") && !localizedFieldValue("secondaryButtonLink").startsWith("/") && (
                   <p className={errorClass}>Link must start with /</p>
                 )}
                 {fieldErrors.secondaryButtonLink && (
                   <p className={errorClass}>{fieldErrors.secondaryButtonLink}</p>
                 )}
-                <p className={countClass}>{data.secondaryButtonLink.length}/{HOMEPAGE_CONTENT_LIMITS.buttonLink} characters</p>
+                <p className={countClass}>{localizedFieldValue("secondaryButtonLink").length}/{HOMEPAGE_CONTENT_LIMITS.buttonLink} characters</p>
               </div>
             </div>
           </Card>
@@ -943,7 +986,7 @@ export default function AdminHomepageEditorPage() {
             </div>
           </Card>
         </div>
-        <HeroPreview data={data} />
+        <HeroPreview data={previewData ?? data} />
         </div>
       )}
 

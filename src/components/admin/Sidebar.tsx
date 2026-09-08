@@ -60,7 +60,7 @@ function AuthenticatedSidebar(props: SidebarProps) {
 
 function SidebarContent({ onNavigate, demo, displayName, detail, role, onSignOut }: SidebarContentProps) {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { t, tText } = useLanguage();
   const [messageCount, setMessageCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -93,10 +93,10 @@ function SidebarContent({ onNavigate, demo, displayName, detail, role, onSignOut
       <div className="flex flex-col items-center border-b border-gray-800 px-4 py-5 text-center">
         <BrandMark className="h-12 w-12 bg-white text-primary-900" />
         <p className="mt-3 font-display text-sm font-bold text-white">RECCU-CAM</p>
-        <p className="mt-1 text-xs leading-tight text-gray-400">Admin workspace</p>
+        <p className="mt-1 text-xs leading-tight text-gray-400">{tText("Admin workspace")}</p>
         {demo && (
           <span className="mt-3 rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-gold-light">
-            Proposal Preview
+            {tText("Proposal Preview")}
           </span>
         )}
       </div>
@@ -108,7 +108,7 @@ function SidebarContent({ onNavigate, demo, displayName, detail, role, onSignOut
           return (
             <div key={`${group.label}-${groupIndex}`}>
               <p className="mb-2 mt-5 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                {group.label}
+                {tText(group.label)}
               </p>
               <div className="space-y-1">
                 {visibleItems.map(({ href, label, icon: Icon, badge }) => {
@@ -128,7 +128,7 @@ function SidebarContent({ onNavigate, demo, displayName, detail, role, onSignOut
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0" />
-                      <span className="flex-1">{label}</span>
+                      <span className="flex-1">{tText(label)}</span>
                       {badge && !!count && (
                         <span className={cn("inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white", BADGE_COLOR[badge])}>
                           {count}
@@ -161,7 +161,7 @@ function SidebarContent({ onNavigate, demo, displayName, detail, role, onSignOut
             className="mt-3 flex items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
           >
             <LogOut className="h-4 w-4" />
-            Sign Out
+            {tText("Sign Out")}
           </button>
         )}
       </div>

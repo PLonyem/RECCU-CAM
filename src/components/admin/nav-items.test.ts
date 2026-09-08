@@ -68,7 +68,7 @@ test("data-backed sidebar modules define a zero-record state", () => {
 test("the nested admin error boundary keeps recovery actions available", () => {
   const source = readFileSync(path.join(dashboardRoot, "error.tsx"), "utf8");
   assert.match(source, /Unable to load this section\./);
-  assert.match(source, /> Retry/);
+  assert.match(source, /tText\("Retry"\)/);
   assert.match(source, /Back to Admin Dashboard/);
   assert.match(source, /href="\/admin"/);
 });

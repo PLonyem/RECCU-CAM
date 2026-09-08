@@ -16,6 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface DropdownItem {
   label: string;
@@ -71,11 +72,12 @@ function DropdownLink({
   className: string;
   onNavigate: () => void;
 }) {
+  const { tText } = useLanguage();
   const Icon = item.icon;
   const content = (
     <>
       <Icon className="h-4 w-4 text-gray-400 transition-colors duration-150 group-hover:text-primary-600" />
-      {item.label}
+      {tText(item.label)}
     </>
   );
 
@@ -95,6 +97,7 @@ function DropdownLink({
 }
 
 export function DashboardNav() {
+  const { tText } = useLanguage();
   const [openLabel, setOpenLabel] = useState<string | null>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [expandedMobileGroups, setExpandedMobileGroups] = useState<Record<string, boolean>>({});
@@ -171,7 +174,7 @@ export function DashboardNav() {
                     : "text-gray-600 hover:text-primary-600 hover:bg-gray-50"
                 )}
               >
-                {group.label}
+                {tText(group.label)}
                 <ChevronDown
                   className={cn(
                     "h-3 w-3 transition-transform duration-150",
@@ -209,7 +212,7 @@ export function DashboardNav() {
         <button
           type="button"
           onClick={() => setIsMobileOpen((current) => !current)}
-          aria-label="Toggle navigation menu"
+          aria-label={tText("Toggle navigation menu")}
           aria-expanded={isMobileOpen}
           className="md:hidden ml-auto p-2 text-gray-600 hover:text-primary-600 rounded-lg hover:bg-gray-50"
         >
@@ -227,7 +230,7 @@ export function DashboardNav() {
                 aria-expanded={!!expandedMobileGroups[group.label]}
                 className="w-full flex items-center justify-between px-6 py-3 text-sm font-medium text-gray-700"
               >
-                {group.label}
+                {tText(group.label)}
                 <ChevronDown
                   className={cn(
                     "h-4 w-4 transition-transform",

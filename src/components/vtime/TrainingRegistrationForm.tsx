@@ -19,6 +19,7 @@ import {
   vtimeRegistrationSchema,
 } from "@/lib/validation/vtime-registration";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 const fieldLabelClassName = "text-sm font-semibold text-institutional";
 
@@ -27,6 +28,7 @@ function errorId(name: keyof VtimeRegistration) {
 }
 
 export function TrainingRegistrationForm({ programs }: { programs: readonly TrainingProgram[] }) {
+  const { tText } = useLanguage();
   const searchParams = useSearchParams();
   const requestedProgram = searchParams.get("program") ?? "";
   const validRequestedProgram = programs.some((program) => program.slug === requestedProgram)
@@ -84,10 +86,10 @@ export function TrainingRegistrationForm({ programs }: { programs: readonly Trai
 
   if (submitted) {
     return (
-      <FormNotice ref={noticeRef} variant="success" title="Training registration received.">
-        <p>RECCU-CAM can now review the participant information. This confirmation does not reserve a place or confirm a cohort date.</p>
+      <FormNotice ref={noticeRef} variant="success" title={tText("Training registration received.")}>
+        <p>{tText("RECCU-CAM can now review the participant information. This confirmation does not reserve a place or confirm a cohort date.")}</p>
         <Button type="button" variant="secondary" className="mt-6" onClick={() => setSubmitted(false)}>
-          Submit another registration
+          {tText("Submit another registration")}
         </Button>
       </FormNotice>
     );
@@ -107,14 +109,14 @@ export function TrainingRegistrationForm({ programs }: { programs: readonly Trai
 
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="block" htmlFor="vtime-registration-participant-name">
-          <span className={fieldLabelClassName}>Participant name<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Participant name")}<RequiredMark /></span>
           <input
             {...register("participantName")}
             id="vtime-registration-participant-name"
             required
             autoComplete="name"
             className={formControlClassName}
-            placeholder="Full name"
+            placeholder={tText("Full name")}
             aria-invalid={Boolean(errors.participantName)}
             aria-describedby={errors.participantName ? errorId("participantName") : undefined}
           />
@@ -122,14 +124,14 @@ export function TrainingRegistrationForm({ programs }: { programs: readonly Trai
         </label>
 
         <label className="block" htmlFor="vtime-registration-institution">
-          <span className={fieldLabelClassName}>Institution<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Institution")}<RequiredMark /></span>
           <input
             {...register("institution")}
             id="vtime-registration-institution"
             required
             autoComplete="organization"
             className={formControlClassName}
-            placeholder="Institution name"
+            placeholder={tText("Institution name")}
             aria-invalid={Boolean(errors.institution)}
             aria-describedby={errors.institution ? errorId("institution") : undefined}
           />
@@ -137,14 +139,14 @@ export function TrainingRegistrationForm({ programs }: { programs: readonly Trai
         </label>
 
         <label className="block" htmlFor="vtime-registration-role">
-          <span className={fieldLabelClassName}>Role<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Role")}<RequiredMark /></span>
           <input
             {...register("role")}
             id="vtime-registration-role"
             required
             autoComplete="organization-title"
             className={formControlClassName}
-            placeholder="Role or position"
+            placeholder={tText("Role or position")}
             aria-invalid={Boolean(errors.role)}
             aria-describedby={errors.role ? errorId("role") : undefined}
           />
@@ -152,7 +154,7 @@ export function TrainingRegistrationForm({ programs }: { programs: readonly Trai
         </label>
 
         <label className="block" htmlFor="vtime-registration-program">
-          <span className={fieldLabelClassName}>Program<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Program")}<RequiredMark /></span>
           <select
             {...register("program")}
             id="vtime-registration-program"
@@ -161,10 +163,10 @@ export function TrainingRegistrationForm({ programs }: { programs: readonly Trai
             aria-invalid={Boolean(errors.program)}
             aria-describedby={errors.program ? errorId("program") : undefined}
           >
-            <option value="">Select a program</option>
+            <option value="">{tText("Select a program")}</option>
             {programs.map((program) => (
               <option key={program.id} value={program.slug}>
-                {program.title} — {registrationStatusLabels[program.registrationStatus as keyof typeof registrationStatusLabels] ?? program.registrationStatus.replaceAll("-", " ")}
+                {program.title} — {tText(registrationStatusLabels[program.registrationStatus as keyof typeof registrationStatusLabels] ?? program.registrationStatus.replaceAll("-", " "))}
               </option>
             ))}
           </select>
@@ -172,7 +174,7 @@ export function TrainingRegistrationForm({ programs }: { programs: readonly Trai
         </label>
 
         <label className="block" htmlFor="vtime-registration-phone">
-          <span className={fieldLabelClassName}>Phone<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Phone")}<RequiredMark /></span>
           <input
             {...register("phone")}
             id="vtime-registration-phone"
@@ -180,7 +182,7 @@ export function TrainingRegistrationForm({ programs }: { programs: readonly Trai
             required
             autoComplete="tel"
             className={formControlClassName}
-            placeholder="Contact number"
+            placeholder={tText("Contact number")}
             aria-invalid={Boolean(errors.phone)}
             aria-describedby={errors.phone ? errorId("phone") : undefined}
           />
@@ -188,7 +190,7 @@ export function TrainingRegistrationForm({ programs }: { programs: readonly Trai
         </label>
 
         <label className="block" htmlFor="vtime-registration-email">
-          <span className={fieldLabelClassName}>Email<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Email")}<RequiredMark /></span>
           <input
             {...register("email")}
             id="vtime-registration-email"
@@ -204,13 +206,13 @@ export function TrainingRegistrationForm({ programs }: { programs: readonly Trai
         </label>
 
         <label className="block sm:col-span-2" htmlFor="vtime-registration-notes">
-          <span className={fieldLabelClassName}>Notes <span className="font-normal text-muted-foreground">(optional)</span></span>
+          <span className={fieldLabelClassName}>{tText("Notes")} <span className="font-normal text-muted-foreground">{tText("(optional)")}</span></span>
           <textarea
             {...register("notes")}
             id="vtime-registration-notes"
             rows={5}
             className={cn(formControlClassName, "min-h-32 py-3")}
-            placeholder="Optional accessibility needs, learning goals, or questions"
+            placeholder={tText("Optional accessibility needs, learning goals, or questions")}
             aria-invalid={Boolean(errors.notes)}
             aria-describedby={errors.notes ? errorId("notes") : undefined}
           />
@@ -219,17 +221,17 @@ export function TrainingRegistrationForm({ programs }: { programs: readonly Trai
       </div>
 
       <div className="rounded-card border border-primary-100 bg-primary-50 p-4 text-sm leading-6 text-institutional">
-        No payment is collected through this form. Submission records registration interest and does not confirm a seat, schedule, venue, facilitator, or participation terms.
+        {tText("No payment is collected through this form. Submission records registration interest and does not confirm a seat, schedule, venue, facilitator, or participation terms.")}
       </div>
 
       {submissionError && (
-        <FormNotice ref={noticeRef} variant="error" title="Registration not submitted">
-          <p>{submissionError}</p>
+        <FormNotice ref={noticeRef} variant="error" title={tText("Registration not submitted")}>
+          <p>{tText(submissionError)}</p>
         </FormNotice>
       )}
 
       <Button type="submit" size="lg" disabled={isSubmitting}>
-        {isSubmitting ? "Submitting registration…" : "Submit Training Registration"}
+        {tText(isSubmitting ? "Submitting registration…" : "Submit Training Registration")}
         {!isSubmitting && <Send className="h-4 w-4" aria-hidden="true" />}
       </Button>
     </form>

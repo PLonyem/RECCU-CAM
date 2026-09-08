@@ -1,4 +1,7 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface SectionHeaderProps {
   eyebrow?: string;
@@ -17,17 +20,18 @@ export function SectionHeader({
   subtitle,
   title,
 }: SectionHeaderProps) {
+  const { tText } = useLanguage();
   return (
     <header className={cn(align === "center" && "mx-auto text-center", className)}>
       {eyebrow && (
         <p className="mb-3 text-meta uppercase text-gold-strong">
-          {eyebrow}
+          {tText(eyebrow)}
         </p>
       )}
-      <Heading className="font-display text-h2 text-institutional">{title}</Heading>
+      <Heading className="font-display text-h2 text-institutional">{tText(title)}</Heading>
       {subtitle && (
         <p className={cn("mt-4 max-w-reading text-body text-muted-foreground", align === "center" && "mx-auto")}>
-          {subtitle}
+          {tText(subtitle)}
         </p>
       )}
     </header>

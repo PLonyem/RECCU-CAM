@@ -17,6 +17,13 @@ import {
   organizationSettingsSchema,
 } from "@/lib/validation/website-content";
 import { reportServerError } from "@/lib/security/logging";
+import { getTranslationDraft } from "@/lib/localized-content";
+
+function bilingualTranslations(existing: unknown, fields: Record<string, string | undefined>): Prisma.InputJsonValue {
+  const draft = getTranslationDraft(existing);
+  const preserved = Object.fromEntries(Object.entries(draft).filter((entry): entry is [string, string] => typeof entry[1] === "string"));
+  return { fr: { ...preserved, ...Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, value?.trim() ?? ""])) } };
+}
 
 export interface WebsiteContentActionState {
   success: boolean;
@@ -61,17 +68,18 @@ export async function updateOperationalRecord(formData: FormData) {
 
 export async function createComplianceRecord(formData: FormData) {
   const actor = await requireStaffPermission(AUTH_PERMISSIONS.manageCompliance);
-  const data = z.object({ title: z.string().trim().min(4).max(180), description: z.string().trim().min(10).max(4000), category: z.string().trim().min(2).max(80), dueDate: z.string().optional(), audience: z.enum(["all-affiliates", "specific-affiliate"]), affiliateId: z.string().optional(), publication: z.enum(["draft", "published"]).default("draft") }).parse(Object.fromEntries(formData));
+  const data = z.object({ title: z.string().trim().min(4).max(180), description: z.string().trim().min(10).max(4000), titleFr: z.string().trim().max(180).optional(), descriptionFr: z.string().trim().max(4000).optional(), category: z.string().trim().min(2).max(80), dueDate: z.string().optional(), audience: z.enum(["all-affiliates", "specific-affiliate"]), affiliateId: z.string().optional(), publication: z.enum(["draft", "published"]).default("draft") }).parse(Object.fromEntries(formData));
   const published = data.publication === "published";
-  const record = await prisma.complianceRecord.create({ data: { title: data.title, description: data.description, category: data.category, dueDate: data.dueDate ? new Date(`${data.dueDate}T00:00:00Z`) : null, audience: data.audience, affiliateId: data.audience === "specific-affiliate" ? data.affiliateId || null : null, published } });
+  const record = await prisma.complianceRecord.create({ data: { title: data.title, description: data.description, translations: bilingualTranslations(null, { title: data.titleFr, description: data.descriptionFr }), category: data.category, dueDate: data.dueDate ? new Date(`${data.dueDate}T00:00:00Z`) : null, audience: data.audience, affiliateId: data.audience === "specific-affiliate" ? data.affiliateId || null : null, published } });
   await writeAuditLog({ actorId: actor.userId, actorRole: actor.role, action: published ? "compliance_notice_published" : "compliance_notice_draft_created", resource: "compliance", resourceId: record.id });
   revalidatePath("/admin/compliance"); revalidatePath("/affiliate-portal/compliance");
 }
 
 export async function updateComplianceRecord(formData: FormData) {
   const actor = await requireStaffPermission(AUTH_PERMISSIONS.manageCompliance);
-  const data = z.object({ id: z.string().min(1), title: z.string().trim().min(4).max(180), description: z.string().trim().min(10).max(4000), category: z.string().trim().min(2).max(80), dueDate: z.string().optional(), audience: z.enum(["all-affiliates", "specific-affiliate"]), affiliateId: z.string().optional(), status: z.enum(["pending", "in-review", "completed", "archived"]), publication: z.enum(["draft", "published"]) }).parse(Object.fromEntries(formData));
-  const record = await prisma.complianceRecord.update({ where: { id: data.id }, data: { title: data.title, description: data.description, category: data.category, dueDate: data.dueDate ? new Date(`${data.dueDate}T00:00:00Z`) : null, audience: data.audience, affiliateId: data.audience === "specific-affiliate" ? data.affiliateId || null : null, status: data.status, published: data.status === "archived" ? false : data.publication === "published" } });
+  const data = z.object({ id: z.string().min(1), title: z.string().trim().min(4).max(180), description: z.string().trim().min(10).max(4000), titleFr: z.string().trim().max(180).optional(), descriptionFr: z.string().trim().max(4000).optional(), category: z.string().trim().min(2).max(80), dueDate: z.string().optional(), audience: z.enum(["all-affiliates", "specific-affiliate"]), affiliateId: z.string().optional(), status: z.enum(["pending", "in-review", "completed", "archived"]), publication: z.enum(["draft", "published"]) }).parse(Object.fromEntries(formData));
+  const existing = await prisma.complianceRecord.findUniqueOrThrow({ where: { id: data.id } });
+  const record = await prisma.complianceRecord.update({ where: { id: data.id }, data: { title: data.title, description: data.description, translations: bilingualTranslations(existing.translations, { title: data.titleFr, description: data.descriptionFr }), category: data.category, dueDate: data.dueDate ? new Date(`${data.dueDate}T00:00:00Z`) : null, audience: data.audience, affiliateId: data.audience === "specific-affiliate" ? data.affiliateId || null : null, status: data.status, published: data.status === "archived" ? false : data.publication === "published" } });
   await writeAuditLog({ actorId: actor.userId, actorRole: actor.role, action: "compliance_record_updated", resource: "compliance", resourceId: record.id, metadata: { status: record.status, published: record.published } });
   revalidatePath("/admin/compliance");
   revalidatePath("/affiliate-portal/compliance");
@@ -79,22 +87,22 @@ export async function updateComplianceRecord(formData: FormData) {
 
 export async function createTrainingProgram(formData: FormData) {
   const actor = await requireStaffPermission(AUTH_PERMISSIONS.manageTraining);
-  const data = z.object({ title: z.string().trim().min(4).max(180), summary: z.string().trim().min(10).max(4000), category: z.string().trim().min(2).max(80), level: z.string().trim().min(2).max(40), format: z.string().optional(), venue: z.string().optional(), startDate: z.string().optional(), endDate: z.string().optional(), capacity: z.preprocess((value) => value === "" ? undefined : value, z.coerce.number().int().positive().optional()), publicationStatus: z.enum(["draft", "published"]).default("draft") }).parse(Object.fromEntries(formData));
+  const data = z.object({ title: z.string().trim().min(4).max(180), summary: z.string().trim().min(10).max(4000), titleFr: z.string().trim().max(180).optional(), summaryFr: z.string().trim().max(4000).optional(), category: z.string().trim().min(2).max(80), level: z.string().trim().min(2).max(40), format: z.string().optional(), venue: z.string().optional(), startDate: z.string().optional(), endDate: z.string().optional(), capacity: z.preprocess((value) => value === "" ? undefined : value, z.coerce.number().int().positive().optional()), publicationStatus: z.enum(["draft", "published"]).default("draft") }).parse(Object.fromEntries(formData));
   const baseSlug = slugify(data.title);
-  const { publicationStatus, ...fields } = data;
+  const { publicationStatus, titleFr, summaryFr, ...fields } = data;
   const published = publicationStatus === "published";
-  const record = await prisma.trainingProgram.create({ data: { ...fields, slug: `${baseSlug}-${Date.now().toString(36)}`, audience: [], format: data.format || null, venue: data.venue || null, startDate: data.startDate ? new Date(`${data.startDate}T00:00:00Z`) : null, endDate: data.endDate ? new Date(`${data.endDate}T00:00:00Z`) : null, capacity: data.capacity || null, registrationStatus: published ? "registration-open" : "schedule-pending", published } });
+  const record = await prisma.trainingProgram.create({ data: { ...fields, translations: bilingualTranslations(null, { title: titleFr, summary: summaryFr }), slug: `${baseSlug}-${Date.now().toString(36)}`, audience: [], format: data.format || null, venue: data.venue || null, startDate: data.startDate ? new Date(`${data.startDate}T00:00:00Z`) : null, endDate: data.endDate ? new Date(`${data.endDate}T00:00:00Z`) : null, capacity: data.capacity || null, registrationStatus: published ? "registration-open" : "schedule-pending", published } });
   await writeAuditLog({ actorId: actor.userId, actorRole: actor.role, action: published ? "training_program_published" : "training_program_draft_created", resource: "training_program", resourceId: record.id });
   revalidateTraining(record.slug);
 }
 
 export async function updateTrainingProgram(formData: FormData) {
   const actor = await requireStaffPermission(AUTH_PERMISSIONS.manageTraining);
-  const data = z.object({ id: z.string().min(1), title: z.string().trim().min(4).max(180), summary: z.string().trim().min(10).max(4000), category: z.string().trim().min(2).max(80), level: z.string().trim().min(2).max(40), format: z.string().optional(), venue: z.string().optional(), startDate: z.string().optional(), endDate: z.string().optional(), capacity: z.preprocess((value) => value === "" ? null : value, z.coerce.number().int().positive().nullable()), publicationStatus: z.enum(["draft", "published", "closed", "archived"]) }).parse(Object.fromEntries(formData));
+  const data = z.object({ id: z.string().min(1), title: z.string().trim().min(4).max(180), summary: z.string().trim().min(10).max(4000), titleFr: z.string().trim().max(180).optional(), summaryFr: z.string().trim().max(4000).optional(), category: z.string().trim().min(2).max(80), level: z.string().trim().min(2).max(40), format: z.string().optional(), venue: z.string().optional(), startDate: z.string().optional(), endDate: z.string().optional(), capacity: z.preprocess((value) => value === "" ? null : value, z.coerce.number().int().positive().nullable()), publicationStatus: z.enum(["draft", "published", "closed", "archived"]) }).parse(Object.fromEntries(formData));
   const existing = await prisma.trainingProgram.findUniqueOrThrow({ where: { id: data.id } });
   const published = data.publicationStatus === "published" || data.publicationStatus === "closed";
   const registrationStatus = data.publicationStatus === "closed" ? "registration-closed" : data.publicationStatus === "archived" ? "archived" : published ? "registration-open" : "schedule-pending";
-  const record = await prisma.trainingProgram.update({ where: { id: data.id }, data: { title: data.title, summary: data.summary, category: data.category, level: data.level, format: data.format || null, venue: data.venue || null, startDate: data.startDate ? new Date(`${data.startDate}T00:00:00Z`) : null, endDate: data.endDate ? new Date(`${data.endDate}T00:00:00Z`) : null, capacity: data.capacity, published, registrationStatus } });
+  const record = await prisma.trainingProgram.update({ where: { id: data.id }, data: { title: data.title, summary: data.summary, translations: bilingualTranslations(existing.translations, { title: data.titleFr, summary: data.summaryFr }), category: data.category, level: data.level, format: data.format || null, venue: data.venue || null, startDate: data.startDate ? new Date(`${data.startDate}T00:00:00Z`) : null, endDate: data.endDate ? new Date(`${data.endDate}T00:00:00Z`) : null, capacity: data.capacity, published, registrationStatus } });
   await writeAuditLog({ actorId: actor.userId, actorRole: actor.role, action: `training_program_${data.publicationStatus}`, resource: "training_program", resourceId: record.id });
   revalidateTraining(existing.slug);
   revalidateTraining(record.slug);
@@ -143,14 +151,15 @@ export async function saveHomepageSections(
 ): Promise<WebsiteContentActionState> {
   const actor = await requireStaffPermission(AUTH_PERMISSIONS.manageContent);
   const mode = formData.get("mode") === "publish" ? "publish" : "draft";
+  const locale = formData.get("locale") === "fr" ? "fr" : "en";
   const parsed = (mode === "publish" ? homepageSectionsPublishSchema : homepageSectionsDraftSchema)
     .safeParse(homepageSectionsFromFormData(formData));
   if (!parsed.success) return { success: false, message: "Review the highlighted fields.", fieldErrors: parsed.error.flatten().fieldErrors };
   const content = parsed.data as unknown as Prisma.InputJsonValue;
   const status = homepageSectionStatus(mode);
   try {
-    const record = await prisma.pageContent.upsert({ where: { pageKey_locale_status: { pageKey: "homepage-sections", locale: "en", status } }, update: { content, publishedAt: mode === "publish" ? new Date() : null, publishedBy: mode === "publish" ? actor.userId : null }, create: { pageKey: "homepage-sections", locale: "en", status, content, publishedAt: mode === "publish" ? new Date() : null, publishedBy: mode === "publish" ? actor.userId : null } });
-    await writeAuditLog({ actorId: actor.userId, actorRole: actor.role, action: mode === "publish" ? "homepage_sections_published" : "homepage_sections_draft_saved", resource: "page_content", resourceId: record.id });
+    const record = await prisma.pageContent.upsert({ where: { pageKey_locale_status: { pageKey: "homepage-sections", locale, status } }, update: { content, publishedAt: mode === "publish" ? new Date() : null, publishedBy: mode === "publish" ? actor.userId : null }, create: { pageKey: "homepage-sections", locale, status, content, publishedAt: mode === "publish" ? new Date() : null, publishedBy: mode === "publish" ? actor.userId : null } });
+    await writeAuditLog({ actorId: actor.userId, actorRole: actor.role, action: mode === "publish" ? "homepage_sections_published" : "homepage_sections_draft_saved", resource: "page_content", resourceId: record.id, metadata: { locale } });
     if (mode === "publish") revalidatePath("/");
     revalidatePath("/admin/content/homepage-sections");
     return { success: true, message: mode === "publish" ? "Homepage sections published successfully." : "Draft saved successfully.", fieldErrors: {} };

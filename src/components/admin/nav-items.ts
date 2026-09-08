@@ -4,6 +4,7 @@ import {
   ScrollText, Settings, ShieldCheck, Users, type LucideIcon,
 } from "lucide-react";
 import { AUTH_PERMISSIONS, type AuthPermission } from "@/lib/auth/roles";
+import { translateText, type Language } from "@/lib/i18n";
 
 export interface AdminNavItem {
   href: string;
@@ -45,9 +46,9 @@ export const adminNavGroups: AdminNavGroup[] = [
 export const adminNavItems = adminNavGroups.flatMap((group) => group.items);
 export function isAdminNavItemActive(pathname: string, href: string) { return href === "/admin" ? pathname === href : pathname.startsWith(href); }
 function bestMatchingNavItem(pathname: string) { return adminNavItems.filter((item) => isAdminNavItemActive(pathname, item.href)).sort((a, b) => b.href.length - a.href.length)[0]; }
-export function getAdminPageTitle(pathname: string) {
-  if (pathname === "/admin") return "RECCU-CAM Administration";
-  return bestMatchingNavItem(pathname)?.label ?? "Dashboard";
+export function getAdminPageTitle(pathname: string, language: Language = "en") {
+  if (pathname === "/admin") return translateText(language, "RECCU-CAM Administration");
+  return translateText(language, bestMatchingNavItem(pathname)?.label ?? "Dashboard");
 }
 export function getActiveAdminNavHref(pathname: string) { return bestMatchingNavItem(pathname)?.href; }
 
@@ -70,7 +71,7 @@ const PAGE_DESCRIPTIONS: Record<string, string> = {
   "/admin/settings": "Configure verified organization and platform settings.",
 };
 
-export function getAdminPageDescription(pathname: string) {
+export function getAdminPageDescription(pathname: string, language: Language = "en") {
   const href = getActiveAdminNavHref(pathname) ?? "/admin";
-  return PAGE_DESCRIPTIONS[href] ?? PAGE_DESCRIPTIONS["/admin"];
+  return translateText(language, PAGE_DESCRIPTIONS[href] ?? PAGE_DESCRIPTIONS["/admin"]);
 }

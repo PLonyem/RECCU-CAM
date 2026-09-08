@@ -40,6 +40,7 @@ model NewsArticle {
   heroImageUrl     String?
   heroImageAlt     String?
   heroImageCaption String?
+  translations     Json      @default("{}")
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -378,6 +379,7 @@ model Resource {
   archivedAt       DateTime?
   downloadCount    Int       @default(0)
   isActive         Boolean   @default(true)
+  translations     Json      @default("{}")
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -569,6 +571,7 @@ model TrainingProgram {
   capacity           Int?
   registrationStatus String                 @default("schedule-pending")
   published          Boolean                @default(false)
+  translations       Json                   @default("{}")
   registrations      TrainingRegistration[]
   createdAt          DateTime               @default(now())
   updatedAt          DateTime               @updatedAt
@@ -599,17 +602,18 @@ model TrainingRegistration {
 }
 
 model ComplianceRecord {
-  id          String    @id @default(cuid())
-  title       String
-  description String    @db.Text
-  category    String
-  dueDate     DateTime?
-  status      String    @default("pending")
-  audience    String    @default("all-affiliates")
-  affiliateId String?
-  published   Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String    @id @default(cuid())
+  title        String
+  description  String    @db.Text
+  category     String
+  dueDate      DateTime?
+  status       String    @default("pending")
+  audience     String    @default("all-affiliates")
+  affiliateId  String?
+  published    Boolean   @default(false)
+  translations Json      @default("{}")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([published, dueDate])
   @@index([affiliateId, status])
@@ -685,6 +689,7 @@ model HomepageContent {
   secondaryButtonText String @default("Discover VTIME")
   secondaryButtonLink String @default("/vtime")
   heroImages          Json   @default("[]")
+  translations        Json   @default("{}")
 
   // HERO APPEARANCE
   overlayColor          String  @default("#0D3D2E")

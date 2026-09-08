@@ -28,6 +28,7 @@ export async function GET() {
     secondaryButtonText: content.secondaryButtonText,
     secondaryButtonLink: content.secondaryButtonLink,
     heroImages: content.heroImages,
+    translations: content.translations,
     statsAffiliates: content.statsAffiliates,
     statsMembers: content.statsMembers,
     statsAssets: content.statsAssets,

@@ -5,6 +5,7 @@ import { LayoutDashboard, LogIn, ShieldCheck, UserPlus } from "lucide-react";
 import { Show, UserButton, useUser } from "@clerk/nextjs";
 import { isAffiliateRole, isStaffRole } from "@/lib/auth/roles";
 import { isDemoMode } from "@/lib/demo-mode";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PortalActionsProps {
   mobile?: boolean;
@@ -13,6 +14,7 @@ interface PortalActionsProps {
 }
 
 function SignInAction({ mobile, signInLabel, onNavigate }: PortalActionsProps) {
+  const { tText } = useLanguage();
   return (
     <Link
       href="/sign-in"
@@ -21,12 +23,13 @@ function SignInAction({ mobile, signInLabel, onNavigate }: PortalActionsProps) {
         ? "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-semibold text-institutional transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
         : "inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-white px-4 text-sm font-semibold text-institutional transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"}
     >
-      <LogIn className="h-4 w-4" aria-hidden="true" /> {signInLabel}
+      <LogIn className="h-4 w-4" aria-hidden="true" /> {tText(signInLabel)}
     </Link>
   );
 }
 
 function SignedOutActions(props: PortalActionsProps) {
+  const { tText } = useLanguage();
   return (
     <>
       <SignInAction {...props} />
@@ -37,13 +40,14 @@ function SignedOutActions(props: PortalActionsProps) {
           ? "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
           : "inline-flex h-10 items-center gap-2 rounded-lg bg-primary-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"}
       >
-        <UserPlus className="h-4 w-4" aria-hidden="true" /> Sign up
+        <UserPlus className="h-4 w-4" aria-hidden="true" /> {tText("Sign up")}
       </Link>
     </>
   );
 }
 
 function ConfiguredPortalActions({ mobile, signInLabel, onNavigate }: PortalActionsProps) {
+  const { tText } = useLanguage();
   const { user } = useUser();
   const role = user?.publicMetadata.role;
   const portal = isStaffRole(role)
@@ -65,11 +69,11 @@ function ConfiguredPortalActions({ mobile, signInLabel, onNavigate }: PortalActi
               onClick={onNavigate}
               className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
             >
-              <LayoutDashboard className="h-4 w-4" aria-hidden="true" /> {portal.label}
+              <LayoutDashboard className="h-4 w-4" aria-hidden="true" /> {tText(portal.label)}
             </Link>
           )}
           <div className="flex h-11 items-center justify-between rounded-xl border border-border bg-white px-4 text-sm font-semibold text-institutional">
-            <span>Account</span>
+            <span>{tText("Account")}</span>
             <UserButton />
           </div>
         </Show>
@@ -85,7 +89,7 @@ function ConfiguredPortalActions({ mobile, signInLabel, onNavigate }: PortalActi
             href={portal.href}
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
           >
-            <LayoutDashboard className="h-4 w-4" aria-hidden="true" /> {portal.label}
+            <LayoutDashboard className="h-4 w-4" aria-hidden="true" /> {tText(portal.label)}
           </Link>
         )}
         <UserButton />
@@ -95,6 +99,7 @@ function ConfiguredPortalActions({ mobile, signInLabel, onNavigate }: PortalActi
 }
 
 export function PortalActions(props: PortalActionsProps) {
+  const { tText } = useLanguage();
   if (isDemoMode()) {
     return (
       <Link
@@ -103,9 +108,9 @@ export function PortalActions(props: PortalActionsProps) {
         className={props.mobile
           ? "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-primary-700 bg-primary-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
           : "inline-flex h-10 items-center gap-2 rounded-lg border border-primary-700 bg-primary-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"}
-        aria-label="Open the RECCU-CAM Admin Dashboard proposal preview"
+        aria-label={tText("Open the RECCU-CAM Admin Dashboard proposal preview")}
       >
-        <ShieldCheck className="h-4 w-4" aria-hidden="true" /> Admin Dashboard
+        <ShieldCheck className="h-4 w-4" aria-hidden="true" /> {tText("Admin Dashboard")}
       </Link>
     );
   }

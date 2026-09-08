@@ -10,6 +10,7 @@ import {
   buildArticlePayload,
   type ArticleFormValues,
 } from "@/components/admin/ArticleForm";
+import { getTranslationDraft } from "@/lib/localized-content";
 
 interface FetchedArticle {
   id: string;
@@ -28,9 +29,11 @@ interface FetchedArticle {
   heroImageUrl: string | null;
   heroImageAlt: string | null;
   heroImageCaption: string | null;
+  translations: unknown;
 }
 
 function toFormValues(article: FetchedArticle): Partial<ArticleFormValues> {
+  const french = getTranslationDraft(article.translations);
   return {
     title: article.title,
     slug: article.slug,
@@ -47,6 +50,9 @@ function toFormValues(article: FetchedArticle): Partial<ArticleFormValues> {
     heroImageUrl: article.heroImageUrl ?? "",
     heroImageAlt: article.heroImageAlt ?? "",
     heroImageCaption: article.heroImageCaption ?? "",
+    titleFr: typeof french.title === "string" ? french.title : "",
+    excerptFr: typeof french.excerpt === "string" ? french.excerpt : "",
+    contentFr: typeof french.content === "string" ? french.content : "",
   };
 }
 

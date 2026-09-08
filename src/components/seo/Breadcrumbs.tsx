@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -6,6 +8,7 @@ import {
   type BreadcrumbItem,
 } from "@/lib/structured-data";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface BreadcrumbsProps {
   items: readonly BreadcrumbItem[];
@@ -14,13 +17,14 @@ interface BreadcrumbsProps {
 }
 
 export function Breadcrumbs({ items, inverted = false, className }: BreadcrumbsProps) {
+  const { tText } = useLanguage();
   if (items.length === 0) return null;
 
   return (
     <>
       <JsonLd data={createBreadcrumbStructuredData(items)} />
       <nav
-        aria-label="Breadcrumb"
+        aria-label={tText("Breadcrumb")}
         className={cn(
           "mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-meta",
           inverted ? "text-primary-200" : "text-muted-foreground",
@@ -34,7 +38,7 @@ export function Breadcrumbs({ items, inverted = false, className }: BreadcrumbsP
               {index > 0 && <ChevronRight aria-hidden="true" className="h-4 w-4" />}
               {isLast ? (
                 <span aria-current="page" className={inverted ? "text-white" : "text-foreground"}>
-                  {item.label}
+                  {tText(item.label)}
                 </span>
               ) : (
                 <Link
@@ -46,7 +50,7 @@ export function Breadcrumbs({ items, inverted = false, className }: BreadcrumbsP
                       : "hover:text-institutional focus-visible:ring-offset-background"
                   )}
                 >
-                  {item.label}
+                  {tText(item.label)}
                 </Link>
               )}
             </span>

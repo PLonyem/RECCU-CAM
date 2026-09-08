@@ -18,6 +18,7 @@ const validHomepage: HomepageContentInput = {
   secondaryButtonText: "Discover VTIME",
   secondaryButtonLink: "/vtime",
   heroImages: [],
+  translations: {},
   statsAffiliates: 0,
   statsMembers: "",
   statsAssets: "",

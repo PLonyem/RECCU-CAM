@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { institution, siteUrl } from "@/config/institution";
+import type { Language } from "@/lib/i18n";
 
 interface PageMetadataInput {
   title: string;
   description: string;
   path: string;
+  locale?: Language;
 }
 
 export interface NewsArticleMetadataInput extends PageMetadataInput {
@@ -21,6 +23,7 @@ export function createPageMetadata({
   title,
   description,
   path,
+  locale = "en",
 }: PageMetadataInput): Metadata {
   const canonical = absoluteUrl(path);
   const socialImage = {
@@ -47,7 +50,8 @@ export function createPageMetadata({
     },
     openGraph: {
       type: "website",
-      locale: "en_CM",
+      locale: locale === "fr" ? "fr_CM" : "en_CM",
+      alternateLocale: locale === "fr" ? ["en_CM"] : ["fr_CM"],
       siteName: institution.brandName,
       title,
       description,
@@ -74,16 +78,18 @@ export function createNewsArticleMetadata({
   publishedTime,
   modifiedTime,
   authors,
+  locale = "en",
 }: NewsArticleMetadataInput): Metadata {
   const canonical = absoluteUrl(path);
   const socialImage = absoluteUrl("/opengraph-image");
-  const base = createPageMetadata({ title, description, path });
+  const base = createPageMetadata({ title, description, path, locale });
 
   return {
     ...base,
     openGraph: {
       type: "article",
-      locale: "en_CM",
+      locale: locale === "fr" ? "fr_CM" : "en_CM",
+      alternateLocale: locale === "fr" ? ["en_CM"] : ["fr_CM"],
       siteName: institution.brandName,
       title,
       description,

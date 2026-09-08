@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { createComplianceRecord, updateComplianceRecord } from "@/app/admin/(dashboard)/operations/actions";
+import { getTranslationDraft } from "@/lib/localized-content";
 
 export default async function CompliancePage() {
   const [records, affiliates] = await Promise.all([
@@ -23,9 +24,11 @@ export default async function CompliancePage() {
       <Card className="p-6">
         <h2 className="font-semibold text-institutional">Create compliance item</h2>
         <form action={createComplianceRecord} className="mt-5 grid gap-4 sm:grid-cols-2">
-          <input required name="title" placeholder="Title" className="rounded-lg border border-slate-300 px-3 py-2" />
+          <label className="text-xs font-semibold text-slate-600">English ✓<input required name="title" placeholder="Title" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+          <label className="text-xs font-semibold text-slate-600">Français — Missing<input name="titleFr" placeholder="Titre" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
           <input required name="category" placeholder="Category" className="rounded-lg border border-slate-300 px-3 py-2" />
-          <textarea required name="description" placeholder="Verified guidance or submission requirement" className="rounded-lg border border-slate-300 px-3 py-2 sm:col-span-2" />
+          <textarea required name="description" placeholder="Verified guidance or submission requirement (English)" className="rounded-lg border border-slate-300 px-3 py-2" />
+          <textarea name="descriptionFr" placeholder="Instructions vérifiées ou exigence de soumission (français)" className="rounded-lg border border-slate-300 px-3 py-2" />
           <label className="text-xs font-semibold text-slate-600">Due date (optional)<input name="dueDate" type="date" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
           <select name="audience" className="rounded-lg border border-slate-300 px-3 py-2"><option value="all-affiliates">All affiliates</option><option value="specific-affiliate">Specific affiliate</option></select>
           <select name="affiliateId" className="rounded-lg border border-slate-300 px-3 py-2 sm:col-span-2"><option value="">All affiliates</option>{affiliates.map((affiliate) => <option key={affiliate.id} value={affiliate.id}>{affiliate.name}</option>)}</select>
@@ -35,7 +38,11 @@ export default async function CompliancePage() {
       </Card>
       {records.length ? (
         <div className="space-y-3">
-          {records.map((record) => (
+          {records.map((record) => {
+            const french = getTranslationDraft(record.translations);
+            const titleFr = typeof french.title === "string" ? french.title : "";
+            const descriptionFr = typeof french.description === "string" ? french.description : "";
+            return (
             <Card key={record.id} className="p-5">
               <div className="flex flex-wrap justify-between gap-3">
                 <div><p className="text-xs font-semibold uppercase tracking-wide text-gold-strong">{record.category}</p><h2 className="mt-1 font-semibold text-slate-900">{record.title}</h2></div>
@@ -46,9 +53,11 @@ export default async function CompliancePage() {
               <summary className="cursor-pointer text-sm font-semibold text-institutional">Edit content and workflow</summary>
               <form action={updateComplianceRecord} className="mt-4 grid gap-3 sm:grid-cols-2">
                 <input type="hidden" name="id" value={record.id} />
-                <input required name="title" defaultValue={record.title} aria-label="Title" className="rounded-lg border border-slate-300 px-3 py-2" />
+                <label className="text-xs font-semibold text-slate-600">English ✓<input required name="title" defaultValue={record.title} aria-label="Title in English" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+                <label className="text-xs font-semibold text-slate-600">{titleFr && descriptionFr ? "Français ✓" : "Français — Missing"}<input name="titleFr" defaultValue={titleFr} aria-label="Titre en français" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
                 <input required name="category" defaultValue={record.category} aria-label="Category" className="rounded-lg border border-slate-300 px-3 py-2" />
-                <textarea required name="description" defaultValue={record.description} aria-label="Description" className="rounded-lg border border-slate-300 px-3 py-2 sm:col-span-2" />
+                <textarea required name="description" defaultValue={record.description} aria-label="Description in English" className="rounded-lg border border-slate-300 px-3 py-2" />
+                <textarea name="descriptionFr" defaultValue={descriptionFr} aria-label="Description en français" className="rounded-lg border border-slate-300 px-3 py-2" />
                 <label className="text-xs font-semibold text-slate-600">Due date<input name="dueDate" type="date" defaultValue={record.dueDate?.toISOString().slice(0, 10) ?? ""} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
                 <label className="text-xs font-semibold text-slate-600">Audience<select name="audience" defaultValue={record.audience} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="all-affiliates">All affiliates</option><option value="specific-affiliate">Specific affiliate</option></select></label>
                 <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Affiliate<select name="affiliateId" defaultValue={record.affiliateId ?? ""} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="">All affiliates</option>{affiliates.map((affiliate) => <option key={affiliate.id} value={affiliate.id}>{affiliate.name}</option>)}</select></label>
@@ -58,7 +67,8 @@ export default async function CompliancePage() {
               </form>
               </details>
             </Card>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <Card className="p-8 text-center text-sm text-slate-500">No compliance resources yet.</Card>

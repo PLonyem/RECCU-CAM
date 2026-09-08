@@ -17,6 +17,7 @@ import {
   type AffiliationInquiry,
 } from "@/lib/validation/affiliation-inquiry";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 const fieldLabelClassName = "text-sm font-semibold text-institutional";
 
@@ -24,6 +25,7 @@ function errorId(name: keyof AffiliationInquiry) {
   return `affiliation-${name}-error`;
 }
 export function AffiliationInquiryForm() {
+  const { tText } = useLanguage();
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const noticeRef = useRef<HTMLDivElement>(null);
@@ -76,10 +78,10 @@ export function AffiliationInquiryForm() {
 
   if (submitted) {
     return (
-      <FormNotice ref={noticeRef} variant="success" title="Affiliation inquiry received">
-        <p>RECCU-CAM can now review the contact information provided and follow up with verified guidance. This does not confirm eligibility or affiliation.</p>
+      <FormNotice ref={noticeRef} variant="success" title={tText("Affiliation inquiry received")}>
+        <p>{tText("RECCU-CAM can now review the contact information provided and follow up with verified guidance. This does not confirm eligibility or affiliation.")}</p>
         <Button type="button" variant="secondary" className="mt-6" onClick={() => setSubmitted(false)}>
-          Submit another inquiry
+          {tText("Submit another inquiry")}
         </Button>
       </FormNotice>
     );
@@ -99,14 +101,14 @@ export function AffiliationInquiryForm() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="block sm:col-span-2" htmlFor="affiliation-institution">
-          <span className={fieldLabelClassName}>Institution<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Institution")}<RequiredMark /></span>
           <input
             {...register("institution")}
             id="affiliation-institution"
             required
             autoComplete="organization"
             className={formControlClassName}
-            placeholder="Institution name"
+            placeholder={tText("Institution name")}
             aria-invalid={Boolean(errors.institution)}
             aria-describedby={errors.institution ? errorId("institution") : undefined}
           />
@@ -114,14 +116,14 @@ export function AffiliationInquiryForm() {
         </label>
 
         <label className="block" htmlFor="affiliation-city">
-          <span className={fieldLabelClassName}>City<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("City")}<RequiredMark /></span>
           <input
             {...register("city")}
             id="affiliation-city"
             required
             autoComplete="address-level2"
             className={formControlClassName}
-            placeholder="Institution city"
+            placeholder={tText("Institution city")}
             aria-invalid={Boolean(errors.city)}
             aria-describedby={errors.city ? errorId("city") : undefined}
           />
@@ -129,14 +131,14 @@ export function AffiliationInquiryForm() {
         </label>
 
         <label className="block" htmlFor="affiliation-contact-person">
-          <span className={fieldLabelClassName}>Contact person<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Contact person")}<RequiredMark /></span>
           <input
             {...register("contactPerson")}
             id="affiliation-contact-person"
             required
             autoComplete="name"
             className={formControlClassName}
-            placeholder="Full name"
+            placeholder={tText("Full name")}
             aria-invalid={Boolean(errors.contactPerson)}
             aria-describedby={errors.contactPerson ? errorId("contactPerson") : undefined}
           />
@@ -144,14 +146,14 @@ export function AffiliationInquiryForm() {
         </label>
 
         <label className="block" htmlFor="affiliation-role">
-          <span className={fieldLabelClassName}>Role<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Role")}<RequiredMark /></span>
           <input
             {...register("role")}
             id="affiliation-role"
             required
             autoComplete="organization-title"
             className={formControlClassName}
-            placeholder="Role or position"
+            placeholder={tText("Role or position")}
             aria-invalid={Boolean(errors.role)}
             aria-describedby={errors.role ? errorId("role") : undefined}
           />
@@ -159,7 +161,7 @@ export function AffiliationInquiryForm() {
         </label>
 
         <label className="block" htmlFor="affiliation-phone">
-          <span className={fieldLabelClassName}>Phone<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Phone")}<RequiredMark /></span>
           <input
             {...register("phone")}
             id="affiliation-phone"
@@ -167,7 +169,7 @@ export function AffiliationInquiryForm() {
             required
             autoComplete="tel"
             className={formControlClassName}
-            placeholder="Contact number"
+            placeholder={tText("Contact number")}
             aria-invalid={Boolean(errors.phone)}
             aria-describedby={errors.phone ? errorId("phone") : undefined}
           />
@@ -175,7 +177,7 @@ export function AffiliationInquiryForm() {
         </label>
 
         <label className="block sm:col-span-2" htmlFor="affiliation-email">
-          <span className={fieldLabelClassName}>Email<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Email")}<RequiredMark /></span>
           <input
             {...register("email")}
             id="affiliation-email"
@@ -191,14 +193,14 @@ export function AffiliationInquiryForm() {
         </label>
 
         <label className="block sm:col-span-2" htmlFor="affiliation-message">
-          <span className={fieldLabelClassName}>Institution and affiliation interest<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Institution and affiliation interest")}<RequiredMark /></span>
           <textarea
             {...register("message")}
             id="affiliation-message"
             required
             rows={6}
             className={cn(formControlClassName, "min-h-36 py-3")}
-            placeholder="Briefly describe the institution and the affiliation guidance you need."
+            placeholder={tText("Briefly describe the institution and the affiliation guidance you need.")}
             aria-invalid={Boolean(errors.message)}
             aria-describedby={errors.message ? errorId("message") : undefined}
           />
@@ -207,17 +209,17 @@ export function AffiliationInquiryForm() {
       </div>
 
       <p className="rounded-card border border-primary-100 bg-primary-50 p-4 text-sm leading-6 text-institutional">
-        Do not include passwords, PINs, OTPs, banking credentials, or confidential account information. Eligibility and documentation requirements are confirmed separately by RECCU-CAM.
+        {tText("Do not include passwords, PINs, OTPs, banking credentials, or confidential account information. Eligibility and documentation requirements are confirmed separately by RECCU-CAM.")}
       </p>
 
       {submissionError && (
-        <FormNotice ref={noticeRef} variant="error" title="Inquiry not submitted">
-          <p>{submissionError}</p>
+        <FormNotice ref={noticeRef} variant="error" title={tText("Inquiry not submitted")}>
+          <p>{tText(submissionError)}</p>
         </FormNotice>
       )}
 
       <Button type="submit" size="lg" disabled={isSubmitting}>
-        {isSubmitting ? "Submitting inquiry…" : "Submit Affiliation Inquiry"}
+        {tText(isSubmitting ? "Submitting inquiry…" : "Submit Affiliation Inquiry")}
         {!isSubmitting && <Send className="h-4 w-4" aria-hidden="true" />}
       </Button>
     </form>

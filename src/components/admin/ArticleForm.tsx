@@ -11,6 +11,8 @@ import { Card } from "@/components/ui/Card";
 import { slugify } from "@/lib/slug";
 import { CATEGORIES, CHAPTERS } from "@/data/admin-options";
 import { httpsUrlSchema } from "@/lib/validation/url";
+import { useLanguage } from "@/context/LanguageContext";
+import { translateValidationMessage } from "@/lib/i18n";
 
 export const FORM_CATEGORIES = CATEGORIES.filter((c) =>
   (
@@ -34,6 +36,9 @@ export const articleFormSchema = z.object({
   heroImageUrl: z.union([z.literal(""), httpsUrlSchema]),
   heroImageAlt: z.string().max(300),
   heroImageCaption: z.string().max(500),
+  titleFr: z.string().max(240),
+  excerptFr: z.string().max(1000),
+  contentFr: z.string().max(100_000),
 });
 
 const articlePublishFormSchema = articleFormSchema.superRefine((data, context) => {
@@ -62,6 +67,9 @@ const emptyDefaults: ArticleFormValues = {
   heroImageUrl: "",
   heroImageAlt: "",
   heroImageCaption: "",
+  titleFr: "",
+  excerptFr: "",
+  contentFr: "",
 };
 
 export function buildArticlePayload(
@@ -87,6 +95,7 @@ export function buildArticlePayload(
     heroImageUrl: values.heroImageUrl || null,
     heroImageAlt: values.heroImageAlt || null,
     heroImageCaption: values.heroImageCaption || null,
+    translations: { fr: { title: values.titleFr, excerpt: values.excerptFr, content: values.contentFr } },
   };
 }
 
@@ -105,6 +114,8 @@ export interface ArticleSubmitError {
 }
 
 export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
+  const { language, tText } = useLanguage();
+  const validation = (message?: string) => message ? translateValidationMessage(language, message) : "";
   const [slugEdited, setSlugEdited] = useState(Boolean(defaultValues?.slug));
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<
@@ -169,15 +180,18 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
       {submitError && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3 mb-6">
           <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-          <p className="text-red-700 text-sm">{submitError}</p>
+          <p className="text-red-700 text-sm">{tText(submitError)}</p>
         </div>
       )}
 
       <Card className="p-6">
         <form noValidate className="space-y-5">
+          <div className="rounded-lg border border-primary-100 bg-primary-50/40 p-4 text-sm text-institutional">
+            <strong>English ✓</strong><span className="mx-2">|</span><strong>{defaultValues?.titleFr && defaultValues?.excerptFr && defaultValues?.contentFr ? "Français ✓" : "Français — Missing"}</strong>
+          </div>
           <div className="space-y-1">
             <label htmlFor="title" className="text-sm font-medium text-gray-700">
-              Title
+              {tText("Title")}
             </label>
             <input
               id="title"
@@ -193,13 +207,21 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
               }}
             />
             <p className="text-xs text-red-500 min-h-[16px]">
-              {errors.title?.message}
+              {validation(errors.title?.message)}
             </p>
           </div>
 
+          <fieldset className="space-y-4 rounded-lg border border-primary-100 p-4">
+            <legend className="px-2 text-sm font-semibold text-institutional">Français</legend>
+            <label className="block text-sm font-medium text-gray-700">Titre<input type="text" disabled={isSubmitting} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5" {...register("titleFr")} /></label>
+            <label className="block text-sm font-medium text-gray-700">Résumé<textarea rows={3} disabled={isSubmitting} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5" {...register("excerptFr")} /></label>
+            <label className="block text-sm font-medium text-gray-700">Contenu<textarea rows={12} disabled={isSubmitting} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5" {...register("contentFr")} /></label>
+            <p className="text-xs text-muted-foreground">Les champs français vides utilisent automatiquement le contenu anglais publié.</p>
+          </fieldset>
+
           <div className="space-y-1">
             <label htmlFor="slug" className="text-sm font-medium text-gray-700">
-              Slug
+              {tText("Slug")}
             </label>
             <input
               id="slug"
@@ -217,7 +239,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
               freely, it won&apos;t auto-update again.
             </p>
             <p className="text-xs text-red-500 min-h-[16px]">
-              {errors.slug?.message}
+              {validation(errors.slug?.message)}
             </p>
           </div>
 
@@ -227,7 +249,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 htmlFor="language"
                 className="text-sm font-medium text-gray-700"
               >
-                Language
+                {tText("Language")}
               </label>
               <select
                 id="language"
@@ -235,8 +257,8 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition disabled:opacity-50"
                 {...register("language")}
               >
-                <option value="en">English</option>
-                <option value="fr">French</option>
+                <option value="en">{tText("English")}</option>
+                <option value="fr">{tText("French")}</option>
               </select>
             </div>
 
@@ -245,7 +267,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 htmlFor="category"
                 className="text-sm font-medium text-gray-700"
               >
-                Category
+                {tText("Category")}
               </label>
               <select
                 id="category"
@@ -253,15 +275,15 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition disabled:opacity-50"
                 {...register("category")}
               >
-                <option value="">Select a category</option>
+                <option value="">{tText("Select a category")}</option>
                 {FORM_CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>
-                    {c.label.en}
+                    {language === "fr" ? c.label.fr : c.label.en}
                   </option>
                 ))}
               </select>
               <p className="text-xs text-red-500 min-h-[16px]">
-                {errors.category?.message}
+                {validation(errors.category?.message)}
               </p>
             </div>
           </div>
@@ -269,7 +291,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-1">
               <label htmlFor="tags" className="text-sm font-medium text-gray-700">
-                Tags
+                {tText("Tags")}
               </label>
               <input
                 id="tags"
@@ -279,7 +301,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition disabled:opacity-50"
                 {...register("tags")}
               />
-              <p className="text-xs text-gray-400">Comma-separated</p>
+              <p className="text-xs text-gray-400">{tText("Comma-separated")}</p>
             </div>
 
             <div className="space-y-1">
@@ -287,7 +309,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 htmlFor="chapter"
                 className="text-sm font-medium text-gray-700"
               >
-                Chapter
+                {tText("Chapter")}
               </label>
               <select
                 id="chapter"
@@ -295,7 +317,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition disabled:opacity-50"
                 {...register("chapter")}
               >
-                <option value="">None</option>
+                <option value="">{tText("None")}</option>
                 {CHAPTERS.map((chapter) => (
                   <option key={chapter} value={chapter}>
                     {chapter}
@@ -311,7 +333,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 htmlFor="excerpt"
                 className="text-sm font-medium text-gray-700"
               >
-                Excerpt
+                {tText("Excerpt")}
               </label>
               <span className="text-xs text-gray-400">
                 {excerptWordCount} / 25–40 words
@@ -325,7 +347,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
               {...register("excerpt")}
             />
             <p className="text-xs text-red-500 min-h-[16px]">
-              {errors.excerpt?.message}
+              {validation(errors.excerpt?.message)}
             </p>
           </div>
 
@@ -334,7 +356,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
               htmlFor="content"
               className="text-sm font-medium text-gray-700"
             >
-              Content
+              {tText("Content")}
             </label>
             <textarea
               id="content"
@@ -345,7 +367,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
               {...register("content")}
             />
             <p className="text-xs text-red-500 min-h-[16px]">
-              {errors.content?.message}
+              {validation(errors.content?.message)}
             </p>
           </div>
 
@@ -355,7 +377,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 htmlFor="authorName"
                 className="text-sm font-medium text-gray-700"
               >
-                Author Name
+                {tText("Author Name")}
               </label>
               <input
                 id="authorName"
@@ -365,7 +387,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 {...register("authorName")}
               />
               <p className="text-xs text-red-500 min-h-[16px]">
-                {errors.authorName?.message}
+                {validation(errors.authorName?.message)}
               </p>
             </div>
 
@@ -374,7 +396,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 htmlFor="authorRole"
                 className="text-sm font-medium text-gray-700"
               >
-                Author Role
+                {tText("Author Role")}
               </label>
               <input
                 id="authorRole"
@@ -394,7 +416,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
                 {...register("featured")}
               />
-              Featured
+              {tText("Featured")}
             </label>
 
             <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -404,7 +426,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
                 {...register("published")}
               />
-              {published ? "Publish immediately" : "Save as draft"}
+              {tText(published ? "Publish immediately" : "Save as draft")}
             </label>
           </div>
 
@@ -414,7 +436,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 htmlFor="heroImageUrl"
                 className="text-sm font-medium text-gray-700"
               >
-                Hero Image URL
+                {tText("Hero Image URL")}
               </label>
               <input
                 id="heroImageUrl"
@@ -431,7 +453,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 htmlFor="heroImageAlt"
                 className="text-sm font-medium text-gray-700"
               >
-                Hero Image Alt Text
+                {tText("Hero Image Alt Text")}
               </label>
               <input
                 id="heroImageAlt"
@@ -448,7 +470,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
                 htmlFor="heroImageCaption"
                 className="text-sm font-medium text-gray-700"
               >
-                Hero Image Caption
+                {tText("Hero Image Caption")}
               </label>
               <input
                 id="heroImageCaption"
@@ -463,7 +485,7 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
 
           <div className="flex flex-wrap gap-3 pt-2">
             <Button type="button" disabled={isSubmitting} onClick={onPublish}>
-              {pendingAction === "publish" ? "Publishing..." : "Publish"}
+              {tText(pendingAction === "publish" ? "Publishing..." : "Publish")}
             </Button>
             <Button
               type="button"
@@ -471,13 +493,13 @@ export function ArticleForm({ defaultValues, onSubmit }: ArticleFormProps) {
               disabled={isSubmitting}
               onClick={onSaveDraft}
             >
-              {pendingAction === "draft" ? "Saving..." : "Save as Draft"}
+              {tText(pendingAction === "draft" ? "Saving..." : "Save as Draft")}
             </Button>
             <Link
               href="/admin/news"
               className={buttonVariants({ variant: "ghost" })}
             >
-              Cancel
+              {tText("Cancel")}
             </Link>
           </div>
         </form>

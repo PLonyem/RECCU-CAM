@@ -9,6 +9,8 @@ import { getAdminPageDescription, getAdminPageTitle } from "./nav-items";
 import { Badge } from "@/components/ui/Badge";
 import { AUTH_PERMISSIONS, hasPermission, normalizeAuthRole, ROLE_LABELS } from "@/lib/auth/roles";
 import { DEMO_ADMIN_IDENTITY, isDemoMode } from "@/lib/demo-mode";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface AdminNavbarProps {
   onMenuClick: () => void;
@@ -65,6 +67,7 @@ function AdminNavbarContent({
   accountControl,
 }: AdminNavbarContentProps) {
   const pathname = usePathname();
+  const { language, tText } = useLanguage();
   const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
@@ -94,19 +97,19 @@ function AdminNavbarContent({
             type="button"
             onClick={onMenuClick}
             className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest lg:hidden"
-            aria-label="Open menu"
+            aria-label={tText("Open menu")}
           >
             <Menu className="h-6 w-6" />
           </button>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <p className="truncate font-display text-base font-bold text-institutional sm:text-lg">
-                {getAdminPageTitle(pathname)}
+                {getAdminPageTitle(pathname, language)}
               </p>
-              {demo && <Badge variant="warning" className="shrink-0">Proposal Preview</Badge>}
+              {demo && <Badge variant="warning" className="shrink-0">{tText("Proposal Preview")}</Badge>}
             </div>
             <p className="hidden truncate text-xs text-slate-500 sm:block">
-              {getAdminPageDescription(pathname)}
+              {getAdminPageDescription(pathname, language)}
             </p>
           </div>
         </div>
@@ -117,9 +120,10 @@ function AdminNavbarContent({
               href="/"
               className="hidden h-9 items-center gap-2 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-institutional transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest sm:inline-flex"
             >
-              View Public Website <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              {tText("View Public Website")} <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
             </Link>
           )}
+          <LanguageSwitcher className="hidden sm:inline-flex" />
           {canViewMessages && (
             <Link href="/admin/messages" aria-label={`Open message notifications${unreadMessages ? `, ${unreadMessages} unread` : ""}`} className="relative grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-institutional focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest">
               <Bell className="h-5 w-5" aria-hidden="true" />

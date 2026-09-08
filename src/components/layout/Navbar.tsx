@@ -16,6 +16,8 @@ import { Container } from "@/components/ui/Container";
 import { siteNavigation, type NavigationLink } from "@/data/site-navigation";
 import { cn } from "@/lib/utils";
 import { PortalActions } from "@/components/layout/PortalActions";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 const DESKTOP_HOVER_QUERY = "(any-hover: hover) and (any-pointer: fine)";
 
@@ -51,6 +53,7 @@ function DesktopNavigationItem({
   pathname: string;
   setOpenMenu: Dispatch<SetStateAction<string | null>>;
 }) {
+  const { tText } = useLanguage();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -95,7 +98,7 @@ function DesktopNavigationItem({
           active ? "public-nav-active after:absolute after:inset-x-3 after:bottom-0 after:h-0.5" : "public-nav-link text-muted-foreground",
         )}
       >
-        {item.label}
+        {tText(item.label)}
       </Link>
     );
   }
@@ -143,7 +146,7 @@ function DesktopNavigationItem({
           active ? "public-nav-active after:absolute after:inset-x-3 after:bottom-0 after:h-0.5" : "public-nav-link text-muted-foreground",
         )}
       >
-        {item.label}
+        {tText(item.label)}
         <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-base", isOpen && "rotate-180")} />
       </button>
       {isOpen && (
@@ -162,9 +165,9 @@ function DesktopNavigationItem({
           }}
         >
           <div className="border-b border-border px-3 pb-3 pt-1">
-            <p className="font-display text-sm font-bold text-institutional">{item.label}</p>
+            <p className="font-display text-sm font-bold text-institutional">{tText(item.label)}</p>
             <Link href={item.href} onClick={() => setOpenMenu(null)} className="public-nav-overview mt-1 inline-flex text-xs font-semibold">
-              {getOverviewLabel(item, "View section overview")}
+              {tText(getOverviewLabel(item, "View section overview"))}
             </Link>
           </div>
           <ul className="mt-2 grid gap-1">
@@ -185,10 +188,10 @@ function DesktopNavigationItem({
                     )}
                   >
                     <span className="flex items-center justify-between gap-3 text-sm font-semibold text-institutional">
-                      {child.label}
+                      {tText(child.label)}
                       <ChevronRight className="public-nav-chevron h-3.5 w-3.5 transition-transform duration-fast group-hover:translate-x-0.5" />
                     </span>
-                    <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{child.description}</span>
+                    <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{tText(child.description)}</span>
                   </Link>
                 </li>
               );
@@ -201,6 +204,7 @@ function DesktopNavigationItem({
 }
 
 export function Navbar() {
+  const { tText } = useLanguage();
   const pathname = usePathname();
   const headerRef = useRef<HTMLElement>(null);
   const mobileNavigationRef = useRef<HTMLDivElement>(null);
@@ -270,12 +274,13 @@ export function Navbar() {
           <span className="min-w-0">
             <span className="block font-display text-lg font-bold leading-none text-institutional">RECCU-CAM</span>
             <span className="mt-1 hidden truncate text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:block">
-              Cooperative network platform
+              {tText("Cooperative network platform")}
             </span>
           </span>
         </Link>
 
         <div className="hidden items-center gap-2 xl:flex">
+          <LanguageSwitcher />
           <PortalActions signInLabel="Sign in" onNavigate={() => setOpenMenu(null)} />
         </div>
 
@@ -318,6 +323,10 @@ export function Navbar() {
           className="public-mobile-navigation absolute inset-x-0 top-full h-[calc(100dvh-4.5rem)] overflow-y-auto border-t border-border xl:hidden"
         >
           <Container className="py-5">
+            <div className="mb-5 flex items-center justify-between border-b border-border pb-4">
+              <span className="text-sm font-semibold text-institutional">{tText("Language")}</span>
+              <LanguageSwitcher />
+            </div>
             <nav aria-label="Mobile navigation">
               <ul className="space-y-1">
                 {siteNavigation.map((item, itemIndex) => {
@@ -336,7 +345,7 @@ export function Navbar() {
                             active ? "public-nav-highlight public-nav-active" : "text-foreground hover:bg-muted",
                           )}
                         >
-                          {item.label}<ChevronRight className="public-nav-chevron h-4 w-4" />
+                          {tText(item.label)}<ChevronRight className="public-nav-chevron h-4 w-4" />
                         </Link>
                       </li>
                     );
@@ -354,12 +363,12 @@ export function Navbar() {
                           active ? "public-nav-highlight public-nav-active" : "text-foreground hover:bg-muted",
                         )}
                       >
-                        {item.label}<ChevronDown className={cn("public-nav-chevron h-4 w-4 transition-transform duration-base", expanded && "rotate-180")} />
+                        {tText(item.label)}<ChevronDown className={cn("public-nav-chevron h-4 w-4 transition-transform duration-base", expanded && "rotate-180")} />
                       </button>
                       {expanded && (
                         <div id={sectionId} className="ml-4 border-l border-primary-200 py-2 pl-3">
                           <Link href={item.href} onClick={() => setMobileOpen(false)} className="public-nav-overview block rounded-control px-3 py-2 text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest">
-                            {getOverviewLabel(item, "Section overview")}
+                            {tText(getOverviewLabel(item, "Section overview"))}
                           </Link>
                           {item.children.map((child) => (
                             <Link
@@ -369,7 +378,7 @@ export function Navbar() {
                               aria-current={isActivePath(pathname, child.href) ? "page" : undefined}
                               className="block rounded-control px-3 py-2.5 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-institutional focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
                             >
-                              {child.label}
+                              {tText(child.label)}
                             </Link>
                           ))}
                         </div>

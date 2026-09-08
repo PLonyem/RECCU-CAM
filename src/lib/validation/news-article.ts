@@ -18,6 +18,11 @@ const newsArticleFields = {
   heroImageUrl: httpsUrlSchema.nullable().optional(),
   heroImageAlt: z.string().trim().max(300).nullable().optional(),
   heroImageCaption: z.string().trim().max(500).nullable().optional(),
+  translations: z.object({ fr: z.object({
+    title: z.string().trim().max(240).optional(),
+    excerpt: z.string().trim().max(1000).optional(),
+    content: z.string().trim().max(100_000).optional(),
+  }).optional() }).default({}),
 };
 
 export const newsArticleDraftSchema = z.object(newsArticleFields);

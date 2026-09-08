@@ -19,6 +19,7 @@ import {
   type AffiliateBankingInquiry,
 } from "@/lib/validation/affiliate-banking";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 const fieldLabelClassName = "text-sm font-semibold text-institutional";
 
@@ -27,6 +28,7 @@ function describedBy(name: keyof AffiliateBankingInquiry, hasError: boolean) {
 }
 
 export function AffiliateBankingInquiryForm() {
+  const { tText } = useLanguage();
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const noticeRef = useRef<HTMLDivElement>(null);
@@ -80,10 +82,10 @@ export function AffiliateBankingInquiryForm() {
 
   if (submitted) {
     return (
-      <FormNotice ref={noticeRef} variant="success" title="Inquiry received">
-        <p>RECCU-CAM can now review the information provided. Submission does not confirm eligibility, terms, or approval.</p>
+      <FormNotice ref={noticeRef} variant="success" title={tText("Inquiry received")}>
+        <p>{tText("RECCU-CAM can now review the information provided. Submission does not confirm eligibility, terms, or approval.")}</p>
         <Button type="button" variant="secondary" className="mt-6" onClick={() => setSubmitted(false)}>
-          Submit another inquiry
+          {tText("Submit another inquiry")}
         </Button>
       </FormNotice>
     );
@@ -103,14 +105,14 @@ export function AffiliateBankingInquiryForm() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="block sm:col-span-2" htmlFor="affiliate-banking-institution">
-          <span className={fieldLabelClassName}>Institution<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Institution")}<RequiredMark /></span>
           <input
             {...register("institution")}
             id="affiliate-banking-institution"
             required
             autoComplete="organization"
             className={formControlClassName}
-            placeholder="Institution name"
+            placeholder={tText("Institution name")}
             aria-invalid={Boolean(errors.institution)}
             aria-describedby={describedBy("institution", Boolean(errors.institution))}
           />
@@ -118,7 +120,7 @@ export function AffiliateBankingInquiryForm() {
         </label>
 
         <label className="block" htmlFor="affiliate-banking-affiliate-status">
-          <span className={fieldLabelClassName}>Affiliate status<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Affiliate status")}<RequiredMark /></span>
           <select
             {...register("affiliateStatus")}
             id="affiliate-banking-affiliate-status"
@@ -128,21 +130,21 @@ export function AffiliateBankingInquiryForm() {
             aria-invalid={Boolean(errors.affiliateStatus)}
             aria-describedby={describedBy("affiliateStatus", Boolean(errors.affiliateStatus))}
           >
-            <option value="" disabled>Select status</option>
-            {affiliateStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            <option value="" disabled>{tText("Select status")}</option>
+            {affiliateStatusOptions.map((option) => <option key={option.value} value={option.value}>{tText(option.label)}</option>)}
           </select>
           <FieldError id="affiliate-banking-affiliateStatus-error" message={errors.affiliateStatus?.message} />
         </label>
 
         <label className="block" htmlFor="affiliate-banking-city">
-          <span className={fieldLabelClassName}>City<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("City")}<RequiredMark /></span>
           <input
             {...register("city")}
             id="affiliate-banking-city"
             required
             autoComplete="address-level2"
             className={formControlClassName}
-            placeholder="Institution city"
+            placeholder={tText("Institution city")}
             aria-invalid={Boolean(errors.city)}
             aria-describedby={describedBy("city", Boolean(errors.city))}
           />
@@ -150,14 +152,14 @@ export function AffiliateBankingInquiryForm() {
         </label>
 
         <label className="block" htmlFor="affiliate-banking-contact-person">
-          <span className={fieldLabelClassName}>Contact person<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Contact person")}<RequiredMark /></span>
           <input
             {...register("contactPerson")}
             id="affiliate-banking-contact-person"
             required
             autoComplete="name"
             className={formControlClassName}
-            placeholder="Full name"
+            placeholder={tText("Full name")}
             aria-invalid={Boolean(errors.contactPerson)}
             aria-describedby={describedBy("contactPerson", Boolean(errors.contactPerson))}
           />
@@ -165,14 +167,14 @@ export function AffiliateBankingInquiryForm() {
         </label>
 
         <label className="block" htmlFor="affiliate-banking-role">
-          <span className={fieldLabelClassName}>Role<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Role")}<RequiredMark /></span>
           <input
             {...register("role")}
             id="affiliate-banking-role"
             required
             autoComplete="organization-title"
             className={formControlClassName}
-            placeholder="Role or position"
+            placeholder={tText("Role or position")}
             aria-invalid={Boolean(errors.role)}
             aria-describedby={describedBy("role", Boolean(errors.role))}
           />
@@ -180,7 +182,7 @@ export function AffiliateBankingInquiryForm() {
         </label>
 
         <label className="block" htmlFor="affiliate-banking-email">
-          <span className={fieldLabelClassName}>Email<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Email")}<RequiredMark /></span>
           <input
             {...register("email")}
             id="affiliate-banking-email"
@@ -196,7 +198,7 @@ export function AffiliateBankingInquiryForm() {
         </label>
 
         <label className="block" htmlFor="affiliate-banking-phone">
-          <span className={fieldLabelClassName}>Phone<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Phone")}<RequiredMark /></span>
           <input
             {...register("phone")}
             id="affiliate-banking-phone"
@@ -204,7 +206,7 @@ export function AffiliateBankingInquiryForm() {
             required
             autoComplete="tel"
             className={formControlClassName}
-            placeholder="Institutional contact number"
+            placeholder={tText("Institutional contact number")}
             aria-invalid={Boolean(errors.phone)}
             aria-describedby={describedBy("phone", Boolean(errors.phone))}
           />
@@ -212,7 +214,7 @@ export function AffiliateBankingInquiryForm() {
         </label>
 
         <label className="block sm:col-span-2" htmlFor="affiliate-banking-support-category">
-          <span className={fieldLabelClassName}>Support category<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Support category")}<RequiredMark /></span>
           <select
             {...register("supportCategory")}
             id="affiliate-banking-support-category"
@@ -222,21 +224,21 @@ export function AffiliateBankingInquiryForm() {
             aria-invalid={Boolean(errors.supportCategory)}
             aria-describedby={describedBy("supportCategory", Boolean(errors.supportCategory))}
           >
-            <option value="" disabled>Select a category</option>
-            {supportCategoryOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            <option value="" disabled>{tText("Select a category")}</option>
+            {supportCategoryOptions.map((option) => <option key={option.value} value={option.value}>{tText(option.label)}</option>)}
           </select>
           <FieldError id="affiliate-banking-supportCategory-error" message={errors.supportCategory?.message} />
         </label>
 
         <label className="block sm:col-span-2" htmlFor="affiliate-banking-message">
-          <span className={fieldLabelClassName}>Message<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Message")}<RequiredMark /></span>
           <textarea
             {...register("message")}
             id="affiliate-banking-message"
             required
             rows={6}
             className={cn(formControlClassName, "min-h-36 py-3")}
-            placeholder="Describe the institutional need and the outcome you would like to discuss."
+            placeholder={tText("Describe the institutional need and the outcome you would like to discuss.")}
             aria-invalid={Boolean(errors.message)}
             aria-describedby={describedBy("message", Boolean(errors.message))}
           />
@@ -246,17 +248,17 @@ export function AffiliateBankingInquiryForm() {
 
       <div className="flex items-start gap-3 rounded-card border border-primary-100 bg-primary-50 p-4 text-sm text-institutional">
         <LockKeyhole className="mt-0.5 h-5 w-5 shrink-0 text-forest" aria-hidden="true" />
-        <p>Do not include passwords, PINs, OTPs, account-access details, or banking credentials. This form begins an institutional conversation; it does not authorize a transaction.</p>
+        <p>{tText("Do not include passwords, PINs, OTPs, account-access details, or banking credentials. This form begins an institutional conversation; it does not authorize a transaction.")}</p>
       </div>
 
       {submissionError && (
-        <FormNotice ref={noticeRef} variant="error" title="Inquiry not submitted">
-          <p>{submissionError}</p>
+        <FormNotice ref={noticeRef} variant="error" title={tText("Inquiry not submitted")}>
+          <p>{tText(submissionError)}</p>
         </FormNotice>
       )}
 
       <Button type="submit" size="lg" disabled={isSubmitting}>
-        {isSubmitting ? "Submitting inquiry…" : "Submit Information Request"}
+        {tText(isSubmitting ? "Submitting inquiry…" : "Submit Information Request")}
         {!isSubmitting && <Send className="h-4 w-4" aria-hidden="true" />}
       </Button>
     </form>

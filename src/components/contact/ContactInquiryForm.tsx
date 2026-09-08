@@ -16,6 +16,7 @@ import { Button, buttonVariants } from "@/components/ui";
 import { contactPurposeOptions } from "@/data/contact";
 import { type ContactInquiry, contactInquirySchema } from "@/lib/validation/contact";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 const fieldLabelClassName = "text-sm font-semibold text-institutional";
 const genericSubmissionError =
@@ -28,6 +29,7 @@ function errorId(name: keyof ContactInquiry) {
 }
 
 export function ContactInquiryForm() {
+  const { tText } = useLanguage();
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const noticeRef = useRef<HTMLDivElement>(null);
@@ -86,22 +88,21 @@ export function ContactInquiryForm() {
       <FormNotice
         ref={noticeRef}
         variant="success"
-        title="Thank You for Contacting RECCU-CAM"
+        title={tText("Thank You for Contacting RECCU-CAM")}
         className="bg-surface p-7 sm:p-9"
       >
         <p>
-          Your inquiry has been received successfully. The appropriate team will review your
-          message and respond using the contact information you provided.
+          {tText("Your inquiry has been received successfully. The appropriate team will review your message and respond using the contact information you provided.")}
         </p>
         <p className="mt-3 text-sm text-muted-foreground">
-          Please keep your phone or email available if further information is required.
+          {tText("Please keep your phone or email available if further information is required.")}
         </p>
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
           <Link href="/" className={buttonVariants({ variant: "default" })}>
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Return Home
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> {tText("Return Home")}
           </Link>
           <Button type="button" variant="secondary" onClick={() => setSubmitted(false)}>
-            <RotateCcw className="h-4 w-4" aria-hidden="true" /> Send Another Message
+            <RotateCcw className="h-4 w-4" aria-hidden="true" /> {tText("Send Another Message")}
           </Button>
         </div>
       </FormNotice>
@@ -128,7 +129,7 @@ export function ContactInquiryForm() {
 
       <div className="grid gap-6 sm:grid-cols-2">
         <label className="block" htmlFor="contact-full-name">
-          <span className={fieldLabelClassName}>Full Name<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Full Name")}<RequiredMark /></span>
           <input
             {...register("fullName")}
             id="contact-full-name"
@@ -136,7 +137,7 @@ export function ContactInquiryForm() {
             maxLength={120}
             autoComplete="name"
             className={formControlClassName}
-            placeholder="Enter your full name"
+            placeholder={tText("Enter your full name")}
             aria-invalid={Boolean(errors.fullName)}
             aria-describedby={errors.fullName ? errorId("fullName") : undefined}
           />
@@ -144,7 +145,7 @@ export function ContactInquiryForm() {
         </label>
 
         <label className="block" htmlFor="contact-phone">
-          <span className={fieldLabelClassName}>Phone Number<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Phone Number")}<RequiredMark /></span>
           <input
             {...register("phone")}
             id="contact-phone"
@@ -162,7 +163,7 @@ export function ContactInquiryForm() {
         </label>
 
         <label className="block" htmlFor="contact-email">
-          <span className={fieldLabelClassName}>Email Address <span className="font-normal text-muted-foreground">(Optional)</span></span>
+          <span className={fieldLabelClassName}>{tText("Email Address")} <span className="font-normal text-muted-foreground">{tText("(Optional)")}</span></span>
           <input
             {...register("email")}
             id="contact-email"
@@ -179,14 +180,14 @@ export function ContactInquiryForm() {
         </label>
 
         <label className="block" htmlFor="contact-organization">
-          <span className={fieldLabelClassName}>Organization / Institution <span className="font-normal text-muted-foreground">(Optional)</span></span>
+          <span className={fieldLabelClassName}>{tText("Organization / Institution")} <span className="font-normal text-muted-foreground">{tText("(Optional)")}</span></span>
           <input
             {...register("organization")}
             id="contact-organization"
             maxLength={160}
             autoComplete="organization"
             className={formControlClassName}
-            placeholder="Enter your organization or credit union"
+            placeholder={tText("Enter your organization or credit union")}
             aria-invalid={Boolean(errors.organization)}
             aria-describedby={errors.organization ? errorId("organization") : undefined}
           />
@@ -194,14 +195,14 @@ export function ContactInquiryForm() {
         </label>
 
         <label className="block" htmlFor="contact-role">
-          <span className={fieldLabelClassName}>Role / Position <span className="font-normal text-muted-foreground">(Optional)</span></span>
+          <span className={fieldLabelClassName}>{tText("Role / Position")} <span className="font-normal text-muted-foreground">{tText("(Optional)")}</span></span>
           <input
             {...register("role")}
             id="contact-role"
             maxLength={120}
             autoComplete="organization-title"
             className={formControlClassName}
-            placeholder="e.g. Branch Manager, Credit Officer, Partner Representative"
+            placeholder={tText("e.g. Branch Manager, Credit Officer, Partner Representative")}
             aria-invalid={Boolean(errors.role)}
             aria-describedby={errors.role ? errorId("role") : undefined}
           />
@@ -209,7 +210,7 @@ export function ContactInquiryForm() {
         </label>
 
         <label className="block" htmlFor="contact-purpose">
-          <span className={fieldLabelClassName}>Purpose of Contact<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Purpose of Contact")}<RequiredMark /></span>
           <select
             {...register("purpose")}
             id="contact-purpose"
@@ -218,26 +219,26 @@ export function ContactInquiryForm() {
             aria-invalid={Boolean(errors.purpose)}
             aria-describedby={errors.purpose ? errorId("purpose") : "contact-purpose-guidance"}
           >
-            <option value="">Select the purpose of your inquiry</option>
+            <option value="">{tText("Select the purpose of your inquiry")}</option>
             {contactPurposeOptions.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
+              <option key={option.value} value={option.value}>{tText(option.label)}</option>
             ))}
           </select>
           <p id="contact-purpose-guidance" className="mt-2 text-xs leading-5 text-muted-foreground">
-            Your selection helps route the inquiry to the appropriate team.
+            {tText("Your selection helps route the inquiry to the appropriate team.")}
           </p>
           <FieldError id={errorId("purpose")} message={errors.purpose?.message} />
         </label>
 
         <label className="block sm:col-span-2" htmlFor="contact-subject">
-          <span className={fieldLabelClassName}>Subject<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Subject")}<RequiredMark /></span>
           <input
             {...register("subject")}
             id="contact-subject"
             required
             maxLength={160}
             className={formControlClassName}
-            placeholder="Briefly describe your inquiry"
+            placeholder={tText("Briefly describe your inquiry")}
             aria-invalid={Boolean(errors.subject)}
             aria-describedby={errors.subject ? errorId("subject") : undefined}
           />
@@ -245,7 +246,7 @@ export function ContactInquiryForm() {
         </label>
 
         <label className="block sm:col-span-2" htmlFor="contact-message">
-          <span className={fieldLabelClassName}>Message<RequiredMark /></span>
+          <span className={fieldLabelClassName}>{tText("Message")}<RequiredMark /></span>
           <textarea
             {...register("message")}
             id="contact-message"
@@ -254,12 +255,12 @@ export function ContactInquiryForm() {
             maxLength={2000}
             rows={8}
             className={cn(formControlClassName, "min-h-48 resize-y py-3")}
-            placeholder="Tell us how we can assist you..."
+            placeholder={tText("Tell us how we can assist you...")}
             aria-invalid={Boolean(errors.message)}
             aria-describedby={`contact-message-count${errors.message ? ` ${errorId("message")}` : ""}`}
           />
           <div className="mt-2 flex items-start justify-between gap-4 text-xs leading-5 text-muted-foreground">
-            <span>Include enough context for accurate routing.</span>
+            <span>{tText("Include enough context for accurate routing.")}</span>
             <span id="contact-message-count" className="shrink-0 tabular-nums">{messageLength} / 2000</span>
           </div>
           <FieldError id={errorId("message")} message={errors.message?.message} />
@@ -267,8 +268,7 @@ export function ContactInquiryForm() {
       </div>
 
       <div className="rounded-card border border-primary-100 bg-primary-50 p-4 text-sm leading-6 text-institutional">
-        Do not include passwords, PINs, OTPs, banking credentials, or confidential account
-        information. RECCU-CAM will never request those details through this form.
+        {tText("Do not include passwords, PINs, OTPs, banking credentials, or confidential account information. RECCU-CAM will never request those details through this form.")}
       </div>
 
       <div>
@@ -283,21 +283,21 @@ export function ContactInquiryForm() {
             aria-describedby={errors.consent ? errorId("consent") : undefined}
           />
           <span className="text-sm leading-6 text-foreground">
-            I agree that RECCU-CAM may use the information provided to respond to my inquiry.
-            <RequiredMark /> Read the <Link href="/privacy" className="font-semibold text-forest underline decoration-gold underline-offset-4">Privacy Policy</Link>.
+            {tText("I agree that RECCU-CAM may use the information provided to respond to my inquiry.")}
+            <RequiredMark /> {tText("Read the")} <Link href="/privacy" className="font-semibold text-forest underline decoration-gold underline-offset-4">{tText("Privacy Policy")}</Link>.
           </span>
         </label>
         <FieldError id={errorId("consent")} message={errors.consent?.message} />
       </div>
 
       {submissionError && (
-        <FormNotice ref={noticeRef} variant="error" title="Inquiry not submitted">
-          <p>{submissionError}</p>
+        <FormNotice ref={noticeRef} variant="error" title={tText("Inquiry not submitted")}>
+          <p>{tText(submissionError)}</p>
         </FormNotice>
       )}
 
       <Button type="submit" size="lg" disabled={isSubmitting} className="w-full sm:w-auto">
-        {isSubmitting ? "Submitting inquiry…" : "Submit Inquiry"}
+        {tText(isSubmitting ? "Submitting inquiry…" : "Submit Inquiry")}
         {!isSubmitting && <Send className="h-4 w-4" aria-hidden="true" />}
       </Button>
     </form>

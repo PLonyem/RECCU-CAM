@@ -19,6 +19,26 @@ const hexColor = z
   .trim()
   .regex(/^#[0-9A-Fa-f]{6}$/, "Enter a valid hex color, such as #0D3D2E.");
 
+export const HOMEPAGE_TRANSLATABLE_FIELDS = [
+  "heroBadge",
+  "heroTitle",
+  "heroSubtitle",
+  "primaryButtonText",
+  "primaryButtonLink",
+  "secondaryButtonText",
+  "secondaryButtonLink",
+] as const;
+
+const homepageTranslationSchema = z.object({
+  heroBadge: trimmedText(HOMEPAGE_CONTENT_LIMITS.heroBadge, `Badge text must be ${HOMEPAGE_CONTENT_LIMITS.heroBadge} characters or fewer.`).optional(),
+  heroTitle: trimmedText(HOMEPAGE_CONTENT_LIMITS.heroTitle, `Headline must be ${HOMEPAGE_CONTENT_LIMITS.heroTitle} characters or fewer.`).optional(),
+  heroSubtitle: trimmedText(HOMEPAGE_CONTENT_LIMITS.heroSubtitle, `Subtitle must be ${HOMEPAGE_CONTENT_LIMITS.heroSubtitle} characters or fewer.`).optional(),
+  primaryButtonText: trimmedText(HOMEPAGE_CONTENT_LIMITS.buttonText, `Primary button text must be ${HOMEPAGE_CONTENT_LIMITS.buttonText} characters or fewer.`).optional(),
+  primaryButtonLink: z.union([z.literal(""), internalPathSchema]).optional(),
+  secondaryButtonText: trimmedText(HOMEPAGE_CONTENT_LIMITS.buttonText, `Secondary button text must be ${HOMEPAGE_CONTENT_LIMITS.buttonText} characters or fewer.`).optional(),
+  secondaryButtonLink: z.union([z.literal(""), internalPathSchema]).optional(),
+});
+
 function channelToLinear(channel: number) {
   const value = channel / 255;
   return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
@@ -73,6 +93,7 @@ const homepageFieldsSchema = z.object({
   heroImages: z
     .array(httpsUrlSchema)
     .max(HOMEPAGE_CONTENT_LIMITS.heroImages, `Add no more than ${HOMEPAGE_CONTENT_LIMITS.heroImages} images.`),
+  translations: z.object({ fr: homepageTranslationSchema.optional() }).default({}),
   statsAffiliates: z.number().int("Affiliates count must be a whole number.").min(0, "Affiliates count cannot be negative."),
   statsMembers: trimmedText(
     HOMEPAGE_CONTENT_LIMITS.statistic,
@@ -165,3 +186,4 @@ export function validateHomepageContent(input: unknown, intent: "draft" | "publi
 
 export type HomepageContentInput = z.infer<typeof homepageFieldsSchema>;
 export type HomepageDraftInput = z.infer<typeof homepageDraftSchema>;
+export type HomepageTranslationField = (typeof HOMEPAGE_TRANSLATABLE_FIELDS)[number];

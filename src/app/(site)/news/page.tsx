@@ -8,12 +8,17 @@ import {
 } from "@/data/news";
 import { getPublicNewsArticles } from "@/lib/data/public-news";
 import { createPageMetadata } from "@/lib/seo";
+import { getServerTranslator } from "@/lib/i18n-server";
 
-export const metadata: Metadata = createPageMetadata({
-  title: "News and Events",
-  description: "Verified RECCU-CAM news, institutional updates, announcements, and confirmed events.",
-  path: "/news",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const { language, tText } = await getServerTranslator();
+  return createPageMetadata({
+    title: tText("News and Events"),
+    description: tText("Verified RECCU-CAM news, institutional updates, announcements, and confirmed events."),
+    path: "/news",
+    locale: language,
+  });
+}
 
 export const dynamic = "force-dynamic";
 

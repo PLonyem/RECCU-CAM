@@ -6,6 +6,7 @@ import { useClerk } from "@clerk/nextjs";
 import { LogOut } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { BrandMark } from "@/components/brand/BrandMark";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 
 interface CreditUnionNavbarProps {
   user: {
@@ -37,6 +38,7 @@ export function CreditUnionNavbar({ user }: CreditUnionNavbarProps) {
         </Link>
 
         <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+          <LanguageSwitcher />
           <span className="hidden max-w-[220px] truncate text-sm font-medium text-gray-700 sm:block">
             {user.name}
           </span>
