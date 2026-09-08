@@ -3,9 +3,13 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getAffiliateSession } from "@/lib/auth/affiliate-context";
 import { PortalShell } from "@/components/portal/PortalShell";
+import { getServerTranslator } from "@/lib/i18n-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Affiliate Portal", robots: { index: false, follow: false, noarchive: true } };
+export async function generateMetadata(): Promise<Metadata> {
+  const { tText } = await getServerTranslator();
+  return { title: tText("Affiliate Portal"), robots: { index: false, follow: false, noarchive: true } };
+}
 
 export default async function AffiliatePortalLayout({ children }: { children: React.ReactNode }) {
   const session = await getAffiliateSession();

@@ -8,6 +8,8 @@ export const announcementDetailSchema = z.object({
 const announcementFields = {
   title: z.string().trim().min(1, "Title is required.").max(180, "Title must be 180 characters or fewer."),
   opening: z.string().trim().max(4000, "Opening message must be 4000 characters or fewer."),
+  titleFr: z.string().trim().max(180, "French title must be 180 characters or fewer.").optional().default(""),
+  openingFr: z.string().trim().max(4000, "French opening message must be 4000 characters or fewer.").optional().default(""),
   details: z.array(announcementDetailSchema).max(20).default([]),
   category: z.string().trim().min(1).max(80).default("Circular"),
   priority: z.string().trim().min(1).max(20).default("normal"),

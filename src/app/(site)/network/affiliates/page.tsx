@@ -11,13 +11,13 @@ import {
   deriveAffiliateFilterOptions,
 } from "@/data/affiliates";
 import { getPublicAffiliates } from "@/lib/data/public-affiliates";
-import { createPageMetadata } from "@/lib/seo";
+import { createLocalizedPageMetadata } from "@/lib/seo-server";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> { return createLocalizedPageMetadata({
   title: "Our Network | Affiliate Directory",
   description: "Explore cooperative financial institutions affiliated with the RECCU-CAM network by name, city, region, type, or service.",
   path: "/network/affiliates",
-});
+}); }
 
 export const dynamic = "force-dynamic";
 

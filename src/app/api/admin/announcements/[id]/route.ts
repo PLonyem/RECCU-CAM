@@ -5,6 +5,7 @@ import { isAdminRole, normalizeAuthRole } from "@/lib/auth/roles";
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { announcementSchema, updateAnnouncementSchema } from "@/lib/validation/announcement";
+import type { Prisma } from "@/generated/prisma/client";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -24,6 +25,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 
   const body = await request.json().catch(() => null);
+  const hasTitleFr = Boolean(body && typeof body === "object" && "titleFr" in body);
+  const hasOpeningFr = Boolean(body && typeof body === "object" && "openingFr" in body);
   const publishCandidate = body && typeof body === "object" && "isPublished" in body && body.isPublished === true
     ? {
         ...existing,
@@ -40,7 +43,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     );
   }
 
-  const data = parsed.data;
+  const { titleFr, openingFr, ...data } = parsed.data;
+  const previousTranslations = existing.translations && typeof existing.translations === "object" && !Array.isArray(existing.translations)
+    ? existing.translations as Record<string, unknown>
+    : {};
+  const previousFrench = previousTranslations.fr && typeof previousTranslations.fr === "object" && !Array.isArray(previousTranslations.fr)
+    ? previousTranslations.fr as Record<string, unknown>
+    : {};
+  const translations: Prisma.InputJsonValue = {
+    ...previousTranslations,
+    fr: {
+      ...previousFrench,
+      ...(hasTitleFr ? { title: titleFr } : {}),
+      ...(hasOpeningFr ? { opening: openingFr } : {}),
+    },
+  } as Prisma.InputJsonValue;
 
   // publishedAt tracks isPublished's transition rather than being a
   // client-supplied value: the draft -> published edge stamps "now" (and
@@ -58,6 +75,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     where: { id },
     data: {
       ...data,
+      translations,
       expiryDate:
         data.expiryDate !== undefined
           ? data.expiryDate

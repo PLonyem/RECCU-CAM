@@ -6,16 +6,16 @@ import { PageIntro } from "@/components/layout/PageIntro";
 import { VerificationNote } from "@/components/layout/VerificationNote";
 import { ProgramsExplorer } from "@/components/vtime/ProgramsExplorer";
 import { Button, Card, Container, LoadingSkeleton, Section, SectionHeader } from "@/components/ui";
-import { createPageMetadata } from "@/lib/seo";
+import { createLocalizedPageMetadata } from "@/lib/seo-server";
 import { getPublicTrainingPrograms } from "@/lib/data/public-training";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> { return createLocalizedPageMetadata({
   title: "VTIME Programs",
   description: "Review VTIME training program outlines, audiences, objectives, and core modules.",
   path: "/vtime/programs",
-});
+}); }
 
 export default async function ProgramsPage() {
   const publishedPrograms = await getPublicTrainingPrograms();

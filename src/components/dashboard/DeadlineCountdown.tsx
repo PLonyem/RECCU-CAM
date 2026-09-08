@@ -2,6 +2,8 @@
 
 import { Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
+import { formatDate as formatLocalizedDate } from "@/lib/i18n";
 
 interface Deadline {
   name: string;
@@ -33,8 +35,8 @@ function urgencyColor(days: number): { text: string; bar: string } {
   return { text: "text-primary-600", bar: "bg-primary-500" };
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(`${dateStr}T00:00:00`).toLocaleDateString("en-US", {
+function formatDate(dateStr: string, language: "en" | "fr"): string {
+  return formatLocalizedDate(`${dateStr}T00:00:00`, language, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -42,6 +44,7 @@ function formatDate(dateStr: string): string {
 }
 
 export function DeadlineCountdown() {
+  const { language } = useLanguage();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -73,7 +76,7 @@ export function DeadlineCountdown() {
             return (
               <div className="mt-4">
                 <p className="font-display text-xl font-bold text-gray-900">{primary.name}</p>
-                <p className="text-gray-500 mt-0.5">{formatDate(primary.date)}</p>
+                <p className="text-gray-500 mt-0.5">{formatDate(primary.date, language)}</p>
 
                 <p className={cn("text-3xl font-bold mt-3", colors.text)}>
                   {days === 0 ? "Due today" : `${days} day${days === 1 ? "" : "s"} remaining`}
@@ -88,7 +91,7 @@ export function DeadlineCountdown() {
 
                 {secondary && (
                   <p className="text-sm text-gray-400 mt-4">
-                    Next after that: {formatDate(secondary.date)}
+                    Next after that: {formatDate(secondary.date, language)}
                   </p>
                 )}
               </div>

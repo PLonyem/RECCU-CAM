@@ -4,14 +4,14 @@ import { Suspense } from "react";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { TrainingRegistrationForm } from "@/components/vtime/TrainingRegistrationForm";
 import { Card, Container, LoadingSkeleton, Section } from "@/components/ui";
-import { createPageMetadata } from "@/lib/seo";
+import { createLocalizedPageMetadata } from "@/lib/seo-server";
 import { getPublicTrainingPrograms } from "@/lib/data/public-training";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> { return createLocalizedPageMetadata({
   title: "VTIME Training Registration",
   description: "Submit participant details for a VTIME training program.",
   path: "/vtime/registration",
-});
+}); }
 
 export const dynamic = "force-dynamic";
 

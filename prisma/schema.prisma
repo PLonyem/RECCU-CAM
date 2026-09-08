@@ -393,6 +393,7 @@ model Announcement {
   title         String
   opening       String    @db.Text // The brief paragraph (Dear Colleagues...)
   details       Json      @default("[]") // Array of { label, value }
+  translations  Json      @default("{}")
   category      String    @default("Circular") // Circular, Training, COBAC, Announcement, Event
   priority      String    @default("normal") // low, normal, high, urgent
   targetChapter String? // null = all chapters, or specific chapter

@@ -5,13 +5,13 @@ import { PageIntro } from "@/components/layout/PageIntro";
 import { TrainingCalendar } from "@/components/vtime/TrainingCalendar";
 import { Button, Container, Section } from "@/components/ui";
 import { getPublicTrainingPrograms } from "@/lib/data/public-training";
-import { createPageMetadata } from "@/lib/seo";
+import { createLocalizedPageMetadata } from "@/lib/seo-server";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> { return createLocalizedPageMetadata({
   title: "VTIME Training Calendar",
   description: "Navigate confirmed VTIME training cohorts by month or list view.",
   path: "/vtime/calendar",
-});
+}); }
 
 export const dynamic = "force-dynamic";
 

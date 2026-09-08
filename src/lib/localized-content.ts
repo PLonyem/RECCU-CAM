@@ -66,6 +66,13 @@ export function localizeResource<T extends { title: string; description: string 
   return { ...resource, title: localized.title, description: localized.description || null };
 }
 
+export function localizeAnnouncement<T extends { title: string; opening: string; translations: unknown }>(
+  announcement: T,
+  language: Language,
+): T {
+  return { ...announcement, ...getLocalizedFields({ title: announcement.title, opening: announcement.opening }, announcement.translations, language) };
+}
+
 export function localizeHomepageSections(
   english: HomepageSectionsContent,
   french: HomepageSectionsContent | null,

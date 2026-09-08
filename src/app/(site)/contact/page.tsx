@@ -15,16 +15,16 @@ import { buttonVariants } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { institution } from "@/config/institution";
-import { createPageMetadata } from "@/lib/seo";
+import { createLocalizedPageMetadata } from "@/lib/seo-server";
 import { prisma } from "@/lib/prisma";
 import { readPublicData } from "@/lib/public-data";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> { return createLocalizedPageMetadata({
   title: "Contact | Get in Touch",
   description:
     "Contact RECCU-CAM for institutional inquiries, affiliate support, training, partnerships, compliance matters and general information.",
   path: "/contact",
-});
+}); }
 
 const contactGuidance = [
   [

@@ -6,13 +6,13 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { getMappableAffiliates } from "@/data/affiliates";
 import { getPublicAffiliates } from "@/lib/data/public-affiliates";
-import { createPageMetadata } from "@/lib/seo";
+import { createLocalizedPageMetadata } from "@/lib/seo-server";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> { return createLocalizedPageMetadata({
   title: "Interactive Network Map",
   description: "Explore RECCU-CAM network affiliates with verified geographic coordinates on an interactive OpenStreetMap.",
   path: "/network/map",
-});
+}); }
 
 export const dynamic = "force-dynamic";
 

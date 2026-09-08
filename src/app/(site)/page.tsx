@@ -12,7 +12,7 @@ import { prisma } from "@/lib/prisma";
 import { blankHomepageSections, parseHomepageSections } from "@/data/homepage-cms";
 import { readPublicData } from "@/lib/public-data";
 import { getServerTranslator } from "@/lib/i18n-server";
-import { localizeHomepageSections } from "@/lib/localized-content";
+import { localizeAnnouncement, localizeHomepageSections } from "@/lib/localized-content";
 
 export const dynamic = "force-dynamic";
 
@@ -73,11 +73,12 @@ export default async function HomePage() {
   const englishCms = parseHomepageSections(sectionsRecord?.content);
   const frenchCms = localizedSectionsRecord ? parseHomepageSections(localizedSectionsRecord.content, blankHomepageSections) : null;
   const cms = localizeHomepageSections(englishCms, frenchCms, language);
+  const localizedNotice = notice ? localizeAnnouncement(notice, language) : null;
   return (
     <>
       {homepageContent?.showHero !== false && <HomeHero content={homepageContent} />}
 
-      {notice && <section className="border-b border-amber-200 bg-amber-50 py-4"><Container className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-800">{tText("Official notice")} · {tText(notice.priority)}</p><p className="mt-1 font-semibold text-institutional">{notice.title}</p></div><p className="max-w-2xl text-sm text-slate-700">{notice.opening}</p></Container></section>}
+      {localizedNotice && <section className="border-b border-amber-200 bg-amber-50 py-4"><Container className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-800">{tText("Official notice")} · {tText(localizedNotice.priority)}</p><p className="mt-1 font-semibold text-institutional">{localizedNotice.title}</p></div><p className="max-w-2xl text-sm text-slate-700">{localizedNotice.opening}</p></Container></section>}
 
       <Section tone="surface" className="overflow-hidden">
         <Container className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">

@@ -20,6 +20,8 @@ import { requestAdminData } from "@/lib/admin-data-client";
 import { cn } from "@/lib/utils";
 import { regions, regionLabels } from "@/data/admin-options";
 import { RejectDialog } from "./RejectDialog";
+import { useLanguage } from "@/context/LanguageContext";
+import { formatDate as formatLocalizedDate } from "@/lib/i18n";
 
 interface DocumentSummary {
   id: string;
@@ -85,9 +87,9 @@ function chapterLabelFor(region: string): string {
   return `${regionLabels[region]?.en ?? region} Chapter`;
 }
 
-function formatDate(iso: string | null): string {
+function formatDate(iso: string | null, language: "en" | "fr"): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-US", {
+  return formatLocalizedDate(iso, language, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -114,6 +116,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode | null 
 }
 
 export default function ChapterReviewPage() {
+  const { language } = useLanguage();
   const [chapters, setChapters] = useState<ReviewChapter[]>([]);
   const [counts, setCounts] = useState<Counts>({ pending: 0, approved: 0, rejected: 0, total: 0 });
   const [statusFilter, setStatusFilter] = useState("");
@@ -312,7 +315,7 @@ export default function ChapterReviewPage() {
                         <td className="px-4 py-3">
                           <Badge variant="primary">{chapterLabelFor(chapter.region)}</Badge>
                         </td>
-                        <td className="px-4 py-3 text-gray-600">{formatDate(chapter.profileUpdatedAt)}</td>
+                        <td className="px-4 py-3 text-gray-600">{formatDate(chapter.profileUpdatedAt, language)}</td>
                         <td className="px-4 py-3">
                           <Badge variant={statusVariant(chapter.profileStatus)}>
                             {statusLabel(chapter.profileStatus)}
@@ -445,7 +448,7 @@ export default function ChapterReviewPage() {
                                       <div className="min-w-0">
                                         <p className="text-sm text-gray-900 truncate">{document.fileName}</p>
                                         <p className="text-xs text-gray-500">
-                                          {formatFileSize(document.fileSize)} · {formatDate(document.createdAt)}
+                                          {formatFileSize(document.fileSize)} · {formatDate(document.createdAt, language)}
                                         </p>
                                       </div>
                                     </div>

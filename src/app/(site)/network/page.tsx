@@ -13,13 +13,13 @@ import { CTASection } from "@/components/ui/CTASection";
 import { Section } from "@/components/ui/Section";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { institution } from "@/config/institution";
-import { createPageMetadata } from "@/lib/seo";
+import { createLocalizedPageMetadata } from "@/lib/seo-server";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> { return createLocalizedPageMetadata({
   title: "Our Network",
   description: "Explore the RECCU-CAM network overview, source-labelled affiliate directory, verified map locations, and affiliation pathway.",
   path: "/network",
-});
+}); }
 
 const networkPathways = [
   {

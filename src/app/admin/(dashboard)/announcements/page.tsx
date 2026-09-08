@@ -13,11 +13,15 @@ import { regions, regionLabels } from "@/data/admin-options";
 import { requestAdminData } from "@/lib/admin-data-client";
 import { cn } from "@/lib/utils";
 import type { AnnouncementDetail } from "@/lib/validation/announcement";
+import { getTranslationDraft } from "@/lib/localized-content";
+import { useLanguage } from "@/context/LanguageContext";
+import { formatDate as formatLocalizedDate } from "@/lib/i18n";
 
 interface AnnouncementRow {
   id: string;
   title: string;
   opening: string;
+  translations: unknown;
   details: AnnouncementDetail[];
   category: string;
   priority: string;
@@ -78,9 +82,9 @@ const inputClass =
 const labelClass = "block text-sm font-medium text-gray-700 mb-1.5";
 const errorClass = "text-xs text-red-600 mt-1";
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, language: "en" | "fr"): string {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString("en-US", {
+  return formatLocalizedDate(value, language, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -90,6 +94,8 @@ function formatDate(value: string | null): string {
 interface FormState {
   title: string;
   opening: string;
+  titleFr: string;
+  openingFr: string;
   details: AnnouncementDetail[];
   category: string;
   priority: string;
@@ -102,6 +108,8 @@ interface FormState {
 const EMPTY_FORM: FormState = {
   title: "",
   opening: "",
+  titleFr: "",
+  openingFr: "",
   details: [],
   category: CATEGORIES[0],
   priority: "normal",
@@ -112,6 +120,7 @@ const EMPTY_FORM: FormState = {
 };
 
 export default function AdminAnnouncementsPage() {
+  const { language } = useLanguage();
   const [announcements, setAnnouncements] = useState<AnnouncementRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -175,10 +184,13 @@ export default function AdminAnnouncementsPage() {
   }
 
   function openEditModal(announcement: AnnouncementRow) {
+    const french = getTranslationDraft(announcement.translations);
     setEditingId(announcement.id);
     setForm({
       title: announcement.title,
       opening: announcement.opening,
+      titleFr: typeof french.title === "string" ? french.title : "",
+      openingFr: typeof french.opening === "string" ? french.opening : "",
       details: announcement.details,
       category: announcement.category,
       priority: announcement.priority,
@@ -213,6 +225,8 @@ export default function AdminAnnouncementsPage() {
     const payload = {
       title: form.title,
       opening: form.opening,
+      titleFr: form.titleFr,
+      openingFr: form.openingFr,
       // Rows an admin added but never actually filled in (both sides still
       // blank) are dropped silently rather than tripping the "label is
       // required" validation error on a row nobody meant to keep.
@@ -367,7 +381,7 @@ export default function AdminAnnouncementsPage() {
                             {announcement.category}
                           </Badge>
                           <span className="text-xs text-gray-400">
-                            Published {formatDate(announcement.publishedAt)}
+                            Published {formatDate(announcement.publishedAt, language)}
                           </span>
                         </div>
                         <p className="text-sm text-gray-600 mt-2 line-clamp-2">{announcement.opening}</p>
@@ -423,7 +437,7 @@ export default function AdminAnnouncementsPage() {
                             {announcement.category}
                           </Badge>
                           <span className="text-xs text-gray-400">
-                            Created {formatDate(announcement.createdAt)}
+                            Created {formatDate(announcement.createdAt, language)}
                           </span>
                         </div>
                       </div>
@@ -481,7 +495,7 @@ export default function AdminAnnouncementsPage() {
             <div className="mt-5 space-y-4">
               <div>
                 <label htmlFor="ann-title" className={labelClass}>
-                  Title
+                  Title — English
                 </label>
                 <input
                   id="ann-title"
@@ -492,6 +506,22 @@ export default function AdminAnnouncementsPage() {
                   disabled={isSaving}
                 />
                 {fieldErrors.title && <p className={errorClass}>{fieldErrors.title}</p>}
+              </div>
+
+              <div>
+                <label htmlFor="ann-title-fr" className={labelClass}>
+                  Titre — Français
+                </label>
+                <input
+                  id="ann-title-fr"
+                  type="text"
+                  value={form.titleFr}
+                  onChange={(e) => setForm((f) => ({ ...f, titleFr: e.target.value }))}
+                  className={inputClass}
+                  disabled={isSaving}
+                />
+                {!form.titleFr.trim() && <p className="mt-1 text-xs text-amber-700">French translation missing — English will be used.</p>}
+                {fieldErrors.titleFr && <p className={errorClass}>{fieldErrors.titleFr}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -535,7 +565,7 @@ export default function AdminAnnouncementsPage() {
 
               <div>
                 <label htmlFor="ann-opening" className={labelClass}>
-                  Opening Message
+                  Opening Message — English
                 </label>
                 <textarea
                   id="ann-opening"
@@ -547,6 +577,22 @@ export default function AdminAnnouncementsPage() {
                   disabled={isSaving}
                 />
                 {fieldErrors.opening && <p className={errorClass}>{fieldErrors.opening}</p>}
+              </div>
+
+              <div>
+                <label htmlFor="ann-opening-fr" className={labelClass}>
+                  Message d’ouverture — Français
+                </label>
+                <textarea
+                  id="ann-opening-fr"
+                  rows={3}
+                  value={form.openingFr}
+                  onChange={(e) => setForm((f) => ({ ...f, openingFr: e.target.value }))}
+                  className={inputClass}
+                  disabled={isSaving}
+                />
+                {!form.openingFr.trim() && <p className="mt-1 text-xs text-amber-700">French translation missing — English will be used.</p>}
+                {fieldErrors.openingFr && <p className={errorClass}>{fieldErrors.openingFr}</p>}
               </div>
 
               <div>

@@ -11,13 +11,13 @@ import { CTASection } from "@/components/ui/CTASection";
 import { Section } from "@/components/ui/Section";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { serviceAreaList } from "@/data/services";
-import { createPageMetadata } from "@/lib/seo";
+import { createLocalizedPageMetadata } from "@/lib/seo-server";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> { return createLocalizedPageMetadata({
   title: "Institutional Services",
   description: "Explore RECCU-CAM service areas for supervision, internal control, capacity building, Affiliate Banking, digital transformation, and institutional support.",
   path: "/services",
-});
+}); }
 
 export default function ServicesPage() {
   return (

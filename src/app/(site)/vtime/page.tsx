@@ -40,14 +40,14 @@ import {
   type TrainingCategorySlug,
 } from "@/data/training-programs";
 import { getPublicTrainingPrograms } from "@/lib/data/public-training";
-import { createPageMetadata } from "@/lib/seo";
+import { createLocalizedPageMetadata } from "@/lib/seo-server";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> { return createLocalizedPageMetadata({
   title: "VTIME",
   description:
     "Explore VTIME training foundations for microfinance professionals, cooperative leaders, entrepreneurs, and institutional teams.",
   path: "/vtime",
-});
+}); }
 
 const categoryIcons: Record<TrainingCategorySlug, LucideIcon> = {
   "governance-leadership": Landmark,

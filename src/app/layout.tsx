@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Lexend } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
-import { frFR } from "@clerk/localizations/fr-FR";
-import { LanguageProvider } from "@/context/LanguageContext";
+import { AppProviders } from "@/components/i18n/AppProviders";
 import { institution, siteUrl } from "@/config/institution";
 import { designTokens } from "@/config/design-tokens";
 import { isClerkConfigured } from "@/lib/auth/config";
@@ -46,24 +44,11 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const language = await getServerLanguage();
-  const content = (
-    <LanguageProvider initialLanguage={language}>{children}</LanguageProvider>
-  );
 
   return (
     <html lang={language} className={`${inter.variable} ${lexend.variable} h-full antialiased`}>
       <body className={`${inter.className} min-h-full bg-background text-foreground`}>
-        {isClerkConfigured() ? (
-          <ClerkProvider
-            localization={language === "fr" ? frFR : undefined}
-            signInUrl="/sign-in"
-            signUpUrl="/sign-up"
-            signInFallbackRedirectUrl="/auth/complete"
-            signUpFallbackRedirectUrl="/auth/complete"
-          >
-            {content}
-          </ClerkProvider>
-        ) : content}
+        <AppProviders initialLanguage={language} clerkConfigured={isClerkConfigured()}>{children}</AppProviders>
       </body>
     </html>
   );

@@ -24,13 +24,13 @@ import { CTASection } from "@/components/ui/CTASection";
 import { IconFeature } from "@/components/ui/IconFeature";
 import { Section } from "@/components/ui/Section";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { createPageMetadata } from "@/lib/seo";
+import { createLocalizedPageMetadata } from "@/lib/seo-server";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> { return createLocalizedPageMetadata({
   title: "Affiliate Banking",
   description: "Learn how RECCU-CAM Affiliate Banking supports institutional resilience, liquidity, and cooperative growth through structured network-based solutions.",
   path: "/services/affiliate-banking",
-});
+}); }
 
 const benefits = [
   {

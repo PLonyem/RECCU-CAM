@@ -17,6 +17,7 @@ import {
   getLocalizedFields,
   localizeHomepageContent,
   localizeHomepageSections,
+  localizeAnnouncement,
   localizeNewsArticle,
   localizeResource,
   localizeTrainingProgram,
@@ -68,23 +69,6 @@ test("the admin dashboard body reacts to language changes without changing its s
   assert.match(welcome, /translationKey="admin\.dashboard\.state"/);
   assert.match(adminText, /useLanguage\(\)/);
   assert.match(adminText, /translateAdminText\(language, value \?\? ""\)/);
-});
-
-test("admin child routes share immediate translation wiring while preserving route and form state", () => {
-  const layout = readFileSync("src/app/admin/(dashboard)/layout.tsx", "utf8");
-  const boundary = readFileSync("src/components/admin/AdminLocalizationBoundary.tsx", "utf8");
-  const inbox = readFileSync("src/components/admin/MessagesInbox.tsx", "utf8");
-
-  assert.match(layout, /<AdminLocalizationBoundary>\{children\}<\/AdminLocalizationBoundary>/);
-  assert.match(boundary, /MutationObserver/);
-  assert.match(boundary, /translateAdminText\(language, source\)/);
-  assert.doesNotMatch(boundary, /router\.|location\.|reload\(/);
-  assert.doesNotMatch(boundary, /cloneElement|key=/);
-  assert.match(inbox, /data-admin-no-translate/);
-  assert.equal(translateAdminText("fr", "No affiliates found."), "Aucune affiliée trouvée.");
-  assert.equal(translateAdminText("fr", "Audit Log Summary"), "Résumé du journal d’audit");
-  assert.equal(translateAdminText("fr", "Save programme"), "Enregistrer le programme");
-  assert.equal(translateAdminText("en", "Published"), "Published");
 });
 
 test("French editorial content falls back field-by-field to English", () => {
@@ -171,6 +155,15 @@ test("shared CMS resolver localizes news, VTIME, and resources with per-field fa
   assert.deepEqual({ title: resource.title, description: resource.description }, { title: "Guide FR", description: "English description" });
 });
 
+test("announcements use the shared bilingual resolver with field-level English fallback", () => {
+  const announcement = localizeAnnouncement(
+    { title: "English notice", opening: "English body", translations: { fr: { title: "Avis français", opening: "" } } },
+    "fr",
+  );
+  assert.equal(announcement.title, "Avis français");
+  assert.equal(announcement.opening, "English body");
+});
+
 test("validation, dates, and numbers respect the selected locale", () => {
   assert.equal(translateValidationMessage("fr", "Email address is required."), "L’adresse e-mail est requise.");
   assert.match(formatDate("2026-09-08T00:00:00Z", "fr", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }), /8 septembre 2026/i);
@@ -179,16 +172,59 @@ test("validation, dates, and numbers respect the selected locale", () => {
 
 test("root rendering and all three application shells use the canonical locale", () => {
   const root = readFileSync("src/app/layout.tsx", "utf8");
+  const appProviders = readFileSync("src/components/i18n/AppProviders.tsx", "utf8");
   const switcher = readFileSync("src/components/i18n/LanguageSwitcher.tsx", "utf8");
   const provider = readFileSync("src/context/LanguageContext.tsx", "utf8");
   const navbar = readFileSync("src/components/layout/Navbar.tsx", "utf8");
   const admin = readFileSync("src/components/admin/AdminNavbar.tsx", "utf8");
   const portal = readFileSync("src/components/portal/PortalShell.tsx", "utf8");
   assert.match(root, /<html lang=\{language\}/);
-  assert.match(root, /localization=\{language === "fr" \? frFR/);
+  assert.match(root, /<AppProviders initialLanguage=\{language\}/);
+  assert.match(appProviders, /localization=\{language === "fr" \? frFR/);
+  assert.match(appProviders, /<LocalizationBoundary>\{children\}<\/LocalizationBoundary>/);
   assert.match(provider, /fetch\("\/api\/locale"/);
   assert.match(switcher, /aria-pressed=\{language === locale\}/);
   for (const source of [navbar, admin, portal]) assert.match(source, /<LanguageSwitcher/);
+});
+
+test("every application surface is covered by the global instant localization boundary", () => {
+  const boundary = readFileSync("src/components/i18n/LocalizationBoundary.tsx", "utf8");
+  const adminLayout = readFileSync("src/app/admin/(dashboard)/layout.tsx", "utf8");
+  assert.match(boundary, /MutationObserver/);
+  assert.match(boundary, /alt.*aria-label.*placeholder.*title/);
+  assert.match(boundary, /data-radix-portal/);
+  assert.match(boundary, /translateUiText\(language, source\)/);
+  assert.doesNotMatch(boundary, /router\.|location\.|reload\(/);
+  assert.doesNotMatch(adminLayout, /AdminLocalizationBoundary/);
+});
+
+test("bilingual announcements are persisted safely and localized on every consumer", () => {
+  const schema = readFileSync("prisma/schema.prisma", "utf8");
+  const migration = readFileSync("prisma/migrations/20260908120000_announcement_i18n/migration.sql", "utf8");
+  const adminApi = readFileSync("src/app/api/admin/announcements/route.ts", "utf8");
+  const homepage = readFileSync("src/app/(site)/page.tsx", "utf8");
+  const portal = readFileSync("src/app/affiliate-portal/[section]/page.tsx", "utf8");
+  const feed = readFileSync("src/components/dashboard/AnnouncementsFeed.tsx", "utf8");
+  assert.match(schema, /model Announcement[\s\S]*translations\s+Json/);
+  assert.match(migration, /ADD COLUMN "translations" JSONB NOT NULL DEFAULT '\{\}'/);
+  assert.match(adminApi, /translations: \{ fr: \{ title: data\.titleFr, opening: data\.openingFr \} \}/);
+  assert.match(homepage, /localizeAnnouncement\(notice, language\)/);
+  assert.match(portal, /rows\.map\(\(row\) => localizeAnnouncement\(row, language\)\)/);
+  assert.match(feed, /localizeAnnouncement\(announcement, language\)/);
+});
+
+test("public static page metadata is locale-aware", () => {
+  const pages = [
+    "about", "contact", "faq", "network", "network/affiliates", "network/become-an-affiliate", "network/map",
+    "services", "services/affiliate-banking", "services/capacity-building", "services/consultancy", "services/digitalization",
+    "services/financial-auditing", "services/regulatory-supervision", "vtime", "vtime/calendar", "vtime/programs", "vtime/registration",
+  ];
+  for (const page of pages) {
+    const source = readFileSync(`src/app/(site)/${page}/page.tsx`, "utf8");
+    assert.match(source, /generateMetadata/);
+    assert.match(source, /createLocalizedPageMetadata/);
+    assert.doesNotMatch(source, /export const metadata/);
+  }
 });
 
 test("localized public CMS responses are cookie-varying and production builds deploy migrations", () => {

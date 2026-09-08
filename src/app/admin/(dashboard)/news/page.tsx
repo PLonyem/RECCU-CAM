@@ -11,6 +11,7 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { CATEGORIES } from "@/data/admin-options";
 import { useLanguage } from "@/context/LanguageContext";
 import { requestAdminData } from "@/lib/admin-data-client";
+import { formatDate as formatLocalizedDate } from "@/lib/i18n";
 
 interface NewsArticleRow {
   id: string;
@@ -55,8 +56,8 @@ function categoryLabel(category: string): string {
   return CATEGORIES.find((c) => c.value === category)?.label.en ?? category;
 }
 
-function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString("en-US", {
+function formatDate(value: string, language: "en" | "fr"): string {
+  return formatLocalizedDate(value, language, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -64,7 +65,7 @@ function formatDate(value: string): string {
 }
 
 export default function AdminNewsPage() {
-  const { t } = useLanguage();
+  const { language: locale, t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const showCreatedToast = searchParams.get("created") === "1";
@@ -311,7 +312,7 @@ export default function AdminNewsPage() {
                         {article.authorName}
                       </td>
                       <td className="px-4 py-3 text-gray-600">
-                        {formatDate(article.publishedAt ?? article.createdAt)}
+                        {formatDate(article.publishedAt ?? article.createdAt, locale)}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
@@ -377,7 +378,7 @@ export default function AdminNewsPage() {
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-500">
                   <span>{article.authorName}</span>
-                  <span>{formatDate(article.publishedAt ?? article.createdAt)}</span>
+                  <span>{formatDate(article.publishedAt ?? article.createdAt, locale)}</span>
                 </div>
               </div>
             ))}

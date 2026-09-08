@@ -17,6 +17,9 @@ import {
 } from "lucide-react";
 import { Badge, type BadgeProps } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
+import { formatDate as formatLocalizedDate } from "@/lib/i18n";
+import { localizeAnnouncement } from "@/lib/localized-content";
 
 interface AnnouncementDetail {
   label: string;
@@ -31,6 +34,7 @@ interface Announcement {
   category: string;
   priority: string;
   publishedAt: string | null;
+  translations: unknown;
 }
 
 const CATEGORY_BADGE_VARIANT: Record<string, NonNullable<BadgeProps["variant"]>> = {
@@ -68,9 +72,9 @@ function iconForLabel(label: string): LucideIcon {
   return Info;
 }
 
-function formatDate(iso: string | null): string {
+function formatDate(iso: string | null, language: "en" | "fr"): string {
   if (!iso) return "";
-  return new Date(iso).toLocaleDateString("en-US", {
+  return formatLocalizedDate(iso, language, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -87,10 +91,12 @@ function AnnouncementCard({
   item,
   isExpanded,
   onToggle,
+  language,
 }: {
   item: Announcement;
   isExpanded: boolean;
   onToggle: () => void;
+  language: "en" | "fr";
 }) {
   return (
     <div
@@ -156,7 +162,7 @@ function AnnouncementCard({
       {isExpanded && <div className="border-t border-gray-100 my-2" />}
 
       <div className="flex items-center justify-between mt-2">
-        <span className="text-xs font-bold text-gray-500">{formatDate(item.publishedAt)}</span>
+        <span className="text-xs font-bold text-gray-500">{formatDate(item.publishedAt, language)}</span>
         <button
           type="button"
           onClick={onToggle}
@@ -180,6 +186,7 @@ function AnnouncementCard({
 }
 
 export function AnnouncementsFeed() {
+  const { language } = useLanguage();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -212,12 +219,13 @@ export function AnnouncementsFeed() {
         <p className="mt-4 text-gray-400 text-sm">No announcements from RECCU-CAM at this time.</p>
       ) : (
         <div className="mt-4 space-y-2">
-          {announcements.map((item) => (
+          {announcements.map((announcement) => localizeAnnouncement(announcement, language)).map((item) => (
             <AnnouncementCard
               key={item.id}
               item={item}
               isExpanded={expandedId === item.id}
               onToggle={() => toggleExpanded(item.id)}
+              language={language}
             />
           ))}
         </div>

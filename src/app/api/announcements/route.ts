@@ -42,5 +42,7 @@ export async function GET() {
     })
     .slice(0, 5);
 
-  return NextResponse.json(sorted);
+  return NextResponse.json(sorted, {
+    headers: { "Cache-Control": "private, no-store" },
+  });
 }

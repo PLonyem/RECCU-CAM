@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
         data: {
           title: data.title,
           opening: data.opening,
+          translations: { fr: { title: data.titleFr, opening: data.openingFr } },
           details: data.details,
           category: data.category,
           priority: data.priority,

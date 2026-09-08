@@ -4,12 +4,16 @@ import { auth } from "@clerk/nextjs/server";
 import { CreditUnionNavbar } from "@/components/dashboard/CreditUnionNavbar";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { isAdminRole, isAffiliateRole } from "@/lib/auth/roles";
+import { getServerTranslator } from "@/lib/i18n-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Affiliate Portal",
+export async function generateMetadata(): Promise<Metadata> {
+  const { tText } = await getServerTranslator();
+  return {
+  title: tText("Affiliate Portal"),
   robots: { index: false, follow: false, noarchive: true },
-};
+  };
+}
 
 export default async function DashboardLayout({
   children,

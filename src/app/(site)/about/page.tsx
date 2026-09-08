@@ -7,13 +7,13 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { institution, verificationNotice } from "@/config/institution";
-import { createPageMetadata } from "@/lib/seo";
+import { createLocalizedPageMetadata } from "@/lib/seo-server";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> { return createLocalizedPageMetadata({
   title: "About",
   description: `Learn about ${institution.legalName} and the verified foundation of this digital platform.`,
   path: "/about",
-});
+}); }
 
 export default function AboutPage() {
   return (

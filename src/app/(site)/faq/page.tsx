@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
-import { createPageMetadata } from "@/lib/seo";
+import { createLocalizedPageMetadata } from "@/lib/seo-server";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> { return createLocalizedPageMetadata({
   title: "Frequently Asked Questions",
   description: "Answers about RECCU-CAM, the affiliate directory, VTIME, and the Knowledge Centre without unverified claims.",
   path: "/faq",
-});
+}); }
 const questions = [
   ["What is RECCU-CAM?", "RECCU-CAM LTD is the Union of Renaissance Cooperative Credit Unions in Cameroon Ltd, listed by Cameroon’s Ministry of Finance as a network headquartered in Bamenda."],
   ["Can I open an account with RECCU-CAM through this website?", "No account-opening service is published on this platform. Use the source-labelled directory to identify an affiliate, then confirm services directly through that institution’s verified channels."],
