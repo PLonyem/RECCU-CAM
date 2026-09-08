@@ -4,11 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { readPublicData } from "@/lib/public-data";
 import { mapPublicNewsArticle } from "@/lib/data/public-content-mappers";
 import { getServerLanguage } from "@/lib/i18n-server";
-import { getLocalizedFields } from "@/lib/localized-content";
-
-function localizeRecord<T extends { title: string; excerpt: string; content: string; translations: unknown }>(record: T, language: "en" | "fr") {
-  return { ...record, ...getLocalizedFields({ title: record.title, excerpt: record.excerpt, content: record.content }, record.translations, language) };
-}
+import { localizeNewsArticle } from "@/lib/localized-content";
 
 export async function getPublicNewsArticles() {
   const language = await getServerLanguage();
@@ -21,7 +17,7 @@ export async function getPublicNewsArticles() {
     [],
   );
 
-  return records.map((record) => mapPublicNewsArticle(localizeRecord(record, language))).filter((record) => record !== null);
+  return records.map((record) => mapPublicNewsArticle(localizeNewsArticle(record, language))).filter((record) => record !== null);
 }
 
 export async function getPublicNewsArticleBySlug(slug: string) {
@@ -34,5 +30,5 @@ export async function getPublicNewsArticleBySlug(slug: string) {
     null,
   );
 
-  return record ? mapPublicNewsArticle(localizeRecord(record, language)) : null;
+  return record ? mapPublicNewsArticle(localizeNewsArticle(record, language)) : null;
 }

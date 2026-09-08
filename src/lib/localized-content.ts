@@ -44,6 +44,28 @@ export function localizeHomepageContent<T extends { translations: unknown } & Re
   return { ...content, ...getLocalizedFields(english, content.translations, language) };
 }
 
+export function localizeNewsArticle<T extends { title: string; excerpt: string; content: string; translations: unknown }>(
+  article: T,
+  language: Language,
+): T {
+  return { ...article, ...getLocalizedFields({ title: article.title, excerpt: article.excerpt, content: article.content }, article.translations, language) };
+}
+
+export function localizeTrainingProgram<T extends { title: string; summary: string; translations: unknown }>(
+  program: T,
+  language: Language,
+): T {
+  return { ...program, ...getLocalizedFields({ title: program.title, summary: program.summary }, program.translations, language) };
+}
+
+export function localizeResource<T extends { title: string; description: string | null; translations: unknown }>(
+  resource: T,
+  language: Language,
+): T {
+  const localized = getLocalizedFields({ title: resource.title, description: resource.description ?? "" }, resource.translations, language);
+  return { ...resource, title: localized.title, description: localized.description || null };
+}
+
 export function localizeHomepageSections(
   english: HomepageSectionsContent,
   french: HomepageSectionsContent | null,

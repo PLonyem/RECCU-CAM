@@ -11,7 +11,14 @@ import {
   translateValidationMessage,
   translations,
 } from "@/lib/i18n";
-import { getLocalizedFields, translationCompleteness } from "@/lib/localized-content";
+import {
+  getLocalizedFields,
+  localizeHomepageContent,
+  localizeNewsArticle,
+  localizeResource,
+  localizeTrainingProgram,
+  translationCompleteness,
+} from "@/lib/localized-content";
 
 test("locale configuration is cookie-backed and fail-safe", () => {
   assert.equal(LOCALE_COOKIE, "reccu_locale");
@@ -41,6 +48,55 @@ test("French editorial content falls back field-by-field to English", () => {
   assert.deepEqual(translationCompleteness({ fr: { title: "Titre français" } }, ["title", "description"]), { completed: 1, total: 2, complete: false });
 });
 
+test("homepage CMS content resolves English and French on the server", () => {
+  const content = {
+    heroBadge: "Institutional network",
+    heroTitle: "English headline",
+    heroSubtitle: "English subtitle",
+    primaryButtonText: "Explore the network",
+    primaryButtonLink: "/network",
+    secondaryButtonText: "Discover VTIME",
+    secondaryButtonLink: "/vtime",
+    translations: {
+      fr: {
+        heroBadge: "Réseau institutionnel",
+        heroTitle: "Titre français",
+        heroSubtitle: "Sous-titre français",
+        primaryButtonText: "Explorer le réseau",
+        secondaryButtonText: "Découvrir VTIME",
+      },
+    },
+  };
+
+  assert.equal(localizeHomepageContent(content, "en").heroTitle, "English headline");
+  const french = localizeHomepageContent(content, "fr");
+  assert.equal(french.heroBadge, "Réseau institutionnel");
+  assert.equal(french.heroTitle, "Titre français");
+  assert.equal(french.heroSubtitle, "Sous-titre français");
+  assert.equal(french.primaryButtonText, "Explorer le réseau");
+  assert.equal(french.secondaryButtonText, "Découvrir VTIME");
+  assert.equal(french.primaryButtonLink, "/network");
+});
+
+test("shared CMS resolver localizes news, VTIME, and resources with per-field fallback", () => {
+  const news = localizeNewsArticle(
+    { title: "News", excerpt: "Summary", content: "Body", translations: { fr: { title: "Actualité", content: "Corps" } } },
+    "fr",
+  );
+  const training = localizeTrainingProgram(
+    { title: "Course", summary: "Course summary", translations: { fr: { title: "Formation", summary: "Résumé" } } },
+    "fr",
+  );
+  const resource = localizeResource(
+    { title: "Guide", description: "English description", translations: { fr: { title: "Guide FR", description: "" } } },
+    "fr",
+  );
+
+  assert.deepEqual({ title: news.title, excerpt: news.excerpt, content: news.content }, { title: "Actualité", excerpt: "Summary", content: "Corps" });
+  assert.deepEqual({ title: training.title, summary: training.summary }, { title: "Formation", summary: "Résumé" });
+  assert.deepEqual({ title: resource.title, description: resource.description }, { title: "Guide FR", description: "English description" });
+});
+
 test("validation, dates, and numbers respect the selected locale", () => {
   assert.equal(translateValidationMessage("fr", "Email address is required."), "L’adresse e-mail est requise.");
   assert.match(formatDate("2026-09-08T00:00:00Z", "fr", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }), /8 septembre 2026/i);
@@ -59,4 +115,20 @@ test("root rendering and all three application shells use the canonical locale",
   assert.match(provider, /fetch\("\/api\/locale"/);
   assert.match(switcher, /aria-pressed=\{language === locale\}/);
   for (const source of [navbar, admin, portal]) assert.match(source, /<LanguageSwitcher/);
+});
+
+test("localized public CMS responses are cookie-varying and production builds deploy migrations", () => {
+  const homepageApi = readFileSync("src/app/api/homepage/route.ts", "utf8");
+  const homepagePage = readFileSync("src/app/(site)/page.tsx", "utf8");
+  const footer = readFileSync("src/components/layout/Footer.tsx", "utf8");
+  const packageJson = readFileSync("package.json", "utf8");
+  const migrationDeploy = readFileSync("scripts/deploy-migrations.mjs", "utf8");
+
+  assert.match(homepageApi, /private, no-store/);
+  assert.match(homepageApi, /Vary: "Cookie"/);
+  assert.match(homepagePage, /getServerTranslator/);
+  assert.match(homepagePage, /localizeHomepageContent\(homepageContent, language\)/);
+  assert.match(footer, /language === "fr"/);
+  assert.match(packageJson, /node scripts\/deploy-migrations\.mjs/);
+  assert.match(migrationDeploy, /prisma", "migrate", "deploy"/);
 });

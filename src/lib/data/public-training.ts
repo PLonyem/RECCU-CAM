@@ -4,11 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { readPublicData } from "@/lib/public-data";
 import { mapPublicTrainingProgram } from "@/lib/data/public-content-mappers";
 import { getServerLanguage } from "@/lib/i18n-server";
-import { getLocalizedFields } from "@/lib/localized-content";
-
-function localizeRecord<T extends { title: string; summary: string; translations: unknown }>(record: T, language: "en" | "fr") {
-  return { ...record, ...getLocalizedFields({ title: record.title, summary: record.summary }, record.translations, language) };
-}
+import { localizeTrainingProgram } from "@/lib/localized-content";
 
 export async function getPublicTrainingPrograms() {
   const language = await getServerLanguage();
@@ -21,7 +17,7 @@ export async function getPublicTrainingPrograms() {
     [],
   );
 
-  return records.map((record) => mapPublicTrainingProgram(localizeRecord(record, language)));
+  return records.map((record) => mapPublicTrainingProgram(localizeTrainingProgram(record, language)));
 }
 
 export async function getPublicTrainingProgramBySlug(slug: string) {
@@ -32,5 +28,5 @@ export async function getPublicTrainingProgramBySlug(slug: string) {
     null,
   );
 
-  return record ? mapPublicTrainingProgram(localizeRecord(record, language)) : null;
+  return record ? mapPublicTrainingProgram(localizeTrainingProgram(record, language)) : null;
 }

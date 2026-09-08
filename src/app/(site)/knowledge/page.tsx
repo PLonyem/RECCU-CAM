@@ -30,7 +30,7 @@ import { prisma } from "@/lib/prisma";
 import { readPublicData } from "@/lib/public-data";
 import { getServerTranslator } from "@/lib/i18n-server";
 import { formatDate } from "@/lib/i18n";
-import { getLocalizedFields } from "@/lib/localized-content";
+import { localizeResource } from "@/lib/localized-content";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { language, tText } = await getServerTranslator();
@@ -64,7 +64,7 @@ export default async function KnowledgePage() {
       }),
     [],
   );
-  const localizedResources = publishedResources.map((resource) => ({ ...resource, ...getLocalizedFields({ title: resource.title, description: resource.description ?? "" }, resource.translations, language) }));
+  const localizedResources = publishedResources.map((resource) => localizeResource(resource, language));
   return (
     <>
       <PageIntro

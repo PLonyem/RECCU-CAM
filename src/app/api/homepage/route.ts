@@ -15,5 +15,7 @@ export async function GET() {
     create: { id: "default" },
   });
 
-  return NextResponse.json(localizeHomepageContent(content, language));
+  return NextResponse.json(localizeHomepageContent(content, language), {
+    headers: { "Cache-Control": "private, no-store", Vary: "Cookie" },
+  });
 }
