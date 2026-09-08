@@ -22,6 +22,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { AdminDashboardWelcome } from "@/components/admin/AdminDashboardWelcome";
+import { AdminDate, AdminText, AdminTextNode } from "@/components/admin/AdminText";
 import { Badge, type BadgeProps } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { buttonVariants } from "@/components/ui/Button";
@@ -65,21 +66,6 @@ function countStatuses(
     .reduce((total, row) => total + row._count._all, 0);
 }
 
-function formatDate(date: Date | null) {
-  return date
-    ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(date)
-    : "Not scheduled";
-}
-
-function formatTime(date: Date) {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
-
 function labelize(value: string) {
   return value.replaceAll("-", " ").replaceAll("_", " ");
 }
@@ -102,8 +88,8 @@ function Panel({ title, description, action, children, className }: {
     <Card className={cn("min-w-0 overflow-hidden", className)}>
       <div className="flex flex-col gap-4 border-b border-slate-200 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-6">
         <div>
-          <h2 className="font-display text-xl font-bold text-institutional">{title}</h2>
-          {description && <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>}
+          <h2 className="font-display text-xl font-bold text-institutional"><AdminText value={title} /></h2>
+          {description && <p className="mt-1 text-sm leading-6 text-slate-500"><AdminText value={description} /></p>}
         </div>
         {action}
       </div>
@@ -120,8 +106,8 @@ function EmptyState({ icon: Icon, title, description }: {
   return (
     <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
       <Icon className="mx-auto h-7 w-7 text-slate-400" aria-hidden="true" />
-      <p className="mt-3 font-semibold text-slate-800">{title}</p>
-      <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-slate-500">{description}</p>
+      <p className="mt-3 font-semibold text-slate-800"><AdminText value={title} /></p>
+      <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-slate-500"><AdminText value={description} /></p>
     </div>
   );
 }
@@ -152,8 +138,8 @@ function StatCard({ label, value, detail, icon: Icon, href }: {
           </span>
           <span className="font-display text-3xl font-bold tabular-nums text-institutional">{value}</span>
         </div>
-        <h2 className="mt-5 font-semibold text-slate-900">{label}</h2>
-        <p className="mt-1 text-sm text-slate-500">{detail}</p>
+        <h2 className="mt-5 font-semibold text-slate-900"><AdminText value={label} /></h2>
+        <p className="mt-1 text-sm text-slate-500"><AdminText value={detail} /></p>
       </Card>
     </Link>
   );
@@ -401,8 +387,8 @@ export default async function AdminDashboardPage() {
       {summaryCards.length > 0 && (
         <section aria-labelledby="summary-heading">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <h2 id="summary-heading" className="font-display text-xl font-bold text-institutional">Executive summary</h2>
-            <p className="hidden text-xs text-slate-500 sm:block">Live stored records</p>
+            <h2 id="summary-heading" className="font-display text-xl font-bold text-institutional"><AdminText translationKey="admin.dashboard.executiveSummary" /></h2>
+            <p className="hidden text-xs text-slate-500 sm:block"><AdminText value="Live stored records" /></p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {summaryCards.map((card) => <StatCard key={card.label} {...card} />)}
@@ -431,7 +417,7 @@ export default async function AdminDashboardPage() {
             {quickActions.map(({ label, href, icon: Icon }) => (
               <Link key={label} href={href} className="group flex min-h-12 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition-colors hover:border-primary-200 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest">
                 <Icon className="h-4 w-4 text-forest" aria-hidden="true" />
-                <span className="flex-1">{label}</span>
+                <span className="flex-1"><AdminText value={label} /></span>
                 <ArrowRight className="h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </Link>
             ))}
@@ -461,10 +447,10 @@ export default async function AdminDashboardPage() {
                   {affiliates.data.recent.map((affiliate) => (
                     <div key={affiliate.id} className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 px-4 py-3">
                       <div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-900">{affiliate.name}</p><p className="mt-1 text-xs text-slate-500">{affiliate.code} · {affiliate.region}</p></div>
-                      <Badge variant={affiliate.isActive ? "success" : "default"}>{affiliate.isActive ? "Active" : "Inactive"}</Badge>
+                      <Badge variant={affiliate.isActive ? "success" : "default"}><AdminText value={affiliate.isActive ? "Active" : "Inactive"} /></Badge>
                     </div>
                   ))}
-                  {affiliates.data.recent.length === 0 && <p className="text-sm text-slate-500">No affiliate records are available.</p>}
+                  {affiliates.data.recent.length === 0 && <p className="text-sm text-slate-500"><AdminText value="No affiliate records are available." /></p>}
                 </div>
               </>
             )}
@@ -484,8 +470,8 @@ export default async function AdminDashboardPage() {
                 {training.data.programs.length ? (
                   <div className="mt-5 overflow-x-auto">
                     <table className="w-full min-w-[34rem] text-left text-sm">
-                      <thead className="text-xs uppercase tracking-wide text-slate-500"><tr><th className="pb-3 font-semibold">Program</th><th className="pb-3 font-semibold">Date</th><th className="pb-3 font-semibold">Location</th><th className="pb-3 text-right font-semibold">Registrations</th></tr></thead>
-                      <tbody className="divide-y divide-slate-200">{training.data.programs.map((program) => <tr key={program.id}><td className="py-3 pr-4 font-semibold text-slate-900">{program.title}</td><td className="py-3 pr-4 text-slate-600">{formatDate(program.startDate)}</td><td className="py-3 pr-4 text-slate-600">{program.venue || "Not confirmed"}</td><td className="py-3 text-right tabular-nums text-slate-700">{program._count.registrations}</td></tr>)}</tbody>
+                      <thead className="text-xs uppercase tracking-wide text-slate-500"><tr><th className="pb-3 font-semibold"><AdminText value="Program" /></th><th className="pb-3 font-semibold"><AdminText value="Date" /></th><th className="pb-3 font-semibold"><AdminText value="Location" /></th><th className="pb-3 text-right font-semibold"><AdminText value="Registrations" /></th></tr></thead>
+                      <tbody className="divide-y divide-slate-200">{training.data.programs.map((program) => <tr key={program.id}><td className="py-3 pr-4 font-semibold text-slate-900">{program.title}</td><td className="py-3 pr-4 text-slate-600"><AdminDate value={program.startDate} /></td><td className="py-3 pr-4 text-slate-600">{program.venue || <AdminText value="Not confirmed" />}</td><td className="py-3 text-right tabular-nums text-slate-700">{program._count.registrations}</td></tr>)}</tbody>
                     </table>
                   </div>
                 ) : <div className="mt-5"><EmptyState icon={CalendarDays} title="No VTIME programmes" description="Create a programme when delivery details are ready for staff review." /></div>}
@@ -506,7 +492,7 @@ export default async function AdminDashboardPage() {
                   <MiniMetric label="Draft documents" value={knowledge.data.draftCount} />
                   <MiniMetric label="Circulars" value={knowledge.data.circulars} />
                 </div>
-                <div className="mt-5 space-y-3">{knowledge.data.recent.map((resource) => <div key={resource.id} className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3 last:border-0 last:pb-0"><div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-900">{resource.title}</p><p className="mt-1 text-xs text-slate-500">{resource.category} · {labelize(resource.accessLevel)}</p></div><Badge variant={resource.published ? "success" : "default"}>{resource.published ? "Published" : "Draft"}</Badge></div>)}</div>
+                <div className="mt-5 space-y-3">{knowledge.data.recent.map((resource) => <div key={resource.id} className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3 last:border-0 last:pb-0"><div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-900">{resource.title}</p><p className="mt-1 text-xs text-slate-500"><AdminText value={resource.category} /> · <AdminText value={labelize(resource.accessLevel)} /></p></div><Badge variant={resource.published ? "success" : "default"}><AdminText value={resource.published ? "Published" : "Draft"} /></Badge></div>)}</div>
                 {knowledge.data.recent.length === 0 && <div className="mt-5"><EmptyState icon={BookOpenCheck} title="No knowledge documents" description="Approved resources will appear here after they are added." /></div>}
               </>
             )}
@@ -523,7 +509,7 @@ export default async function AdminDashboardPage() {
                   <MiniMetric label="More information" value={banking.data.informationCount} />
                   <MiniMetric label="Closed" value={banking.data.closedCount} />
                 </div>
-                <div className="mt-5 space-y-3">{banking.data.recent.map((inquiry) => <div key={inquiry.id} className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3 last:border-0 last:pb-0"><div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-900">{inquiry.institution}</p><p className="mt-1 text-xs text-slate-500">{inquiry.reference} · {inquiry.supportCategory}</p></div><Badge variant={statusVariant(inquiry.status)}>{labelize(inquiry.status)}</Badge></div>)}</div>
+                <div className="mt-5 space-y-3">{banking.data.recent.map((inquiry) => <div key={inquiry.id} className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3 last:border-0 last:pb-0"><div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-900">{inquiry.institution}</p><p className="mt-1 text-xs text-slate-500">{inquiry.reference} · <AdminText value={inquiry.supportCategory} /></p></div><Badge variant={statusVariant(inquiry.status)}><AdminText value={labelize(inquiry.status)} /></Badge></div>)}</div>
                 {banking.data.recent.length === 0 && <div className="mt-5"><EmptyState icon={HandCoins} title="No banking inquiries" description="New institutional service requests will appear here." /></div>}
               </>
             )}
@@ -537,7 +523,7 @@ export default async function AdminDashboardPage() {
             {!notices.available ? <DataUnavailable /> : (
               <>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><MiniMetric label="Active" value={notices.data.active} /><MiniMetric label="Upcoming" value={notices.data.upcoming} /><MiniMetric label="Expired" value={notices.data.expired} /><MiniMetric label="Urgent" value={notices.data.urgent} /></div>
-                <div className="mt-5 space-y-3">{notices.data.recent.map((notice) => <div key={notice.id} className="rounded-xl border border-slate-200 p-4"><div className="flex items-start justify-between gap-3"><p className="font-semibold text-slate-900">{notice.title}</p><Badge variant={statusVariant(notice.priority)}>{notice.priority}</Badge></div><p className="mt-2 text-xs text-slate-500">{labelize(notice.audience)} · {formatDate(notice.startDate)} – {formatDate(notice.expiryDate)}</p></div>)}</div>
+                <div className="mt-5 space-y-3">{notices.data.recent.map((notice) => <div key={notice.id} className="rounded-xl border border-slate-200 p-4"><div className="flex items-start justify-between gap-3"><p className="font-semibold text-slate-900">{notice.title}</p><Badge variant={statusVariant(notice.priority)}><AdminText value={notice.priority} /></Badge></div><p className="mt-2 text-xs text-slate-500"><AdminText value={labelize(notice.audience)} /> · <AdminDate value={notice.startDate} /> – <AdminDate value={notice.expiryDate} /></p></div>)}</div>
                 {notices.data.recent.length === 0 && <div className="mt-5"><EmptyState icon={Megaphone} title="No official notices" description="There are no draft or published notices to display." /></div>}
               </>
             )}
@@ -549,7 +535,7 @@ export default async function AdminDashboardPage() {
             {!support.available ? <DataUnavailable /> : (
               <>
                 <div className="grid grid-cols-3 gap-3"><MiniMetric label="Open" value={support.data.open} /><MiniMetric label="In progress" value={support.data.inProgress} /><MiniMetric label="Resolved" value={support.data.resolved} /></div>
-                <div className="mt-5 space-y-3">{support.data.recent.map((ticket) => <div key={ticket.id} className="grid gap-2 rounded-xl border border-slate-200 p-4 sm:grid-cols-[1fr_auto] sm:items-start"><div className="min-w-0"><p className="truncate font-semibold text-slate-900">{ticket.affiliate.name}</p><p className="mt-1 text-xs text-slate-500">{ticket.category} · {ticket.priority} priority</p><p className="mt-1 text-xs text-slate-500">Assigned: {ticket.assignedTo || "Unassigned"}</p></div><Badge variant={statusVariant(ticket.status)}>{labelize(ticket.status)}</Badge></div>)}</div>
+                <div className="mt-5 space-y-3">{support.data.recent.map((ticket) => <div key={ticket.id} className="grid gap-2 rounded-xl border border-slate-200 p-4 sm:grid-cols-[1fr_auto] sm:items-start"><div className="min-w-0"><p className="truncate font-semibold text-slate-900">{ticket.affiliate.name}</p><p className="mt-1 text-xs text-slate-500"><AdminText value={ticket.category} /> · <AdminText value={ticket.priority} /> <AdminText value="priority" /></p><p className="mt-1 text-xs text-slate-500"><AdminText value="Assigned" />: {ticket.assignedTo || <AdminText value="Unassigned" />}</p></div><Badge variant={statusVariant(ticket.status)}><AdminText value={labelize(ticket.status)} /></Badge></div>)}</div>
                 {support.data.recent.length === 0 && <div className="mt-5"><EmptyState icon={Headphones} title="No support requests" description="There are currently no affiliate support tickets." /></div>}
               </>
             )}
@@ -562,7 +548,7 @@ export default async function AdminDashboardPage() {
           <Panel title="Recent Activity" description="Latest non-sensitive administrative audit events." action={<PanelLink href="/admin/audit-log">Open Audit Log</PanelLink>}>
             {!activity.available ? <DataUnavailable /> : activity.data.length === 0 ? (
               <EmptyState icon={ScrollText} title="No audit activity" description="Recorded administrative changes will appear here." />
-            ) : <div className="divide-y divide-slate-200">{activity.data.map((entry) => <div key={entry.id} className="grid gap-2 py-3 first:pt-0 last:pb-0 sm:grid-cols-[1fr_auto]"><div><p className="text-sm font-semibold text-slate-900">{labelize(entry.action)}</p><p className="mt-1 text-xs text-slate-500">{labelize(entry.actorRole)} · Staff {entry.actorId.slice(-6)} · {labelize(entry.resource)}</p></div><time className="text-xs text-slate-500" dateTime={entry.createdAt.toISOString()}>{formatTime(entry.createdAt)}</time></div>)}</div>}
+            ) : <div className="divide-y divide-slate-200">{activity.data.map((entry) => <div key={entry.id} className="grid gap-2 py-3 first:pt-0 last:pb-0 sm:grid-cols-[1fr_auto]"><div><p className="text-sm font-semibold text-slate-900"><AdminText value={labelize(entry.action)} /></p><p className="mt-1 text-xs text-slate-500"><AdminText value={labelize(entry.actorRole)} /> · <AdminText value="Staff" /> {entry.actorId.slice(-6)} · <AdminText value={labelize(entry.resource)} /></p></div><time className="text-xs text-slate-500" dateTime={entry.createdAt.toISOString()}><AdminDate value={entry.createdAt} includeTime /></time></div>)}</div>}
           </Panel>
         )}
 
@@ -578,26 +564,26 @@ export default async function AdminDashboardPage() {
       </div>
 
       <Card className="border-l-4 border-l-gold p-5 sm:p-6">
-        <div className="flex gap-3"><CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-forest" aria-hidden="true" /><div><h2 className="font-semibold text-institutional">Verified operational data</h2><p className="mt-1 text-sm leading-6 text-slate-600">Dashboard figures are calculated from stored records available to your role. No financial balances, regulatory deadlines, or unverified institutional statistics are fabricated.</p></div></div>
+        <div className="flex gap-3"><CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-forest" aria-hidden="true" /><div><h2 className="font-semibold text-institutional"><AdminText value="Verified operational data" /></h2><p className="mt-1 text-sm leading-6 text-slate-600"><AdminText value="Dashboard figures are calculated from stored records available to your role. No financial balances, regulatory deadlines, or unverified institutional statistics are fabricated." /></p></div></div>
       </Card>
     </div>
   );
 }
 
 function PanelLink({ href, children }: { href: string; children: ReactNode }) {
-  return <Link href={href} className={buttonVariants({ variant: "secondary", size: "sm", className: "shrink-0" })}>{children}<ArrowRight className="h-3.5 w-3.5" aria-hidden="true" /></Link>;
+  return <Link href={href} className={buttonVariants({ variant: "secondary", size: "sm", className: "shrink-0" })}><AdminTextNode>{children}</AdminTextNode><ArrowRight className="h-3.5 w-3.5" aria-hidden="true" /></Link>;
 }
 
 function StatusRow({ label, value }: { label: string; value: string }) {
-  return <div className="flex items-center justify-between gap-4 py-3"><span className="text-sm font-semibold text-slate-800">{label}</span><span className="text-right text-sm text-slate-500">{value}</span></div>;
+  return <div className="flex items-center justify-between gap-4 py-3"><span className="text-sm font-semibold text-slate-800"><AdminText value={label} /></span><span className="text-right text-sm text-slate-500"><AdminText value={value} /></span></div>;
 }
 
 function MiniMetric({ label, value, className }: { label: string; value: number; className?: string }) {
-  return <div className={cn("rounded-xl bg-slate-50 p-3", className)}><p className="font-display text-2xl font-bold tabular-nums text-institutional">{value}</p><p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p></div>;
+  return <div className={cn("rounded-xl bg-slate-50 p-3", className)}><p className="font-display text-2xl font-bold tabular-nums text-institutional">{value}</p><p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500"><AdminText value={label} /></p></div>;
 }
 
 function HealthRow({ icon: Icon, label, value, healthy }: { icon: LucideIcon; label: string; value: string; healthy: boolean }) {
-  return <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3"><span className={cn("grid h-9 w-9 place-items-center rounded-lg", healthy ? "bg-primary-50 text-forest" : "bg-amber-50 text-amber-700")}><Icon className="h-4 w-4" aria-hidden="true" /></span><span className="min-w-0 flex-1 text-sm font-semibold text-slate-800">{label}</span><span className="text-right text-xs text-slate-500">{value}</span></div>;
+  return <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3"><span className={cn("grid h-9 w-9 place-items-center rounded-lg", healthy ? "bg-primary-50 text-forest" : "bg-amber-50 text-amber-700")}><Icon className="h-4 w-4" aria-hidden="true" /></span><span className="min-w-0 flex-1 text-sm font-semibold text-slate-800"><AdminText value={label} /></span><span className="text-right text-xs text-slate-500"><AdminText value={value} /></span></div>;
 }
 
 function ContactMessages({ rows }: {
@@ -606,12 +592,12 @@ function ContactMessages({ rows }: {
   return (
     <>
       <div className="space-y-3 md:hidden">
-        {rows.map((message) => <Link href={`/admin/messages?message=${message.id}`} key={message.id} className={cn("block rounded-xl border p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest", !message.isRead ? "border-primary-200 bg-primary-50/60" : "border-slate-200")}><div className="flex items-start justify-between gap-3"><div><p className={cn("text-slate-900", !message.isRead ? "font-bold" : "font-semibold")}>{message.name}</p><p className="mt-1 text-xs text-slate-500">{message.organization || "No organization provided"}</p></div><Badge variant={statusVariant(message.status)}>{labelize(message.status)}</Badge></div><p className="mt-3 text-sm font-medium text-slate-800">{message.subject}</p><p className="mt-2 text-xs text-slate-500">{message.referenceNumber} · {labelize(message.purpose)} · {message.priority} · {formatDate(message.createdAt)}</p></Link>)}
+        {rows.map((message) => <Link href={`/admin/messages?message=${message.id}`} key={message.id} className={cn("block rounded-xl border p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest", !message.isRead ? "border-primary-200 bg-primary-50/60" : "border-slate-200")}><div className="flex items-start justify-between gap-3"><div><p className={cn("text-slate-900", !message.isRead ? "font-bold" : "font-semibold")}>{message.name}</p><p className="mt-1 text-xs text-slate-500">{message.organization || <AdminText value="No organization provided" />}</p></div><Badge variant={statusVariant(message.status)}><AdminText value={labelize(message.status)} /></Badge></div><p className="mt-3 text-sm font-medium text-slate-800">{message.subject}</p><p className="mt-2 text-xs text-slate-500">{message.referenceNumber} · <AdminText value={labelize(message.purpose)} /> · <AdminText value={message.priority} /> · <AdminDate value={message.createdAt} /></p></Link>)}
       </div>
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[50rem] text-left text-sm">
-          <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500"><tr><th className="pb-3 font-semibold">Sender</th><th className="pb-3 font-semibold">Organization</th><th className="pb-3 font-semibold">Purpose</th><th className="pb-3 font-semibold">Subject</th><th className="pb-3 font-semibold">Date</th><th className="pb-3 text-right font-semibold">Status</th></tr></thead>
-          <tbody className="divide-y divide-slate-200">{rows.map((message) => <tr key={message.id} className={!message.isRead ? "bg-primary-50/50" : undefined}><td className={cn("py-3 pr-4 text-slate-900", !message.isRead ? "font-bold" : "font-semibold")}><Link href={`/admin/messages?message=${message.id}`} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest">{message.name}</Link></td><td className="py-3 pr-4 text-slate-600">{message.organization || "—"}</td><td className="py-3 pr-4 capitalize text-slate-600">{labelize(message.purpose)}</td><td className="max-w-64 truncate py-3 pr-4 text-slate-700">{message.subject}</td><td className="whitespace-nowrap py-3 pr-4 text-slate-500">{formatDate(message.createdAt)}</td><td className="py-3 text-right"><Badge variant={statusVariant(message.status)}>{labelize(message.status)}</Badge></td></tr>)}</tbody>
+          <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500"><tr>{["Sender", "Organization", "Purpose", "Subject", "Date", "Status"].map((heading) => <th key={heading} className={cn("pb-3 font-semibold", heading === "Status" && "text-right")}><AdminText value={heading} /></th>)}</tr></thead>
+          <tbody className="divide-y divide-slate-200">{rows.map((message) => <tr key={message.id} className={!message.isRead ? "bg-primary-50/50" : undefined}><td className={cn("py-3 pr-4 text-slate-900", !message.isRead ? "font-bold" : "font-semibold")}><Link href={`/admin/messages?message=${message.id}`} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest">{message.name}</Link></td><td className="py-3 pr-4 text-slate-600">{message.organization || "—"}</td><td className="py-3 pr-4 capitalize text-slate-600"><AdminText value={labelize(message.purpose)} /></td><td className="max-w-64 truncate py-3 pr-4 text-slate-700">{message.subject}</td><td className="whitespace-nowrap py-3 pr-4 text-slate-500"><AdminDate value={message.createdAt} /></td><td className="py-3 text-right"><Badge variant={statusVariant(message.status)}><AdminText value={labelize(message.status)} /></Badge></td></tr>)}</tbody>
         </table>
       </div>
     </>

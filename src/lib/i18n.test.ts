@@ -8,6 +8,7 @@ import {
   formatNumber,
   hasFrenchTranslation,
   normalizeLanguage,
+  translateAdminText,
   translateText,
   translateValidationMessage,
   translations,
@@ -40,6 +41,50 @@ test("shared frontend and admin interface labels translate", () => {
   assert.equal(translateText("fr", "Our Network"), "Notre réseau");
   assert.equal(translateText("fr", "Support Requests"), "Demandes d’assistance");
   assert.equal(translateText("fr", "Inbox"), "Boîte de réception");
+});
+
+test("admin dashboard copy and operational labels have complete French translations", () => {
+  assert.equal(translations.fr["admin.dashboard.welcome"], "Bon retour, {name}");
+  assert.equal(translations.fr["admin.dashboard.state"], "Voici l’état actuel de la plateforme numérique RECCU-CAM.");
+  assert.equal(translations.fr["admin.dashboard.executiveSummary"], "Résumé exécutif");
+  assert.equal(translations.fr["admin.dashboard.bankingInquiries"], "Demandes de services bancaires aux affiliées");
+  assert.equal(translations.fr["admin.dashboard.newInstitutionalInquiries"], "Nouvelles demandes institutionnelles");
+  assert.equal(translations.fr["admin.dashboard.websiteStatus"], "État du site web");
+  assert.equal(translations.fr["admin.dashboard.quickActions"], "Actions rapides");
+  assert.equal(translateAdminText("fr", "published"), "Publié");
+  assert.equal(translateAdminText("fr", "3 drafts"), "3 brouillons");
+  assert.equal(translateAdminText("fr", "5 upcoming programmes"), "5 programmes à venir");
+});
+
+test("the admin dashboard body reacts to language changes without changing its server layout", () => {
+  const dashboard = readFileSync("src/app/admin/(dashboard)/page.tsx", "utf8");
+  const welcome = readFileSync("src/components/admin/AdminDashboardWelcome.tsx", "utf8");
+  const adminText = readFileSync("src/components/admin/AdminText.tsx", "utf8");
+
+  assert.match(dashboard, /<AdminText value=\{title\}/);
+  assert.match(dashboard, /<AdminDate value=\{/);
+  assert.doesNotMatch(dashboard, /Intl\.DateTimeFormat\("en-GB"/);
+  assert.match(welcome, /translationKey="admin\.dashboard\.welcome"/);
+  assert.match(welcome, /translationKey="admin\.dashboard\.state"/);
+  assert.match(adminText, /useLanguage\(\)/);
+  assert.match(adminText, /translateAdminText\(language, value \?\? ""\)/);
+});
+
+test("admin child routes share immediate translation wiring while preserving route and form state", () => {
+  const layout = readFileSync("src/app/admin/(dashboard)/layout.tsx", "utf8");
+  const boundary = readFileSync("src/components/admin/AdminLocalizationBoundary.tsx", "utf8");
+  const inbox = readFileSync("src/components/admin/MessagesInbox.tsx", "utf8");
+
+  assert.match(layout, /<AdminLocalizationBoundary>\{children\}<\/AdminLocalizationBoundary>/);
+  assert.match(boundary, /MutationObserver/);
+  assert.match(boundary, /translateAdminText\(language, source\)/);
+  assert.doesNotMatch(boundary, /router\.|location\.|reload\(/);
+  assert.doesNotMatch(boundary, /cloneElement|key=/);
+  assert.match(inbox, /data-admin-no-translate/);
+  assert.equal(translateAdminText("fr", "No affiliates found."), "Aucune affiliée trouvée.");
+  assert.equal(translateAdminText("fr", "Audit Log Summary"), "Résumé du journal d’audit");
+  assert.equal(translateAdminText("fr", "Save programme"), "Enregistrer le programme");
+  assert.equal(translateAdminText("en", "Published"), "Published");
 });
 
 test("French editorial content falls back field-by-field to English", () => {

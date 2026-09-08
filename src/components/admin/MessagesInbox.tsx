@@ -546,12 +546,12 @@ function MessageRow({
         <span className="min-w-0">
           <span className="flex items-center gap-2">
             {!message.isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-primary-600" aria-hidden="true" />}
-            <span className={cn("truncate text-sm text-slate-900", !message.isRead ? "font-bold" : "font-medium")}>{message.name}</span>
+            <span data-admin-no-translate className={cn("truncate text-sm text-slate-900", !message.isRead ? "font-bold" : "font-medium")}>{message.name}</span>
           </span>
-          {message.organization && <span className="mt-0.5 block truncate pl-4 text-xs text-slate-500">{message.organization}</span>}
+          {message.organization && <span data-admin-no-translate className="mt-0.5 block truncate pl-4 text-xs text-slate-500">{message.organization}</span>}
         </span>
         <span className="mt-1 min-w-0 md:mt-0">
-          <span className={cn("text-sm text-slate-800", !message.isRead && "font-bold")}>{message.subject}</span>
+          <span data-admin-no-translate className={cn("text-sm text-slate-800", !message.isRead && "font-bold")}>{message.subject}</span>
           <span className="text-sm text-slate-400"> — </span>
           <span className="text-sm text-slate-500">{message.preview}</span>
         </span>
@@ -622,7 +622,7 @@ function MessageDetailView({
       <div className="mx-auto max-w-5xl space-y-7 p-5 sm:p-8">
         <div>
           <p className="font-mono text-xs font-semibold tracking-wide text-slate-400">{message.referenceNumber}</p>
-          <h2 id="message-subject" className="mt-2 font-display text-2xl font-bold leading-tight text-institutional sm:text-3xl">{message.subject}</h2>
+          <h2 id="message-subject" data-admin-no-translate className="mt-2 font-display text-2xl font-bold leading-tight text-institutional sm:text-3xl">{message.subject}</h2>
           <p className="mt-2 text-sm text-slate-500">{formatFullDate(message.createdAt, language)}</p>
         </div>
 
@@ -642,7 +642,7 @@ function MessageDetailView({
 
         <section>
           <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{tText("Message")}</h3>
-          <div className="mt-3 whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50/50 p-5 text-sm leading-7 text-slate-700 sm:p-6">{message.message}</div>
+          <div data-admin-no-translate className="mt-3 whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50/50 p-5 text-sm leading-7 text-slate-700 sm:p-6">{message.message}</div>
         </section>
       </div>
     </article>

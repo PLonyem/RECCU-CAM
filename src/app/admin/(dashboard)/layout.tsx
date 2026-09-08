@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { AdminNavGuard } from "@/components/admin/AdminNavGuard";
+import { AdminLocalizationBoundary } from "@/components/admin/AdminLocalizationBoundary";
 import { isAdminRole } from "@/lib/auth/roles";
 import { isDemoMode } from "@/lib/demo-mode";
 
@@ -34,7 +35,7 @@ export default async function AdminLayout({
   return (
     <AdminShell>
       <AdminNavGuard />
-      {children}
+      <AdminLocalizationBoundary>{children}</AdminLocalizationBoundary>
     </AdminShell>
   );
 }
