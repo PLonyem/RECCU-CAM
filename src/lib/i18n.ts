@@ -530,7 +530,33 @@ const frenchUi: Record<string, string> = {
   "We were unable to submit your inquiry at this time. Please review your information and try again.": "Nous n’avons pas pu envoyer votre demande. Vérifiez les informations saisies puis réessayez.",
   "Something went wrong while sending your message. Please try again shortly.": "Une erreur s’est produite lors de l’envoi de votre message. Veuillez réessayer dans quelques instants.",
   "Building Stronger Credit Unions. Building Stronger Communities.": "Des coopératives de crédit plus fortes. Des communautés plus fortes.",
+  "Building Stronger Credit Unions.": "Des coopératives de crédit plus fortes.",
+  "Building Stronger Communities.": "Des communautés plus fortes.",
+  "Cooperation that moves communities forward.": "La coopération qui fait avancer les communautés.",
+  "One trusted digital home for RECCU-CAM network services, learning, knowledge, and cooperative connection.": "Un espace numérique fiable pour les services du réseau RECCU-CAM, la formation, les connaissances et la coopération.",
+  "RECCU-CAM strengthens cooperative financial institutions through institutional support, responsible governance, professional development and shared growth.": "RECCU-CAM renforce les institutions financières coopératives grâce à l’appui institutionnel, à une gouvernance responsable, au développement professionnel et à une croissance partagée.",
+  "Learn About RECCU-CAM": "Découvrir RECCU-CAM",
+  "Discover VTIME": "Découvrir VTIME",
+  "Illustrative scene of Cameroonian cooperative professionals reviewing documents together": "Scène illustrative de professionnels camerounais du secteur coopératif examinant des documents ensemble",
   "Meet RECCU-CAM, an apex cooperative financial network supporting stronger institutions, responsible governance, and sustainable growth in Cameroon.": "Découvrez RECCU-CAM, un réseau financier coopératif faîtier qui soutient des institutions plus fortes, une gouvernance responsable et une croissance durable au Cameroun.",
+  "An apex institution with a cooperative purpose.": "Une institution faîtière au service d’une mission coopérative.",
+  "RECCU-CAM is an apex cooperative financial network that supports cooperative financial institutions and the communities they serve.": "RECCU-CAM est un réseau financier coopératif faîtier qui soutient les institutions financières coopératives et les communautés qu’elles servent.",
+  "Strengthening the conditions for cooperative finance to endure.": "Renforcer les conditions d’une finance coopérative durable.",
+  "To foster resilient, well-governed, and professional cooperative institutions that can grow responsibly and contribute to financial inclusion.": "Favoriser des institutions coopératives résilientes, bien gouvernées et professionnelles, capables de croître de manière responsable et de contribuer à l’inclusion financière.",
+  "Shared strength matters in cooperative finance.": "La force collective est essentielle à la finance coopérative.",
+  "RECCU-CAM exists to help cooperative institutions move forward with greater confidence, shared purpose, and long-term perspective.": "RECCU-CAM aide les institutions coopératives à progresser avec davantage de confiance, une mission commune et une vision à long terme.",
+  "Integrity": "Intégrité",
+  "Acting with honesty, consistency, and respect for the trust placed in cooperative institutions.": "Agir avec honnêteté, cohérence et respect de la confiance accordée aux institutions coopératives.",
+  "Accountability": "Responsabilité",
+  "Encouraging clear responsibility, sound oversight, and decisions that can stand up to scrutiny.": "Promouvoir des responsabilités claires, une supervision rigoureuse et des décisions capables de résister à l’examen.",
+  "Cooperation": "Coopération",
+  "Advancing shared progress through collective purpose and enduring institutional relationships.": "Faire progresser l’intérêt commun grâce à une mission collective et à des relations institutionnelles durables.",
+  "Professionalism": "Professionnalisme",
+  "Promoting disciplined practice, capable leadership, and high standards across institutional life.": "Promouvoir des pratiques rigoureuses, une direction compétente et des normes élevées dans toute la vie institutionnelle.",
+  "Inclusion": "Inclusion",
+  "Keeping people, participation, and wider access to responsible finance at the centre of progress.": "Placer les personnes, la participation et un accès élargi à une finance responsable au cœur du progrès.",
+  "Stronger Institutions Start With Stronger Cooperation.": "Des institutions plus fortes commencent par une coopération renforcée.",
+  "Connect with RECCU-CAM or continue exploring the institution's identity, purpose, and cooperative foundation.": "Contactez RECCU-CAM ou poursuivez votre découverte de son identité, de sa mission et de ses fondements coopératifs.",
   "Who we are": "Qui sommes-nous",
   "Our purpose": "Notre mission",
   "Why RECCU-CAM exists": "Pourquoi RECCU-CAM existe",
@@ -692,6 +718,10 @@ const frenchUi: Record<string, string> = {
 
 export function translateText(language: Language, value: string): string {
   return language === "fr" ? frenchUi[value] ?? value : value;
+}
+
+export function hasFrenchTranslation(value: string): boolean {
+  return Object.hasOwn(frenchUi, value);
 }
 
 export function formatDate(value: Date | string | number, language: Language, options?: Intl.DateTimeFormatOptions) {

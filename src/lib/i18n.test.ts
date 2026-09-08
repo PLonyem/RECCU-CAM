@@ -6,6 +6,7 @@ import {
   LOCALE_COOKIE,
   formatDate,
   formatNumber,
+  hasFrenchTranslation,
   normalizeLanguage,
   translateText,
   translateValidationMessage,
@@ -14,11 +15,13 @@ import {
 import {
   getLocalizedFields,
   localizeHomepageContent,
+  localizeHomepageSections,
   localizeNewsArticle,
   localizeResource,
   localizeTrainingProgram,
   translationCompleteness,
 } from "@/lib/localized-content";
+import { blankHomepageSections, defaultHomepageSections } from "@/data/homepage-cms";
 
 test("locale configuration is cookie-backed and fail-safe", () => {
   assert.equal(LOCALE_COOKIE, "reccu_locale");
@@ -76,6 +79,32 @@ test("homepage CMS content resolves English and French on the server", () => {
   assert.equal(french.primaryButtonText, "Explorer le réseau");
   assert.equal(french.secondaryButtonText, "Découvrir VTIME");
   assert.equal(french.primaryButtonLink, "/network");
+});
+
+test("homepage sections use French dictionary copy when the French CMS record is missing or partial", () => {
+  const missing = localizeHomepageSections(defaultHomepageSections, null, "fr");
+  assert.equal(missing.whoTitle, "Une institution faîtière au service d’une mission coopérative.");
+  assert.equal(missing.whoDescription, "RECCU-CAM est un réseau financier coopératif faîtier qui soutient les institutions financières coopératives et les communautés qu’elles servent.");
+
+  const partial = localizeHomepageSections(defaultHomepageSections, { ...blankHomepageSections, whoTitle: "Titre CMS" }, "fr");
+  assert.equal(partial.whoTitle, "Titre CMS");
+  assert.equal(partial.missionTitle, "Renforcer les conditions d’une finance coopérative durable.");
+});
+
+test("every built-in homepage section fallback has French copy", () => {
+  const copy = [
+    defaultHomepageSections.whoTitle,
+    defaultHomepageSections.whoDescription,
+    defaultHomepageSections.missionTitle,
+    defaultHomepageSections.missionBody,
+    defaultHomepageSections.visionTitle,
+    defaultHomepageSections.visionBody,
+    ...defaultHomepageSections.values.flatMap((value) => [value.title, value.description]),
+    defaultHomepageSections.contactTitle,
+    defaultHomepageSections.contactDescription,
+    defaultHomepageSections.contactButtonText,
+  ];
+  for (const value of copy) assert.equal(hasFrenchTranslation(value), true, `Missing French fallback: ${value}`);
 });
 
 test("shared CMS resolver localizes news, VTIME, and resources with per-field fallback", () => {

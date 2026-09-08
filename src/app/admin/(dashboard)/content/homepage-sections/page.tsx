@@ -11,7 +11,7 @@ export default async function HomepageSectionsPage() {
   ]);
   const data = parseHomepageSections(draft?.content ?? published?.content);
   const frenchData = frenchDraft?.content || frenchPublished?.content
-    ? parseHomepageSections(frenchDraft?.content ?? frenchPublished?.content)
+    ? parseHomepageSections(frenchDraft?.content ?? frenchPublished?.content, blankHomepageSections)
     : blankHomepageSections;
   return <div className="space-y-7">
     <header><p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold-strong">Structured content editor</p><h1 className="mt-2 font-display text-3xl font-bold text-institutional">Homepage Sections</h1><p className="mt-2 text-slate-600">Edit mission, vision, values, leadership, and the contact call-to-action using validated plain text.</p></header>

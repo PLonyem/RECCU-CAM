@@ -1,4 +1,4 @@
-import type { Language } from "@/lib/i18n";
+import { translateText, type Language } from "@/lib/i18n";
 import type { HomepageSectionsContent } from "@/data/homepage-cms";
 
 type TranslationRecord = Record<string, unknown>;
@@ -71,21 +71,21 @@ export function localizeHomepageSections(
   french: HomepageSectionsContent | null,
   language: Language,
 ): HomepageSectionsContent {
-  if (language === "en" || !french) return english;
-  const text = (candidate: string | undefined, fallback: string) => candidate?.trim() || fallback;
+  if (language === "en") return english;
+  const text = (candidate: string | undefined, fallback: string) => candidate?.trim() || translateText(language, fallback);
   return {
-    whoTitle: text(french.whoTitle, english.whoTitle),
-    whoDescription: text(french.whoDescription, english.whoDescription),
-    missionTitle: text(french.missionTitle, english.missionTitle),
-    missionBody: text(french.missionBody, english.missionBody),
-    visionTitle: text(french.visionTitle, english.visionTitle),
-    visionBody: text(french.visionBody, english.visionBody),
-    values: english.values.map((value, index) => ({ title: text(french.values[index]?.title, value.title), description: text(french.values[index]?.description, value.description) })),
-    leaderName: text(french.leaderName, english.leaderName),
-    leaderRole: text(french.leaderRole, english.leaderRole),
-    leaderMessage: text(french.leaderMessage, english.leaderMessage),
-    contactTitle: text(french.contactTitle, english.contactTitle),
-    contactDescription: text(french.contactDescription, english.contactDescription),
-    contactButtonText: text(french.contactButtonText, english.contactButtonText),
+    whoTitle: text(french?.whoTitle, english.whoTitle),
+    whoDescription: text(french?.whoDescription, english.whoDescription),
+    missionTitle: text(french?.missionTitle, english.missionTitle),
+    missionBody: text(french?.missionBody, english.missionBody),
+    visionTitle: text(french?.visionTitle, english.visionTitle),
+    visionBody: text(french?.visionBody, english.visionBody),
+    values: english.values.map((value, index) => ({ title: text(french?.values[index]?.title, value.title), description: text(french?.values[index]?.description, value.description) })),
+    leaderName: text(french?.leaderName, english.leaderName),
+    leaderRole: text(french?.leaderRole, english.leaderRole),
+    leaderMessage: text(french?.leaderMessage, english.leaderMessage),
+    contactTitle: text(french?.contactTitle, english.contactTitle),
+    contactDescription: text(french?.contactDescription, english.contactDescription),
+    contactButtonText: text(french?.contactButtonText, english.contactButtonText),
   };
 }

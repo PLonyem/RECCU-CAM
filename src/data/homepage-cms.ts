@@ -31,8 +31,8 @@ export const blankHomepageSections: HomepageSectionsContent = {
   leaderName: "", leaderRole: "", leaderMessage: "", contactTitle: "", contactDescription: "", contactButtonText: "",
 };
 
-export function parseHomepageSections(value: unknown): HomepageSectionsContent {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return defaultHomepageSections;
+export function parseHomepageSections(value: unknown, fallback: HomepageSectionsContent = defaultHomepageSections): HomepageSectionsContent {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return fallback;
   const candidate = value as Partial<HomepageSectionsContent>;
-  return { ...defaultHomepageSections, ...candidate, values: Array.isArray(candidate.values) ? candidate.values.filter((item): item is { title: string; description: string } => Boolean(item && typeof item.title === "string" && typeof item.description === "string")) : defaultHomepageSections.values };
+  return { ...fallback, ...candidate, values: Array.isArray(candidate.values) ? candidate.values.filter((item): item is { title: string; description: string } => Boolean(item && typeof item.title === "string" && typeof item.description === "string")) : fallback.values };
 }

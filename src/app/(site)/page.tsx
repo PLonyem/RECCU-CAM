@@ -9,7 +9,7 @@ import { Section } from "@/components/ui/Section";
 import { institution } from "@/config/institution";
 import { createPageMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
-import { parseHomepageSections } from "@/data/homepage-cms";
+import { blankHomepageSections, parseHomepageSections } from "@/data/homepage-cms";
 import { readPublicData } from "@/lib/public-data";
 import { getServerTranslator } from "@/lib/i18n-server";
 import { localizeHomepageContent, localizeHomepageSections } from "@/lib/localized-content";
@@ -71,7 +71,7 @@ export default async function HomePage() {
     ),
   ]);
   const englishCms = parseHomepageSections(sectionsRecord?.content);
-  const frenchCms = localizedSectionsRecord ? parseHomepageSections(localizedSectionsRecord.content) : null;
+  const frenchCms = localizedSectionsRecord ? parseHomepageSections(localizedSectionsRecord.content, blankHomepageSections) : null;
   const cms = localizeHomepageSections(englishCms, frenchCms, language);
   const localizedHomepageContent = homepageContent ? localizeHomepageContent(homepageContent, language) : null;
   return (
